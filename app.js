@@ -3,7 +3,7 @@
    ===================================================================== */
 "use strict";
 const CFG = window.CONFIG || {};
-const VERSION = "2.0";
+const VERSION = "2.1";
 const ADMIN = "p1";   // Raúl es el administrador
 const REMOTO = !!(CFG.supabaseUrl && CFG.supabaseKey);
 const IA = !!CFG.workerUrl;
@@ -722,6 +722,27 @@ function pintarHojaGoogle(){
   $("gsAbrir").style.opacity = ok ? 1 : .5;
   $("gsSub").textContent = ok ? "Se abre en Google Sheets" : "Primero pega abajo el enlace de tu hoja";
 }
+$("gsGuiaBtn").onclick = () => { vibrar(); $("gsGuia").classList.add("show"); };
+$("gsCerrar").onclick = () => $("gsGuia").classList.remove("show");
+$("gsGuia").addEventListener("click", e => { if (e.target.id === "gsGuia") $("gsGuia").classList.remove("show"); });
+let codigoHoja = null;
+$("gsCopiar").onclick = async () => {
+  const b = $("gsCopiar"); b.disabled = true; b.innerHTML = '<span class="spin"></span> Copiando…';
+  try {
+    if (!codigoHoja){
+      const r = await fetch("google-sheets/Ahorraulin.gs?v=" + VERSION, { cache:"no-cache" });
+      if (!r.ok) throw new Error();
+      codigoHoja = await r.text();
+    }
+    await navigator.clipboard.writeText(codigoHoja);
+    b.textContent = "✅ ¡Copiado! Ahora el paso 3"; toast("📋 Código copiado");
+  } catch(e){
+    b.textContent = "📋 Copiar el código";
+    toast("⚠️ No se ha podido copiar. Ábrelo en el enlace de la guía en GitHub.");
+    window.open("https://raw.githubusercontent.com/Magicraulin/ahorraulin/main/google-sheets/Ahorraulin.gs", "_blank");
+  }
+  b.disabled = false;
+};
 $("gsAbrir").addEventListener("click", e => { if ($("gsAbrir").getAttribute("href") === "#"){ e.preventDefault(); $("gsUrl").focus(); } });
 $("gsUrl").addEventListener("change", e => {
   const v = e.target.value.trim();

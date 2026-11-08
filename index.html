@@ -225,6 +225,16 @@ select.inp{appearance:none;-webkit-appearance:none;background-image:linear-gradi
 .badge{display:inline-block;font-size:11px;font-weight:900;padding:2px 7px;border-radius:8px;background:var(--p-soft);color:var(--p);margin-left:6px;vertical-align:1px}
 .adm button.reset{font-size:13px;font-weight:900;color:#fff;background:var(--warn);padding:10px 12px;border-radius:12px;white-space:nowrap}
 .adm button.reset.sure{background:#9b1c2e}
+.guia{margin-top:14px}
+.paso{display:flex;gap:12px;padding:12px 0;border-top:1px solid var(--line)}
+.paso:first-child{border-top:0}
+.paso>span{flex:0 0 auto;width:30px;height:30px;border-radius:50%;background:var(--p);color:#fff;font-weight:900;display:grid;place-items:center;font-size:14px}
+.paso.aviso>span,.paso.fin>span{background:var(--soft);font-size:17px}
+.paso>div{flex:1;min-width:0;font-size:14px;font-weight:700;color:var(--ink2);line-height:1.45}
+.paso>div>b:first-child{display:block;color:var(--ink);font-size:15px;font-weight:900;margin-bottom:2px}
+.paso .btn{margin-top:10px;padding:12px;text-decoration:none}
+.paso.aviso{background:#fff4d6;border-radius:16px;padding:12px;border:0}
+body.dark .paso.aviso{background:#3a3016}
 .foot{text-align:center;font-size:12px;font-weight:800;color:var(--ink3);margin:18px 0 6px}
 
 /* nav */
@@ -379,7 +389,7 @@ nav button.on .e{filter:none;opacity:1;transform:translateY(-1px) scale(1.08)}
         <div class="muted small" style="margin-bottom:6px">Una sola hoja que se actualiza sola cada noche a las 00:00 y al abrirla. Se conecta una vez desde el ordenador.</div>
         <a class="opt" id="gsAbrir" target="_blank" rel="noopener" style="text-decoration:none;color:inherit" href="#"><span class="e">📊</span><span>Abrir mi hoja<small id="gsSub">Guarda abajo el enlace de tu hoja</small></span></a>
         <input class="inp" id="gsUrl" placeholder="Pega aquí el enlace de tu hoja de Google" style="margin-top:10px" inputmode="url" autocomplete="off">
-        <a class="opt" target="_blank" rel="noopener" style="text-decoration:none;color:inherit" href="https://github.com/Magicraulin/ahorraulin/blob/main/google-sheets/README.md"><span class="e">📖</span><span>Cómo crear mi hoja<small>Pasos para conectarla (5 minutos, desde el ordenador)</small></span></a>
+        <button class="opt" id="gsGuiaBtn"><span class="e">📖</span><span>Cómo crear mi hoja, paso a paso<small>5 minutos, una sola vez, desde el ordenador</small></span></button>
       </div>
       <div class="card hidden" id="adminCard">
         <h2>👑 Administrador</h2>
@@ -430,12 +440,27 @@ nav button.on .e{filter:none;opacity:1;transform:translateY(-1px) scale(1.08)}
   <button class="btn save-btn gasto" id="eSave" disabled>Guardar</button>
 </div></div>
 
+<div class="modal" id="gsGuia"><div class="sheet" role="dialog" aria-modal="true" aria-labelledby="gsTit">
+  <div class="grab"></div>
+  <div class="e-head"><div class="e" style="--cb:#e1f4e6">📊</div><div><b id="gsTit">Crea tu hoja de Google</b><small style="color:var(--ink3)">Una sola vez · unos 5 minutos</small></div><button class="x" id="gsCerrar" aria-label="Cerrar">✕</button></div>
+  <div class="guia">
+    <div class="paso aviso"><span>💻</span><div><b>Hazlo desde el ordenador</b>En el móvil Google no deja hacer el paso 3. Abre <b>magicraulin.github.io/ahorraulin</b> en el ordenador, entra con tu código y vuelve aquí (Ajustes).</div></div>
+    <div class="paso"><span>1</span><div><b>Crea una hoja nueva</b>Con tu cuenta de Google. Ponle de nombre «Ahorraulin» (arriba a la izquierda).<a class="btn soft" href="https://sheets.new" target="_blank" rel="noopener">➕ Crear hoja en Google Sheets</a></div></div>
+    <div class="paso"><span>2</span><div><b>Copia el código</b>Pulsa este botón y el código se copia solo.<button class="btn p" id="gsCopiar">📋 Copiar el código</button></div></div>
+    <div class="paso"><span>3</span><div><b>Pégalo en la hoja</b>En la hoja: menú <b>Extensiones → Apps Script</b>. Se abre otra pestaña con un poco de código: <b>bórralo todo</b>, pega el tuyo (Ctrl+V o Cmd+V) y pulsa el icono de <b>guardar 💾</b>. Cierra esa pestaña.</div></div>
+    <div class="paso"><span>4</span><div><b>Recarga la hoja</b>Pulsa F5 (o recargar). Arriba aparece un menú nuevo: <b>💸 Ahorraulin</b>.</div></div>
+    <div class="paso"><span>5</span><div><b>Conéctala</b>Menú <b>💸 Ahorraulin → 🔑 Configurar mi perfil y código</b>. Google pedirá permiso: <b>Continuar</b> → tu cuenta → si sale «no verificada», <b>Configuración avanzada → Ir a Ahorraulin → Permitir</b>. Es normal: es tu propio código en tu propia hoja. Vuelve a pulsar Configurar y escribe tu nombre y tu código de la app.</div></div>
+    <div class="paso"><span>6</span><div><b>Guarda el enlace aquí</b>Copia la dirección de tu hoja (la barra de arriba del navegador) y pégala en «Pega aquí el enlace de tu hoja», en Ajustes. Así la abrirás con un toque desde el móvil.</div></div>
+    <div class="paso fin"><span>🎉</span><div><b>¡Listo!</b>Tu hoja se actualizará sola cada noche a las 00:00 y al abrirla en el ordenador. Para actualizarla al momento: <b>💸 Ahorraulin → 🔄 Refrescar ahora</b>. No escribas nada en ella: se redibuja entera cada vez.</div></div>
+  </div>
+</div></div>
+
 <div class="toast" id="toast"><div class="tt"><b id="toastFrase" class="hidden"></b><span id="toastTxt"></span></div><button id="undo">Deshacer</button></div>
 
-<script src="config.js?v=16"></script>
-<script src="datos.js?v=16"></script>
-<script src="excel.js?v=16"></script>
+<script src="config.js?v=17"></script>
+<script src="datos.js?v=17"></script>
+<script src="excel.js?v=17"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js" defer></script>
-<script src="app.js?v=16"></script>
+<script src="app.js?v=17"></script>
 </body>
 </html>
