@@ -13,7 +13,7 @@ Es siempre **la misma hoja**: no se crean archivos nuevos. Tiene el mismo diseñ
 
 1. **Crea la hoja.** Entra en **[sheets.new](https://sheets.new)** con tu cuenta de Google y ponle de nombre `Ahorraulin` (arriba a la izquierda, donde pone «Hoja de cálculo sin título»).
 
-2. **Pega el código.** En la hoja: menú **Extensiones → Apps Script**. Se abre una pestaña nueva con un poco de código. **Bórralo todo** y pega el código de este enlace (abre el enlace, selecciona todo con Ctrl+A o Cmd+A y copia):
+2. **Pega el código.** En la hoja: menú **Extensiones → Apps Script**. Se abre una pestaña nueva con un poco de código. Haz clic dentro, pulsa **Ctrl+A** (Mac: **Cmd+A**) y **bórralo para que quede totalmente vacío**. Luego pega el código de este enlace (abre el enlace, selecciona todo con Ctrl+A o Cmd+A y copia):
    👉 **https://raw.githubusercontent.com/Magicraulin/ahorraulin/main/google-sheets/Ahorraulin.gs**
 
    Pulsa el icono de **guardar 💾**. Ya puedes cerrar esa pestaña.
