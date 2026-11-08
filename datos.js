@@ -2,22 +2,26 @@
 
 const GASTOS_BASE = [
   ["gasolina","⛽","Gasolina","#fff1d6"], ["comer","🍔","Comer fuera","#ffe4dc"], ["super","🛒","Súper","#e1f4e6"],
-  ["casa","🏠","Casa","#e3ecff"], ["transporte","🚗","Coche y transporte","#e6f2fb"], ["ocio","🎉","Ocio","#fbe3f1"],
+  ["casa","🏠","Casa","#e3ecff"], ["transporte","🚗","Coche y transporte","#e6f2fb"], ["ocio","🎉","Ocio","#fbe3f1"], ["viajes","✈️","Viajes","#dff1fb"],
   ["ropa","👕","Ropa","#ece5ff"], ["salud","💊","Salud","#ffe3e6"], ["regalos","🎁","Regalos","#fff0dc"],
   ["suscripciones","📱","Suscripciones","#e0f5f5"], ["trabajo","✏️","Material de clase","#fff7cf"],
   ["ahorro","🐷","Ahorro","#ffe3ef"], ["inversion","📈","Inversión","#e1f4e6"], ["otros","✨","Otros gastos","#f0eef5"]
 ];
 const BELLEZA = ["belleza","💅","Belleza","#fde3f3"];
+const DEPORTE = ["deporte","🏋️","Deporte","#e6f6df"];
+// Mete una categoría justo detrás de otra
+const meterDetras = (lista, id, cat) => { const i = lista.findIndex(c => c[0] === id); return [...lista.slice(0, i + 1), cat, ...lista.slice(i + 1)]; };
 const CATEGORIAS = {
   mago: {
-    gasto: GASTOS_BASE.map(c => c[0] === "trabajo" ? ["trabajo","🪄","Material de magia","#efe6ff"] : c),
+    // Raúl: con Deporte (detrás de Viajes)
+    gasto: meterDetras(GASTOS_BASE.map(c => c[0] === "trabajo" ? ["trabajo","🪄","Material de magia","#efe6ff"] : c), "viajes", DEPORTE),
     ingreso: [["bolos","🎩","Actuaciones","#ece5ff"],["bodas","💍","Bodas y eventos","#fbe3f1"],["teatro","🎭","Teatro","#ffe4dc"],
               ["sueldo","💰","Sueldo","#e1f4e6"],["bizum","💸","Bizum / me devuelven","#e0f5f5"],["ventas","🏷️","Ventas","#fff1d6"],
               ["regalo","🎁","Regalo","#fff0dc"],["otros_in","✨","Otros ingresos","#f0eef5"]]
   },
   profe: {
     // Sara y Marta: con Belleza (antes de Ahorro)
-    gasto: [...GASTOS_BASE.slice(0, 11), BELLEZA, ...GASTOS_BASE.slice(11)],
+    gasto: meterDetras(GASTOS_BASE, "trabajo", BELLEZA),
     ingreso: [["sueldo","💰","Nómina","#e1f4e6"],["clases","📚","Clases particulares","#e3ecff"],["academia","🏫","Academia / extraescolares","#ece5ff"],
               ["paga","🎄","Paga extra","#ffe4dc"],["bizum","💸","Bizum / me devuelven","#e0f5f5"],["regalo","🎁","Regalo","#fff0dc"],
               ["ventas","🏷️","Ventas","#fff1d6"],["otros_in","✨","Otros ingresos","#f0eef5"]]
@@ -116,6 +120,19 @@ const CONSEJOS = {
     "Compra el material en packs grandes o en tiendas al por mayor.",
     "Antes de comprar, mira si puedes reutilizar o fabricar tú el material.",
     "Guarda los tickets: si eres autónomo, muchos gastos de trabajo se pueden desgravar."
+  ],
+  viajes: [
+    "Reserva con tiempo: vuelos y hoteles suelen ser bastante más baratos con 2-3 meses de antelación.",
+    "Viaja entre semana o fuera de temporada alta: mismo sitio, mucho menos dinero.",
+    "Pon alertas de precio en las webs de vuelos y compara antes de comprar.",
+    "Apartamento con cocina: desayunar y cenar algún día en casa ahorra muchísimo.",
+    "Crea una hucha solo para viajes y aparta un poco cada mes (categoría Ahorro)."
+  ],
+  deporte: [
+    "Antes de comprar material caro, prueba el deporte con algo básico o de segunda mano.",
+    "Mira si tu gimnasio tiene tarifa anual o de mañanas: suele salir más barato.",
+    "Correr, bici o rutinas en casa y en el parque: deporte gratis y igual de eficaz.",
+    "Si vas poco al gimnasio, quizá te compensa pagar por sesión en vez de cuota."
   ],
   belleza: [
     "Peluquería cada 6-8 semanas en vez de cada 4: se nota poco y se ahorra mucho.",
@@ -265,6 +282,25 @@ const FRASES_INGRESO = {
   alto: ["¡BOOM! 💰 Hoy invitas tú… ¡pero no te pases!", "¡Qué alegría! Aparta un 20 % antes de que se escape.", "¡Cobrado! Ahora el reto es que llegue a fin de mes. 💪",
          "¡Lluvia de billetes! 🌧️💶 Guarda paraguas para los gastos.", "¡Nómina/bolo top! Primero ahorra, luego disfruta. 🏆", "¡Toma ya! Este mes empieza fuerte. 🚀"]
 };
+/* Frases de Viajes y Deporte */
+FRASES.viajes = { lim:[60, 250],
+  bajo: ["Escapada barata, recuerdos caros. ✈️😍", "Viajar sin arruinarse: nivel experto. 🧳", "¡Bien! Viajar no tiene por qué ser caro. 🗺️",
+         "Pequeña aventura, gran sonrisa. 🌄", "Low cost y feliz. ¡Así sí! 🎒", "Un viajecito así alegra el mes. ☀️", "Escapada apuntada. ¡A disfrutar! 🚂"],
+  medio:["¡Viajecito apuntado! Ahora, a disfrutarlo a tope. 🏖️", "Viajar es invertir en recuerdos. 📸", "¿Has comparado precios? A veces cambia mucho. 🔍",
+         "Buen plan. Desayunar en el alojamiento ayuda a ahorrar. ☕", "Maleta lista, cartera un poco más ligera. 🧳", "Experiencias que valen la pena. ¡Con cabeza! 🧠",
+         "Reservar con tiempo la próxima vez sale más barato. 📅"],
+  alto: ["¡Viaje de los gordos! 🌍 Ahora, unos meses de ahorro.", "Eso no es un viaje, es una expedición. 🗺️💸", "¡Qué pasada de viaje! Tu cuenta también se ha ido de vacaciones. 🏝️",
+         "Recuerdos para toda la vida… y gasto para todo el trimestre. 😅", "¡Vuelta al mundo! O casi. 🌎", "Viajazo apuntado. Para el próximo, abre una hucha de viajes. 🐷✈️",
+         "Has viajado a lo grande. A la vuelta, modo ahorro ON. 🔋", "Avión, hotel, comidas… ¡Disfrútalo, que te lo has ganado! 🥂"] };
+FRASES.deporte = { lim:[20, 60],
+  bajo: ["¡A sudar sin gastar mucho! 💦", "Deporte barato, salud de lujo. 💪", "Moverse es lo mejor que hay. 🏃", "Pequeña inversión en tu cuerpo. ¡Bien! 🙌",
+         "Entrenamiento low cost, resultados top. 🔥", "¡Eso es cuidarse! 🥇"],
+  medio:["Cuota apuntada. ¡Ahora a ir de verdad, eh! 😜", "¡Menos sofá y más deporte! Bien invertido. 🏋️", "Salud en vena. Sácale partido a cada euro. 💯",
+         "Material nuevo = cero excusas para entrenar. 👟", "¿Vas todas las semanas? Si sí, ¡dinero bien gastado! ✅", "Cuerpo de mago en construcción. 🎩💪"],
+  alto: ["¡Equipación de profesional! Ahora, a entrenar como uno. 🏆", "Gasto deportivo serio. ¡Que se note en los músculos! 💪",
+         "Eso cuesta más que una medalla olímpica. 🥇😅", "Si no vas al gimnasio después de esto, te lo recordaré. 👀",
+         "Inversión en salud XL. ¡A rentabilizarla sudando! 💦", "Gasto de atleta. Este mes, el resto, con calma. 🧘"] };
+
 // Elige una frase sin repetir hasta que hayan salido todas las de ese grupo
 function fraseApunte(tipo, cat, importe){
   const f = tipo === "ingreso" ? FRASES_INGRESO : (FRASES[cat] || FRASES.otros);
