@@ -223,6 +223,8 @@ select.inp{appearance:none;-webkit-appearance:none;background-image:linear-gradi
 .rep .re{font-size:22px}.rep .rt{flex:1;min-width:0}.rep b{display:block;font-weight:900;font-size:15px}.rep small{display:block;font-size:12px;font-weight:800;color:var(--ink3)}
 .rep.on{background:var(--p-soft)}.rep.on small{color:var(--p)}
 .badge{display:inline-block;font-size:11px;font-weight:900;padding:2px 7px;border-radius:8px;background:var(--p-soft);color:var(--p);margin-left:6px;vertical-align:1px}
+.adm button.reset{font-size:13px;font-weight:900;color:#fff;background:var(--warn);padding:10px 12px;border-radius:12px;white-space:nowrap}
+.adm button.reset.sure{background:#9b1c2e}
 .foot{text-align:center;font-size:12px;font-weight:800;color:var(--ink3);margin:18px 0 6px}
 
 /* nav */
@@ -366,6 +368,11 @@ nav button.on .e{filter:none;opacity:1;transform:translateY(-1px) scale(1.08)}
         <h2>🛡️ Copias de seguridad</h2>
         <div class="muted small" style="margin-bottom:6px">Cada noche a las 00:00 se guarda sola una copia de tus cuentas. Aquí tienes las de los últimos 30 días para descargarlas en Excel. Solo las ves tú.</div>
         <div id="copias"></div>
+      </div>
+      <div class="card hidden" id="adminCard">
+        <h2>👑 Administrador</h2>
+        <div class="muted small" style="margin-bottom:6px">Si alguien olvida su código, restablécelo aquí. La próxima vez que entre creará uno nuevo. Sus gastos no se tocan.</div>
+        <div id="adminList"></div>
       </div>
       <div class="card">
         <h2>Seguridad y datos</h2>

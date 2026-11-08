@@ -3,6 +3,7 @@
    ===================================================================== */
 "use strict";
 const CFG = window.CONFIG || {};
+const ADMIN = "p1";   // Raúl es el administrador
 const REMOTO = !!(CFG.supabaseUrl && CFG.supabaseKey);
 const IA = !!CFG.workerUrl;
 
@@ -48,6 +49,8 @@ const Nube = {
   guardarMov(id,pin,m){ return this.rpc("guardar_mov",{p_id:id,p_pin:pin,p_tipo:m.tipo,p_cat:m.cat,p_importe:m.importe,p_fecha:m.fecha,p_nota:m.nota}); },
   borrarMov(id,pin,mov){ return this.rpc("borrar_mov",{p_id:id,p_pin:pin,p_mov:mov}); },
   ultimaCopia(){ return this.rpc("ultima_copia"); },
+  adminEstado(pin){ return this.rpc("admin_estado",{p_pin:pin}); },
+  adminResetear(pin,obj){ return this.rpc("admin_resetear_pin",{p_pin:pin,p_objetivo:obj}); },
   guardarRecurrente(id,pin,r){ return this.rpc("guardar_recurrente",{p_id:id,p_pin:pin,p_tipo:r.tipo,p_cat:r.cat,p_importe:r.importe,p_dia:r.dia,p_nota:r.nota}); },
   pararRecurrente(id,pin,rec){ return this.rpc("parar_recurrente",{p_id:id,p_pin:pin,p_rec:rec}); },
   misCopias(id,pin){ return this.rpc("mis_copias",{p_id:id,p_pin:pin}); },
@@ -70,6 +73,16 @@ const Local = {
   },
   save(d){ lsSet(this.KEY, d); },
   async ultimaCopia(){ return null; },
+  async adminEstado(pin){
+    const d = this.db(), e = await this.check(d,ADMIN,pin); if (e !== "OK") return {error:e};
+    return {ok:true, perfiles:Object.keys(d.perfiles).filter(id => id !== ADMIN).map(id => ({ id, nombre:d.perfiles[id].nombre, emoji:d.perfiles[id].emoji,
+      tiene_pin:!!d.perfiles[id].pin, bloqueado:!!(d.perfiles[id].bloq && d.perfiles[id].bloq > Date.now()) }))};
+  },
+  async adminResetear(pin,obj){
+    const d = this.db(), e = await this.check(d,ADMIN,pin); if (e !== "OK") return {error:e};
+    if (obj === ADMIN || !d.perfiles[obj]) return {error:"NO_PERMITIDO"};
+    Object.assign(d.perfiles[obj], {pin:null, salt:null, fallos:0, bloq:0}); this.save(d); return {ok:true};
+  },
   generar(d,id){
     const hoy = ymd(new Date());
     (d.recurrentes || []).filter(r => r.activo && r.persona === id).forEach(r => {
@@ -320,7 +333,7 @@ function abrirSesion(id, pin, r){
   show("app"); pintarCabecera(); pintarCats(); pintarTodo();
 }
 function cerrarSesion(){
-  S = null; copiasCache = null; cerrarEntry(); show("menu"); cargarMenu();
+  S = null; copiasCache = null; $("adminCard").classList.add("hidden"); $("adminList").innerHTML = ""; cerrarEntry(); show("menu"); cargarMenu();
 }
 $("lockBtn").onclick = cerrarSesion; $("logout").onclick = cerrarSesion;
 
@@ -676,6 +689,7 @@ function pintarAjustes(){
   $("darkSw").classList.toggle("on", !!P.oscuro); $("darkSw").setAttribute("aria-checked", !!P.oscuro);
   $("xlSub").textContent = `${S.movs.length === 1 ? "1 movimiento" : S.movs.length + " movimientos"} · resumen y gráficas`;
   pintarCopias();
+  pintarAdmin();
   $("foot").textContent = REMOTO ? "☁️ Tus datos se guardan en la nube y se sincronizan entre móviles" : "🧪 Modo prueba: datos guardados solo en este móvil";
   if (REMOTO) Store.ultimaCopia().then(t => {
     if (!t || view !== "set") return;
@@ -713,6 +727,34 @@ $("copias").addEventListener("click", async e => {
     await entregarExcel(blob, `Ahorraulin - ${S.perfil.nombre} - copia ${ymd(d)}.xlsx`);
   } catch(err){ toast(err.message === "NOZIP" ? "⚠️ Falta conexión para preparar el Excel" : "⚠️ No se ha podido descargar la copia"); }
   b.disabled = false; b.textContent = txt;
+});
+async function pintarAdmin(){
+  const card = $("adminCard");
+  card.classList.toggle("hidden", S.id !== ADMIN);
+  if (S.id !== ADMIN) return;
+  const box = $("adminList");
+  try {
+    const r = await Store.adminEstado(S.pin);
+    if (!r.ok) throw new Error(r.error);
+    if (!S || view !== "set") return;
+    box.innerHTML = r.perfiles.map(p => `<div class="copia adm"><div class="ci" style="background:var(--soft)">${esc(p.emoji)}</div>
+      <div class="cm"><b>${esc(p.nombre)}</b><span>${p.bloqueado ? "🔒 Bloqueado por intentos fallidos" : p.tiene_pin ? "Tiene código" : "Sin código: lo creará al entrar"}</span></div>
+      ${p.tiene_pin ? `<button class="reset" data-reset="${esc(p.id)}" data-nombre="${esc(p.nombre)}">Restablecer</button>` : ""}</div>`).join("");
+  } catch(e){ box.innerHTML = `<div class="empty">No se puede cargar ahora mismo.</div>`; }
+}
+$("adminList").addEventListener("click", async e => {
+  const b = e.target.closest("[data-reset]"); if (!b) return;
+  if (!b.classList.contains("sure")){
+    b.classList.add("sure"); b.textContent = "¿Seguro?"; vibrar();
+    setTimeout(() => { if (b.isConnected){ b.classList.remove("sure"); b.textContent = "Restablecer"; } }, 3000); return;
+  }
+  b.disabled = true; b.innerHTML = '<span class="spin"></span>';
+  try {
+    const r = await Store.adminResetear(S.pin, b.dataset.reset);
+    if (!r.ok) throw new Error(r.error);
+    toast(`👑 Código de ${b.dataset.nombre} restablecido. Creará uno nuevo al entrar.`);
+  } catch(err){ toast("⚠️ No se ha podido restablecer"); }
+  pintarAdmin();
 });
 let ajustesT;
 async function guardarAjustes(cambios, inmediato){

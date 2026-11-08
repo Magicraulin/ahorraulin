@@ -347,3 +347,33 @@ end $$;
 
 grant execute on function public.guardar_recurrente(text,text,text,text,numeric,int,text) to anon;
 grant execute on function public.parar_recurrente(text,text,uuid) to anon;
+
+-- =====================================================================
+--  ADMINISTRADOR (Raúl, perfil p1)
+--  Con su código puede restablecer el código de Sara o Marta si lo olvidan.
+--  Sus gastos no se tocan: la próxima vez que entren crean uno nuevo.
+-- =====================================================================
+create or replace function public.admin_estado(p_pin text)
+returns jsonb language plpgsql security definer set search_path = public as $$
+declare e text := public._pin_ok('p1', p_pin);
+begin
+  if e <> 'OK' then return jsonb_build_object('error',e); end if;
+  return jsonb_build_object('ok',true,'perfiles', coalesce((select jsonb_agg(jsonb_build_object(
+      'id',id,'nombre',nombre,'emoji',emoji,'tiene_pin',pin_hash is not null,
+      'bloqueado', bloqueado_hasta is not null and bloqueado_hasta > now()) order by id)
+    from public.perfiles where id <> 'p1'), '[]'::jsonb));
+end $$;
+
+create or replace function public.admin_resetear_pin(p_pin text, p_objetivo text)
+returns jsonb language plpgsql security definer set search_path = public as $$
+declare e text := public._pin_ok('p1', p_pin);
+begin
+  if e <> 'OK' then return jsonb_build_object('error',e); end if;
+  if p_objetivo = 'p1' then return jsonb_build_object('error','NO_PERMITIDO'); end if;
+  update public.perfiles set pin_hash = null, fallos = 0, bloqueado_hasta = null where id = p_objetivo;
+  if not found then return jsonb_build_object('error','NO_EXISTE'); end if;
+  return jsonb_build_object('ok',true);
+end $$;
+
+grant execute on function public.admin_estado(text) to anon;
+grant execute on function public.admin_resetear_pin(text,text) to anon;

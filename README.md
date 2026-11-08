@@ -33,7 +33,7 @@ Sin este paso, cada móvil guarda sus propios datos. Con él, todo está en la n
 
 > ⚠️ Lo que se haya apuntado en modo prueba no pasa a la nube: empieza a apuntar después de este paso.
 
-**¿Alguien ha olvidado su código?** En Supabase → SQL Editor ejecuta esta línea, cambiando `p2` por el perfil (`p1` Raúl, `p2` Sara, `p3` Marta):
+**¿Alguien ha olvidado su código?** Lo más fácil: Raúl entra en su perfil → **Ajustes → 👑 Administrador → Restablecer**. La próxima vez que esa persona entre, creará un código nuevo. Si es Raúl quien lo olvida, en Supabase → SQL Editor ejecuta esta línea, cambiando `p2` por el perfil (`p1` Raúl, `p2` Sara, `p3` Marta):
 
 ```sql
 update public.perfiles set pin_hash = null, fallos = 0, bloqueado_hasta = null where id = 'p2';
