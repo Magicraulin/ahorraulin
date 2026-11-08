@@ -1,6 +1,6 @@
 /* Hace que la app se abra rápido y funcione aunque falle la cobertura.
    Si cambias algún archivo, sube el número de versión para que se actualice. */
-const VERSION = "ahorraulin-v6";
+const VERSION = "ahorraulin-v7";
 const ARCHIVOS = ["./", "index.html", "app.js", "datos.js", "config.js", "plantilla.js", "manifest.webmanifest",
                   "icon-192.png", "icon-512.png", "apple-touch-icon.png"];
 
@@ -18,7 +18,7 @@ self.addEventListener("fetch", e => {
   if (!propio && !estatico) return;
   if (propio){
     // Primero internet (para tener siempre la última versión); si no hay, lo guardado.
-    e.respondWith(fetch(req).then(r => { const copia = r.clone(); caches.open(VERSION).then(c => c.put(req, copia)); return r; })
+    e.respondWith(fetch(req, { cache: "no-cache" }).then(r => { const copia = r.clone(); caches.open(VERSION).then(c => c.put(req, copia)); return r; })
       .catch(() => caches.match(req).then(r => r || caches.match("index.html"))));
   } else {
     e.respondWith(caches.match(req).then(r => r || fetch(req).then(res => { const copia = res.clone(); caches.open(VERSION).then(c => c.put(req, copia)); return res; })));
