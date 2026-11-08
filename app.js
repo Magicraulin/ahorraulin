@@ -217,10 +217,12 @@ function confetti(){
   }
 }
 let toastT;
-function toast(txt, undo){
+function toast(txt, undo, frase){
   $("toastTxt").textContent = txt; $("undo").classList.toggle("hidden", !undo);
-  $("toast").classList.add("show"); clearTimeout(toastT);
-  toastT = setTimeout(() => $("toast").classList.remove("show"), 3800);
+  $("toastFrase").textContent = frase || ""; $("toastFrase").classList.toggle("hidden", !frase);
+  const t = $("toast"); t.classList.remove("frase"); void t.offsetWidth; t.classList.toggle("frase", !!frase);
+  t.classList.add("show"); clearTimeout(toastT);
+  toastT = setTimeout(() => t.classList.remove("show"), frase ? 5500 : 3800);
 }
 function banner(t){ $("banner").textContent = t || ""; $("banner").classList.toggle("hidden", !t); }
 
@@ -449,14 +451,14 @@ $("eSave").onclick = async () => {
       if (!res.ok) throw new Error(res.error);
       const r2 = await Store.entrar(S.id, S.pin);
       if (r2.ok){ S.movs = r2.movs.map(limpiar); S.recs = limpiarRecs(r2.recurrentes); }
-      pintarTodo(); toast(`🔁 ${c.e} ${eur(v)} el día ${r.dia} de cada mes ✓`);
+      pintarTodo(); toast(`🔁 ${c.e} ${eur(v)} el día ${r.dia} de cada mes ✓`, false, fraseApunte(r.tipo, r.cat, v));
     } catch(err){ toast("⚠️ No se ha guardado: " + errTxt(err.message || "RED")); }
     return;
   }
   const m = { tipo:entry.tipo, cat:entry.cat.id, importe:v, fecha, nota:$("eNote").value.trim().slice(0,80) };
   const temp = { id:"tmp" + Date.now(), ...m, creado:Date.now() };
   S.movs.push(temp); cerrarEntry(); pintarTodo(); vibrar(20);
-  const c = catOf(m); toast(`${c.e} ${eur(v)} · ${c.n} ✓`, true); lastAdded = temp.id;
+  const c = catOf(m); toast(`${c.e} ${eur(v)} · ${c.n} ✓`, true, fraseApunte(m.tipo, m.cat, v)); lastAdded = temp.id;
   try {
     const r = await Store.guardarMov(S.id, S.pin, m);
     if (!r.ok) throw new Error(r.error);
