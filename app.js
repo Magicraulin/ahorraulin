@@ -784,38 +784,8 @@ $("chPin").onclick = () => { pinState = { id:S.id, nombre:S.perfil.nombre, emoji
 /* =====================================================================
    EXCEL
    ===================================================================== */
-function xmlEsc(s){ return String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])).replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g,""); }
-function serial(s){ const [y,m,d] = s.split("-").map(Number); return Date.UTC(y,m-1,d)/86400000 + 25569; }
-function celdaTxt(ref, v, st){ return `<c r="${ref}"${st ? ` s="${st}"` : ""} t="inlineStr"><is><t xml:space="preserve">${xmlEsc(v)}</t></is></c>`; }
-async function crearExcel(movs, mesRef){
-  if (!window.JSZip) throw new Error("NOZIP");
-  const zip = await JSZip.loadAsync(Uint8Array.from(atob(PLANTILLA_XLSX), c => c.charCodeAt(0)));
-  const lista = [...(movs || S.movs)].sort((a,b) => a.fecha.localeCompare(b.fecha) || a.creado - b.creado);
-  let filas = `<row r="1" ht="22" customHeight="1">` + ["Fecha","Tipo","Categoría","Importe (€)","Nota"].map((h,i) => celdaTxt("ABCDE"[i]+"1", h, 14)).join("") + `</row>`;
-  lista.forEach((m,i) => {
-    const r = i + 2;
-    filas += `<row r="${r}"><c r="A${r}" s="15"><v>${serial(m.fecha)}</v></c>${celdaTxt("B"+r, m.tipo === "ingreso" ? "Ingreso" : "Gasto", 16)}${celdaTxt("C"+r, catOf(m).n, 16)}<c r="D${r}" s="17"><v>${m.importe}</v></c>${celdaTxt("E"+r, m.nota, 16)}</row>`;
-  });
-  let s2 = await zip.file("xl/worksheets/sheet2.xml").async("string");
-  s2 = s2.replace(/<sheetData>[\s\S]*<\/sheetData>|<sheetData\/>/, `<sheetData>${filas}</sheetData>`)
-         .replace(/<dimension ref="[^"]*"\/>/, `<dimension ref="A1:E${Math.max(2, lista.length + 1)}"/>`);
-  zip.file("xl/worksheets/sheet2.xml", s2);
-  const g = cats("gasto").map(c => c.n), ig = cats("ingreso").map(c => c.n), todas = g.concat(ig);
-  const d = mesRef || new Date(), primero = `${d.getFullYear()}-${pad(d.getMonth()+1)}-01`;
-  let lr = "";
-  for (let i = 0; i < Math.max(todas.length, 12); i++){
-    const r = i + 1; let c = "";
-    if (g[i]) c += celdaTxt("A"+r, g[i]);
-    if (ig[i]) c += celdaTxt("B"+r, ig[i]);
-    if (r === 1) c += celdaTxt("D1", S.perfil.nombre);
-    if (r === 2) c += `<c r="D2" s="23"><v>${serial(primero)}</v></c>`;
-    if (todas[i]) c += celdaTxt("F"+r, todas[i]);
-    lr += `<row r="${r}">${c}</row>`;
-  }
-  let s4 = await zip.file("xl/worksheets/sheet4.xml").async("string");
-  s4 = s4.replace(/<sheetData>[\s\S]*<\/sheetData>|<sheetData\/>/, `<sheetData>${lr}</sheetData>`);
-  zip.file("xl/worksheets/sheet4.xml", s4);
-  return zip.generateAsync({ type:"blob", mimeType:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+async function crearExcel(movs, generado){
+  return crearExcelAhorraulin({ nombre:S.perfil.nombre, movs:(movs || S.movs), catOf, generado });
 }
 async function entregarExcel(blob, nombre){
   const file = new File([blob], nombre, { type: blob.type });
