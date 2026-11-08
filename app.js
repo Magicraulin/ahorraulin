@@ -3,7 +3,7 @@
    ===================================================================== */
 "use strict";
 const CFG = window.CONFIG || {};
-const VERSION = "1.8";
+const VERSION = "1.9";
 const ADMIN = "p1";   // Raúl es el administrador
 const REMOTO = !!(CFG.supabaseUrl && CFG.supabaseKey);
 const IA = !!CFG.workerUrl;
@@ -703,7 +703,7 @@ function pintarAjustes(){
   $("emojiGrid").innerHTML = EMOJIS.map(e => `<button data-em="${e}" class="${e === P.emoji ? "on" : ""}" aria-label="${e}">${e}</button>`).join("");
   $("swatches").innerHTML = Object.entries(PALETAS).map(([k,v]) => `<button class="sw ${k === P.color ? "on" : ""}" data-col="${k}" style="background:linear-gradient(135deg,${v[0]},${v[1]})">${v[2]}</button>`).join("");
   $("darkSw").classList.toggle("on", !!P.oscuro); $("darkSw").setAttribute("aria-checked", !!P.oscuro);
-  $("xlSub").textContent = `${S.movs.length === 1 ? "1 movimiento" : S.movs.length + " movimientos"} · resumen y gráficas`;
+  $("xlSub").textContent = `Con tus ${S.movs.length === 1 ? "1 movimiento" : S.movs.length + " movimientos"} hasta ahora · todos los meses`;
   pintarCopias();
   pintarAdmin();
   $("foot").textContent = (REMOTO ? "☁️ Tus datos se guardan en la nube y se sincronizan entre móviles" : "🧪 Modo prueba: datos guardados solo en este móvil") + ` · versión ${VERSION}`;
@@ -807,7 +807,7 @@ async function entregarExcel(blob, nombre){
     const url = URL.createObjectURL(blob), a = document.createElement("a");
     a.href = url; a.download = nombre; document.body.appendChild(a); a.click(); a.remove();
     setTimeout(() => URL.revokeObjectURL(url), 4000);
-    toast("📗 Excel descargado");
+    toast("🔄 Excel actualizado y descargado");
   }
 }
 $("xlBtn").onclick = async () => {
