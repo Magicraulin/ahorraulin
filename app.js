@@ -305,6 +305,12 @@ async function pinListo(){
       if (pin !== s.first){ s.mode = s.prev; sacudir($("dots")); pintarPin("No coinciden. Empieza otra vez", true); return; }
       if (s.prev === "create"){
         const r = await Store.crearPin(s.id, pin);
+        if (!r.ok && r.error === "YA_TIENE_PIN"){
+          // El perfil ya tenía código (creado antes o desde otro móvil): pedimos el de verdad
+          s.mode = "enter"; s.first = null; s.prev = null; pintarPin("Este perfil ya tiene código. Escríbelo para entrar", true);
+          const p = perfilesMenu.find(x => x.id === s.id); if (p) p.tiene_pin = true;
+          return;
+        }
         if (!r.ok){ s.mode = "create"; pintarPin(errTxt(r.error), true); return; }
         const r2 = await Store.entrar(s.id, pin);
         if (!r2.ok){ pintarPin(errTxt(r2.error), true); return; }
@@ -318,7 +324,7 @@ async function pinListo(){
 }
 $("pinBack").onclick = () => {
   if (S && pinState && (pinState.mode === "change" || pinState.prev === "change")){ pinState = null; show("app"); aplicarTema(S.perfil.color, S.perfil.oscuro); return; }
-  pinState = null; show("menu");
+  pinState = null; show("menu"); cargarMenu();
 };
 
 /* =====================================================================
