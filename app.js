@@ -3,7 +3,7 @@
    ===================================================================== */
 "use strict";
 const CFG = window.CONFIG || {};
-const VERSION = "2.3";
+const VERSION = "2.4";
 const ADMIN = "p1";   // Raúl es el administrador
 const REMOTO = !!(CFG.supabaseUrl && CFG.supabaseKey);
 const IA = !!CFG.workerUrl;
@@ -703,7 +703,7 @@ function pintarAjustes(){
   $("emojiGrid").innerHTML = EMOJIS.map(e => `<button data-em="${e}" class="${e === P.emoji ? "on" : ""}" aria-label="${e}">${e}</button>`).join("");
   $("swatches").innerHTML = Object.entries(PALETAS).map(([k,v]) => `<button class="sw ${k === P.color ? "on" : ""}" data-col="${k}" style="background:linear-gradient(135deg,${v[0]},${v[1]})">${v[2]}</button>`).join("");
   $("darkSw").classList.toggle("on", !!P.oscuro); $("darkSw").setAttribute("aria-checked", !!P.oscuro);
-  $("xlSub").textContent = `Con tus ${S.movs.length === 1 ? "1 movimiento" : S.movs.length + " movimientos"} hasta ahora · todos los meses`;
+  $("xlSub").textContent = `Archivo nuevo con tus ${S.movs.length === 1 ? "1 movimiento" : S.movs.length + " movimientos"} · para enviarlo o guardarlo`;
   pintarCopias();
   pintarAdmin();
   pintarHojaGoogle();
@@ -720,7 +720,7 @@ function pintarHojaGoogle(){
   const ok = /^https:\/\/docs\.google\.com\/spreadsheets\//.test(url);
   $("gsAbrir").href = ok ? url : "#";
   $("gsAbrir").style.opacity = ok ? 1 : .5;
-  $("gsSub").textContent = ok ? "Se abre en Google Sheets" : "Primero pega abajo el enlace de tu hoja";
+  $("gsSub").textContent = ok ? "Tu Excel único, siempre al día" : "Primero pega abajo el enlace de tu hoja";
 }
 $("gsGuiaBtn").onclick = () => { vibrar(); $("gsGuia").classList.add("show"); };
 $("gsCerrar").onclick = () => $("gsGuia").classList.remove("show");
@@ -844,7 +844,7 @@ async function entregarExcel(blob, nombre){
     const url = URL.createObjectURL(blob), a = document.createElement("a");
     a.href = url; a.download = nombre; document.body.appendChild(a); a.click(); a.remove();
     setTimeout(() => URL.revokeObjectURL(url), 4000);
-    toast("🔄 Excel actualizado y descargado");
+    toast("📥 Copia en Excel descargada");
   }
 }
 $("xlBtn").onclick = async () => {
