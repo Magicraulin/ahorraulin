@@ -8,6 +8,8 @@
    Es siempre la MISMA hoja: no se crean archivos nuevos.
    ===================================================================== */
 
+/** @OnlyCurrentDoc  ← solo puede tocar ESTA hoja, ninguna otra de tu Drive */
+
 const SUPABASE_URL = "https://fbjwnfvmrfaqyvvproyv.supabase.co";
 const SUPABASE_KEY = "sb_publishable_mI68ZSEPKber-LPoMai5Wg_Qq1YTs5G";   // clave pública de la app
 
