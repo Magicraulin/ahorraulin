@@ -8,12 +8,12 @@ const GASTOS_BASE = [
   ["ahorro","🐷","Ahorro","#ffe3ef"], ["inversion","📈","Inversión","#e1f4e6"], ["otros","✨","Otros gastos","#f0eef5"]
 ];
 const BELLEZA = ["belleza","💅","Belleza","#fde3f3"];
-const DEPORTE = ["deporte","🏋️","Deporte","#e6f6df"];
+const DEPORTE = ["deporte","🏓","Pádel","#e6f6df"];   // se guarda como "deporte"
 // Mete una categoría justo detrás de otra
 const meterDetras = (lista, id, cat) => { const i = lista.findIndex(c => c[0] === id); return [...lista.slice(0, i + 1), cat, ...lista.slice(i + 1)]; };
 const CATEGORIAS = {
   mago: {
-    // Raúl: con Deporte (detrás de Viajes)
+    // Raúl: con Pádel (detrás de Viajes)
     gasto: meterDetras(GASTOS_BASE.map(c => c[0] === "trabajo" ? ["trabajo","🪄","Material de magia","#efe6ff"] : c), "viajes", DEPORTE),
     ingreso: [["bolos","🎩","Actuaciones","#ece5ff"],["bodas","💍","Bodas y eventos","#fbe3f1"],["teatro","🎭","Teatro","#ffe4dc"],
               ["sueldo","💰","Sueldo","#e1f4e6"],["bizum","💸","Bizum / me devuelven","#e0f5f5"],["ventas","🏷️","Ventas","#fff1d6"],
@@ -129,10 +129,11 @@ const CONSEJOS = {
     "Crea una hucha solo para viajes y aparta un poco cada mes (categoría Ahorro)."
   ],
   deporte: [
-    "Antes de comprar material caro, prueba el deporte con algo básico o de segunda mano.",
-    "Mira si tu gimnasio tiene tarifa anual o de mañanas: suele salir más barato.",
-    "Correr, bici o rutinas en casa y en el parque: deporte gratis y igual de eficaz.",
-    "Si vas poco al gimnasio, quizá te compensa pagar por sesión en vez de cuota."
+    "Reserva pista en horas valle (mañanas o mediodía): suelen ser bastante más baratas.",
+    "Si jugáis 4, repartid siempre la pista a partes iguales con Bizum al momento.",
+    "Las bolas duran más de lo que parece: no abras bote nuevo cada partido.",
+    "Pala nueva solo cuando la vieja esté de verdad gastada; mira modelos de temporadas anteriores, salen mucho más baratas.",
+    "Mira si tu club tiene bono de varias horas o cuota mensual: si juegas mucho, compensa."
   ],
   belleza: [
     "Peluquería cada 6-8 semanas en vez de cada 4: se nota poco y se ahorra mucho.",
@@ -292,14 +293,16 @@ FRASES.viajes = { lim:[60, 250],
   alto: ["¡Viaje de los gordos! 🌍 Ahora, unos meses de ahorro.", "Eso no es un viaje, es una expedición. 🗺️💸", "¡Qué pasada de viaje! Tu cuenta también se ha ido de vacaciones. 🏝️",
          "Recuerdos para toda la vida… y gasto para todo el trimestre. 😅", "¡Vuelta al mundo! O casi. 🌎", "Viajazo apuntado. Para el próximo, abre una hucha de viajes. 🐷✈️",
          "Has viajado a lo grande. A la vuelta, modo ahorro ON. 🔋", "Avión, hotel, comidas… ¡Disfrútalo, que te lo has ganado! 🥂"] };
-FRASES.deporte = { lim:[20, 60],
-  bajo: ["¡A sudar sin gastar mucho! 💦", "Deporte barato, salud de lujo. 💪", "Moverse es lo mejor que hay. 🏃", "Pequeña inversión en tu cuerpo. ¡Bien! 🙌",
-         "Entrenamiento low cost, resultados top. 🔥", "¡Eso es cuidarse! 🥇"],
-  medio:["Cuota apuntada. ¡Ahora a ir de verdad, eh! 😜", "¡Menos sofá y más deporte! Bien invertido. 🏋️", "Salud en vena. Sácale partido a cada euro. 💯",
-         "Material nuevo = cero excusas para entrenar. 👟", "¿Vas todas las semanas? Si sí, ¡dinero bien gastado! ✅", "Cuerpo de mago en construcción. 🎩💪"],
-  alto: ["¡Equipación de profesional! Ahora, a entrenar como uno. 🏆", "Gasto deportivo serio. ¡Que se note en los músculos! 💪",
-         "Eso cuesta más que una medalla olímpica. 🥇😅", "Si no vas al gimnasio después de esto, te lo recordaré. 👀",
-         "Inversión en salud XL. ¡A rentabilizarla sudando! 💦", "Gasto de atleta. Este mes, el resto, con calma. 🧘"] };
+FRASES.deporte = { lim:[15, 50],
+  bajo: ["¡Partidito barato y a sudar! 🏓💦", "Pista a medias, risas enteras. 😂", "Pádel low cost, bandeja de lujo. 🎾", "¡Así se juega: barato y con ganas!",
+         "Un partido así alegra cualquier semana. ☀️", "Pista pagada, excusas cero. ¡Al lío! 💪", "Deporte y amigos por poco. ¡Combo perfecto! 🤝"],
+  medio:["¡A ver esa víbora, que hay que amortizar la pista! 🐍", "Partido apuntado. ¿Ganaste o pagaste las cañas? 🍻",
+         "Pádel del bueno. Reserva en horas valle y te sale más barato. 🕐", "¡Que no se te escape ninguna bola, que cuestan! 🎾",
+         "Cuerpo de mago en construcción. 🎩💪", "Bote nuevo de bolas… ¡que duren, eh! 🥫", "¡Qué smash! Y qué gasto. 😅"],
+  alto: ["¡Pala nueva! Ahora no hay excusa para perder. 🏓🔥", "Eso cuesta más que la pista de Galán y Lebrón. 😂",
+         "Equipación de profesional… ahora juega como uno. 🏆", "Si no ganas el próximo partido con esto, es culpa tuya, no de la pala. 😜",
+         "Gasto de World Padel Tour. Este mes, el resto con calma. 🧘", "¡Menudo fichaje de material! A rentabilizarlo en la pista. 💪",
+         "Con eso alquilabas pista para medio año. Solo lo dejo caer. 👀"] };
 
 // Elige una frase sin repetir hasta que hayan salido todas las de ese grupo
 function fraseApunte(tipo, cat, importe){
