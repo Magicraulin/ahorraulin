@@ -3,6 +3,7 @@
    ===================================================================== */
 "use strict";
 const CFG = window.CONFIG || {};
+const VERSION = "1.4";
 const ADMIN = "p1";   // Raúl es el administrador
 const REMOTO = !!(CFG.supabaseUrl && CFG.supabaseKey);
 const IA = !!CFG.workerUrl;
@@ -341,6 +342,7 @@ function abrirSesion(id, pin, r){
   show("app"); pintarCabecera(); pintarCats(); pintarTodo();
 }
 function cerrarSesion(){
+  if (window.__actualizar){ window.__actualizar(); return; }
   S = null; copiasCache = null; $("adminCard").classList.add("hidden"); $("adminList").innerHTML = ""; cerrarEntry(); show("menu"); cargarMenu();
 }
 $("lockBtn").onclick = cerrarSesion; $("logout").onclick = cerrarSesion;
@@ -463,8 +465,10 @@ $("eSave").onclick = async () => {
     const r = await Store.guardarMov(S.id, S.pin, m);
     if (!r.ok) throw new Error(r.error);
     const tmpId = temp.id; temp.id = String(r.id);
+    temp.tmpId = tmpId;
     if (!S.movs.includes(temp)){ Store.borrarMov(S.id, S.pin, temp.id).catch(() => {}); return; }   // se deshizo mientras se guardaba
     if (lastAdded === tmpId) lastAdded = temp.id;
+    pintarTodo();   // los botones ✕ pasan a llevar el id definitivo
   } catch(err){
     S.movs = S.movs.filter(x => x !== temp); pintarTodo();
     toast("⚠️ No se ha guardado: " + errTxt(err.message || "RED"));
@@ -479,7 +483,8 @@ async function pararFijo(rec){
   catch(err){ S.recs.push(r); pintarTodo(); toast("⚠️ No se ha podido cambiar"); }
 }
 async function borrar(id){
-  const m = S.movs.find(x => x.id === id); if (!m) return;
+  const m = S.movs.find(x => x.id === id || x.tmpId === id); if (!m) return;
+  id = m.id;
   S.movs = S.movs.filter(x => x !== m); pintarTodo();
   if (id.startsWith("tmp")) return;
   try { const r = await Store.borrarMov(S.id, S.pin, id); if (!r.ok) throw new Error(r.error); }
@@ -536,9 +541,10 @@ function pintarLista(){
   for (const m of l){ if (m.fecha !== d){ d = m.fecha; h += `<div class="day-h">${esc(dayLabel(d))}</div>`; } h += fila(m,false); }
   $("list").innerHTML = h;
 }
-function porCategoria(l){
+const CATS_GUARDADO = ["ahorro","inversion"];
+function porCategoria(l, sinGuardado){
   const by = {};
-  l.filter(m => m.tipo === "gasto").forEach(m => { by[m.cat] = (by[m.cat] || 0) + m.importe; });
+  l.filter(m => m.tipo === "gasto" && !(sinGuardado && CATS_GUARDADO.includes(m.cat))).forEach(m => { by[m.cat] = (by[m.cat] || 0) + m.importe; });
   return Object.entries(by).sort((a,b) => b[1] - a[1]);
 }
 function pintarGraficas(){
@@ -602,8 +608,9 @@ function pintarAhorro(){
   let mes = k, l = ofMonth(S.movs, k);
   if (total(l,"gasto") === 0 && total(ofMonth(S.movs, prev),"gasto") > 0){ mes = prev; l = ofMonth(S.movs, prev); }
   const lPrev = ofMonth(S.movs, shiftMonth(mes,-1));
-  const g = total(l,"gasto"), i = total(l,"ingreso"), rows = porCategoria(l);
-  const prevBy = Object.fromEntries(porCategoria(lPrev));
+  const guardado = l.filter(m => m.tipo === "gasto" && CATS_GUARDADO.includes(m.cat)).reduce((s,m) => s + m.importe, 0);
+  const g = total(l,"gasto") - guardado, i = total(l,"ingreso"), rows = porCategoria(l, true);
+  const prevBy = Object.fromEntries(porCategoria(lPrev, true));
   let h = "";
 
   // Veredicto
@@ -618,6 +625,7 @@ function pintarAhorro(){
     else { em = "🚨"; tit = `Has gastado ${eur(g-i)} más de lo que ha entrado`; txt = "Toca frenar un poco. Empieza por la categoría de arriba del todo: es donde más se nota."; }
   }
   h += `<div class="card"><div class="verdict"><div class="big">${em}</div><div><b>${esc(tit)}</b><div class="muted small">${esc(txt)}</div></div></div></div>`;
+  if (guardado > 0) h += `<div class="card"><div class="verdict"><div class="big">🐷</div><div><b>Has apartado ${eur(guardado)} en ahorro e inversión</b><div class="muted small">¡Así se hace! Ese dinero no cuenta como gasto en tus consejos: es dinero que trabaja para ti.</div></div></div></div>`;
 
   // Tarjetas de las 3 categorías donde más se gasta
   let recetasPuestas = false;
@@ -698,11 +706,11 @@ function pintarAjustes(){
   $("xlSub").textContent = `${S.movs.length === 1 ? "1 movimiento" : S.movs.length + " movimientos"} · resumen y gráficas`;
   pintarCopias();
   pintarAdmin();
-  $("foot").textContent = REMOTO ? "☁️ Tus datos se guardan en la nube y se sincronizan entre móviles" : "🧪 Modo prueba: datos guardados solo en este móvil";
+  $("foot").textContent = (REMOTO ? "☁️ Tus datos se guardan en la nube y se sincronizan entre móviles" : "🧪 Modo prueba: datos guardados solo en este móvil") + ` · versión ${VERSION}`;
   if (REMOTO) Store.ultimaCopia().then(t => {
     if (!t || view !== "set") return;
     const d = new Date(t), hoy = ymd(new Date()), cuando = ymd(d) === hoy ? "hoy" : dayLabel(ymd(d)).toLowerCase();
-    $("foot").innerHTML = `☁️ Tus datos se guardan en la nube y se sincronizan entre móviles<br>🛡️ Copia de seguridad automática cada noche a las 00:00 · última: ${esc(cuando)} a las ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    $("foot").innerHTML = `☁️ Tus datos se guardan en la nube y se sincronizan entre móviles · versión ${VERSION}<br>🛡️ Copia de seguridad automática cada noche a las 00:00 · última: ${esc(cuando)} a las ${pad(d.getHours())}:${pad(d.getMinutes())}`;
   }).catch(() => {});
 }
 let copiasCache = null;
@@ -841,5 +849,16 @@ function pintarTodo(){
 show("menu");
 cargarMenu();
 if ("serviceWorker" in navigator && location.protocol === "https:"){
-  navigator.serviceWorker.register("sw.js").catch(() => {});
+  let recargando = false;
+  const habia = !!navigator.serviceWorker.controller;
+  navigator.serviceWorker.addEventListener("controllerchange", () => {
+    // Hay versión nueva: recarga sola, pero sin cortar a nadie que esté apuntando
+    if (!habia || recargando) return;
+    const recargar = () => { if (recargando) return; recargando = true; location.reload(); };
+    if (!S && !entry) recargar();
+    else { banner("✨ Hay una versión nueva de Ahorraulin. Se pondrá sola la próxima vez que la abras."); window.__actualizar = recargar; }
+  });
+  navigator.serviceWorker.register("sw.js").then(reg => {
+    document.addEventListener("visibilitychange", () => { if (!document.hidden) reg.update().catch(() => {}); });
+  }).catch(() => {});
 }

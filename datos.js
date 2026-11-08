@@ -4,8 +4,10 @@ const GASTOS_BASE = [
   ["gasolina","⛽","Gasolina","#fff1d6"], ["comer","🍔","Comer fuera","#ffe4dc"], ["super","🛒","Súper","#e1f4e6"],
   ["casa","🏠","Casa","#e3ecff"], ["transporte","🚗","Coche y transporte","#e6f2fb"], ["ocio","🎉","Ocio","#fbe3f1"],
   ["ropa","👕","Ropa","#ece5ff"], ["salud","💊","Salud","#ffe3e6"], ["regalos","🎁","Regalos","#fff0dc"],
-  ["suscripciones","📱","Suscripciones","#e0f5f5"], ["trabajo","✏️","Material de clase","#fff7cf"], ["otros","✨","Otros gastos","#f0eef5"]
+  ["suscripciones","📱","Suscripciones","#e0f5f5"], ["trabajo","✏️","Material de clase","#fff7cf"],
+  ["ahorro","🐷","Ahorro","#ffe3ef"], ["inversion","📈","Inversión","#e1f4e6"], ["otros","✨","Otros gastos","#f0eef5"]
 ];
+const BELLEZA = ["belleza","💅","Belleza","#fde3f3"];
 const CATEGORIAS = {
   mago: {
     gasto: GASTOS_BASE.map(c => c[0] === "trabajo" ? ["trabajo","🪄","Material de magia","#efe6ff"] : c),
@@ -14,7 +16,8 @@ const CATEGORIAS = {
               ["regalo","🎁","Regalo","#fff0dc"],["otros_in","✨","Otros ingresos","#f0eef5"]]
   },
   profe: {
-    gasto: GASTOS_BASE,
+    // Sara y Marta: con Belleza (antes de Ahorro)
+    gasto: [...GASTOS_BASE.slice(0, 11), BELLEZA, ...GASTOS_BASE.slice(11)],
     ingreso: [["sueldo","💰","Nómina","#e1f4e6"],["clases","📚","Clases particulares","#e3ecff"],["academia","🏫","Academia / extraescolares","#ece5ff"],
               ["paga","🎄","Paga extra","#ffe4dc"],["bizum","💸","Bizum / me devuelven","#e0f5f5"],["regalo","🎁","Regalo","#fff0dc"],
               ["ventas","🏷️","Ventas","#fff1d6"],["otros_in","✨","Otros ingresos","#f0eef5"]]
@@ -113,6 +116,13 @@ const CONSEJOS = {
     "Compra el material en packs grandes o en tiendas al por mayor.",
     "Antes de comprar, mira si puedes reutilizar o fabricar tú el material.",
     "Guarda los tickets: si eres autónomo, muchos gastos de trabajo se pueden desgravar."
+  ],
+  belleza: [
+    "Peluquería cada 6-8 semanas en vez de cada 4: se nota poco y se ahorra mucho.",
+    "Busca academias de peluquería o estética: hacen servicios a precio reducido.",
+    "Compra los productos que más usas en tamaño grande o en packs.",
+    "Las marcas blancas de cosmética del súper son muy buenas y mucho más baratas.",
+    "Manicura en casa una semana sí y otra no: mismo resultado, mitad de gasto."
   ],
   otros: [
     "Apunta una nota en cada gasto de «Otros»: así verás en qué se va de verdad.",
@@ -227,6 +237,20 @@ const FRASES = {
     bajo: ["Material de trabajo: inversión, no gasto. 💼", "Herramienta pequeña, gran ayuda.", "Bien. Guarda el ticket, que puede desgravar. 🧾"],
     medio:["Herramientas nuevas, más ganas de trabajar. 💪", "Inversión en lo tuyo. Que dé frutos. 🌱"],
     alto: ["Inversión potente. ¡Que se note en los bolsillos pronto! 📈", "Gasto de trabajo gordo: guarda la factura. 🧾", "A por más trabajo para amortizarlo. 💼🔥"] },
+  belleza: { lim:[20, 60],
+    bajo: ["Guapa y sin arruinarte. ¡Así sí! 💅", "Un mimito pequeño, bien merecido. ✨", "Belleza low cost, resultado top. 😍", "Cuidarse es importante, y barato mejor."],
+    medio:["Divina, pero que no se convierta en costumbre semanal. 😉", "¡Qué guapa vas a ir! Tu cartera un poco menos. 💄", "¿Y si la próxima vez pruebas en una academia? Más barato. 💇‍♀️",
+           "Mimo apuntado. Ahora a lucirlo. 💃"],
+    alto: ["¡Sesión de belleza nivel alfombra roja! 🌟 Este mes, mimos caseros.", "Vas a estar espectacular… y tu cuenta, en recuperación. 😅",
+           "Eso es un tratamiento de estrella de Hollywood. 🎬", "Guapísima, pero ese gasto pide una semanita de manicura casera. 💅"] },
+  ahorro: { lim:[50, 200],
+    bajo: ["¡Bien! Todo lo que se guarda, cuenta. 🐷", "Pequeño ahorro, gran hábito. 👏", "La hucha sonríe. 😊", "Poco a poco se llena el cerdito. 🐖"],
+    medio:["¡Eso es ahorrar con cabeza! 💪", "Tu yo del futuro te está aplaudiendo. 👏👏", "¡Qué disciplina! Sigue así. 🏆", "Ahorro serio. ¡Crack total! 😎"],
+    alto: ["¡OLÉ! Ahorro de campeón/a. 🏆🐷", "¡Madre mía, qué hucha! Eres un ejemplo. 🌟", "Ese ahorro es para enmarcarlo. 🖼️", "¡Así se construye un colchón! 🛏️💰"] },
+  inversion: { lim:[50, 300],
+    bajo: ["Toda inversión empieza con un primer paso. 📈", "¡Poner el dinero a trabajar mola! 💼", "Pequeña inversión, grandes intenciones. 🌱"],
+    medio:["Inversión apuntada. ¡A esperar que crezca! 🌳", "Pensando en el futuro, así me gusta. 🔮", "Dinero trabajando para ti. 💪"],
+    alto: ["¡Inversor/a de los buenos! 📈🚀", "Gran inversión. Paciencia y a largo plazo. ⏳", "¡Eso es mirar al futuro con ganas! 🌟"] },
   otros: { lim:[20, 60],
     bajo: ["Gastito anotado. Así se lleva el control. ✍️", "Todo apuntado, todo controlado. 👀", "Pequeño gasto, gran disciplina por apuntarlo. 👏"],
     medio:["Ponle nota a los «otros» y sabrás dónde se va. 😉", "¿Qué ha sido esto? Ponle nota, detective. 🔎"],
