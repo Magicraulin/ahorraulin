@@ -374,6 +374,13 @@ nav button.on .e{filter:none;opacity:1;transform:translateY(-1px) scale(1.08)}
         <div class="muted small" style="margin-bottom:6px">Cada noche a las 00:00 se guarda sola una copia de tus cuentas. Aquí tienes las de los últimos 30 días para descargarlas en Excel. Solo las ves tú.</div>
         <div id="copias"></div>
       </div>
+      <div class="card">
+        <h2>📊 Mi hoja de Google</h2>
+        <div class="muted small" style="margin-bottom:6px">Una sola hoja que se actualiza sola cada noche a las 00:00 y al abrirla. Se conecta una vez desde el ordenador.</div>
+        <a class="opt" id="gsAbrir" target="_blank" rel="noopener" style="text-decoration:none;color:inherit" href="#"><span class="e">📊</span><span>Abrir mi hoja<small id="gsSub">Guarda abajo el enlace de tu hoja</small></span></a>
+        <input class="inp" id="gsUrl" placeholder="Pega aquí el enlace de tu hoja de Google" style="margin-top:10px" inputmode="url" autocomplete="off">
+        <a class="opt" target="_blank" rel="noopener" style="text-decoration:none;color:inherit" href="https://github.com/Magicraulin/ahorraulin/blob/main/google-sheets/README.md"><span class="e">📖</span><span>Cómo crear mi hoja<small>Pasos para conectarla (5 minutos, desde el ordenador)</small></span></a>
+      </div>
       <div class="card hidden" id="adminCard">
         <h2>👑 Administrador</h2>
         <div class="muted small" style="margin-bottom:6px">Si alguien olvida su código, restablécelo aquí. La próxima vez que entre creará uno nuevo. Sus gastos no se tocan.</div>
@@ -425,10 +432,10 @@ nav button.on .e{filter:none;opacity:1;transform:translateY(-1px) scale(1.08)}
 
 <div class="toast" id="toast"><div class="tt"><b id="toastFrase" class="hidden"></b><span id="toastTxt"></span></div><button id="undo">Deshacer</button></div>
 
-<script src="config.js?v=15"></script>
-<script src="datos.js?v=15"></script>
-<script src="excel.js?v=15"></script>
+<script src="config.js?v=16"></script>
+<script src="datos.js?v=16"></script>
+<script src="excel.js?v=16"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js" defer></script>
-<script src="app.js?v=15"></script>
+<script src="app.js?v=16"></script>
 </body>
 </html>

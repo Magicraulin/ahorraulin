@@ -49,6 +49,10 @@ La próxima vez que entre podrá crear un código nuevo. Sus gastos no se borran
 
 ---
 
+## Hoja de Google que se actualiza sola
+
+Cada uno puede tener **una sola hoja de cálculo** en su Google Drive que se actualiza sola cada noche y al abrirla. Pasos en [`google-sheets/README.md`](google-sheets/README.md).
+
 ## Paso 3 (opcional) · Consejos con IA (Cloudflare)
 
 Sin este paso, la pestaña **Ahorro** ya te da consejos y recetas baratas. Con este paso aparece además el botón **✨ Pedir consejos a la IA**, que analiza tus 3 últimos meses y te hace un plan.

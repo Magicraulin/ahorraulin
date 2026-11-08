@@ -3,7 +3,7 @@
    ===================================================================== */
 "use strict";
 const CFG = window.CONFIG || {};
-const VERSION = "1.9";
+const VERSION = "2.0";
 const ADMIN = "p1";   // Raúl es el administrador
 const REMOTO = !!(CFG.supabaseUrl && CFG.supabaseKey);
 const IA = !!CFG.workerUrl;
@@ -706,6 +706,7 @@ function pintarAjustes(){
   $("xlSub").textContent = `Con tus ${S.movs.length === 1 ? "1 movimiento" : S.movs.length + " movimientos"} hasta ahora · todos los meses`;
   pintarCopias();
   pintarAdmin();
+  pintarHojaGoogle();
   $("foot").textContent = (REMOTO ? "☁️ Tus datos se guardan en la nube y se sincronizan entre móviles" : "🧪 Modo prueba: datos guardados solo en este móvil") + ` · versión ${VERSION}`;
   if (REMOTO) Store.ultimaCopia().then(t => {
     if (!t || view !== "set") return;
@@ -713,6 +714,21 @@ function pintarAjustes(){
     $("foot").innerHTML = `☁️ Tus datos se guardan en la nube y se sincronizan entre móviles · versión ${VERSION}<br>🛡️ Copia de seguridad automática cada noche a las 00:00 · última: ${esc(cuando)} a las ${pad(d.getHours())}:${pad(d.getMinutes())}`;
   }).catch(() => {});
 }
+function pintarHojaGoogle(){
+  let url = ""; try { url = localStorage.getItem("ahorraulin_hoja_" + S.id) || ""; } catch(e){}
+  if (document.activeElement !== $("gsUrl")) $("gsUrl").value = url;
+  const ok = /^https:\/\/docs\.google\.com\/spreadsheets\//.test(url);
+  $("gsAbrir").href = ok ? url : "#";
+  $("gsAbrir").style.opacity = ok ? 1 : .5;
+  $("gsSub").textContent = ok ? "Se abre en Google Sheets" : "Primero pega abajo el enlace de tu hoja";
+}
+$("gsAbrir").addEventListener("click", e => { if ($("gsAbrir").getAttribute("href") === "#"){ e.preventDefault(); $("gsUrl").focus(); } });
+$("gsUrl").addEventListener("change", e => {
+  const v = e.target.value.trim();
+  if (v && !/^https:\/\/docs\.google\.com\/spreadsheets\//.test(v)){ toast("⚠️ Ese enlace no parece de una hoja de Google"); return; }
+  try { localStorage.setItem("ahorraulin_hoja_" + S.id, v); } catch(err){}
+  toast(v ? "📊 Enlace guardado en este móvil" : "Enlace borrado"); pintarHojaGoogle();
+});
 let copiasCache = null;
 async function pintarCopias(){
   const box = $("copias");
