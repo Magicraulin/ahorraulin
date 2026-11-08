@@ -278,3 +278,137 @@ function fraseApunte(tipo, cat, importe){
   try { localStorage.setItem(clave, JSON.stringify(usadas.concat(i))); } catch(e){}
   return lista[i];
 }
+
+/* ---------------------------------------------------------------------
+   MÁS FRASES (se suman a las de arriba)
+   --------------------------------------------------------------------- */
+const FRASES_EXTRA = {
+  gasolina: {
+    bajo: ["Repostaje mini, sonrisa maxi. 😁", "¡Eso es conducir con cabeza! 🧠⛽", "Lo justo para tirar. Tu cartera te lo agradece.",
+           "Gasolina de bolsillo. ¡Muy bien!", "Ni una gota de más. Nivel maestro. 🥋", "Repostaje ecológico para tu cuenta. 🌱",
+           "Si todos los repostajes fueran así… 😍", "Poco gasto, mucho viaje. Así se hace."],
+    medio:["Depósito decente. Ahora, nada de acelerones. 🐢", "Gasolina apuntada. ¿Has probado a ir andando a lo cerca? 🚶",
+           "Normalito. Si apagas el motor en las esperas, aún mejor.", "Esto ya pica un poco… ¡a conducir suave! 🍃",
+           "Ni bien ni mal: gasolina de mes normal.", "El aire acondicionado también gasta. Solo lo dejo ahí. ❄️",
+           "Coche contento por ahora. Cuida el pie derecho. 🦶", "Llevar peso de más en el maletero también gasta. ¡Limpieza! 🧹"],
+    alto: ["¡Ay, mi madre! El surtidor ha hecho caja contigo. 💸", "Ese coche no tiene depósito, tiene una piscina. 🏊",
+           "Has llenado el depósito… y vaciado la cartera. Empate técnico. 🥲", "¿Gasolina o perfume caro? Porque el precio es parecido. 💎",
+           "Este repostaje merece un minuto de silencio. 🕯️", "Con lo que has echado, el coche debería hacer la compra solo. 🤖",
+           "Uff, de aquí a la luna y vuelta. 🌙", "Vale, ahora toca transporte público una temporadita. 🚇",
+           "Tu coche acaba de cenar mejor que tú esta semana. 🍽️", "Depósito a reventar. ¡Ahora a rendirlo al máximo! 💪"] },
+  comer: {
+    bajo: ["Comida rica sin dramas para la cartera. 🥰", "Capricho de los buenos: barato y feliz.", "Así sí: disfrutar sin pasarse. 👍",
+           "Un bocado fuera de vez en cuando alegra el alma. 😊", "Te has controlado. ¡Muy bien!", "Gasto de merienda. Inofensivo. 🍩",
+           "Esto es ahorro disfrazado de capricho. 😎"],
+    medio:["¿Otra vez fuera? Tu cocina te echa de menos. 🍳😢", "Comer fuera mola, pero la tortilla de casa no tiene rival. 🥔",
+           "Pide agua del grifo y te ahorras un pico la próxima. 💧", "Medio menú, medio capricho. Equilibrio a medias. ⚖️",
+           "Cocina el domingo, congela, y verás qué semana más barata. 🧊", "Rico rico… pero en casa también sabes hacerlo. 👨‍🍳",
+           "Si esto se repite mucho, el mes se pone cuesta arriba. ⛰️", "Mañana: bocata casero y sonrisa. 🥪"],
+    alto: ["¡Qué fiestorro gastronómico! Mañana, arroz blanco. 🍚", "¿Has pedido toda la carta? Porque lo parece. 📜",
+           "Esa cuenta ha engordado más que tú. 😂", "Comilona épica apuntada. Ahora, semana de táper sí o sí.",
+           "Michelin estaría orgulloso. Tu banco, no tanto. ⭐", "Con eso hacías la compra de la semana. Lo digo y me voy. 🏃",
+           "Restaurante 1 – Cartera 0. ⚽", "Un homenaje así está bien… una vez al mes, ¿eh? 📅",
+           "Rico, pero esta semana cocinas tú. Sin excusas. 👩‍🍳"] },
+  super: {
+    bajo: ["Compra de supervivencia y para casa. 🏃", "Barato y apañado: ¡así se hace!", "Lo justito. Cero tentaciones. 💪",
+           "Ni un capricho de más. ¡Admirable!", "Compra ligera, cartera feliz. 🎈"],
+    medio:["Compra semanal decente. ¿Lo vas a usar todo? 🤔", "Revisa fechas y congela lo que sobre. ❄️",
+           "¡Cuidado con las ofertas 3×2 que no necesitas! 🙈", "Bien… y si llevas lista la próxima, mejor. 📝",
+           "Compra de familia normal. Sin dramas.", "Mira abajo en las estanterías: lo barato se esconde ahí. 👇"],
+    alto: ["¡Has comprado como si viniera el apocalipsis! 🧟", "Carro lleno hasta arriba. A cocinar todo, ¿eh?",
+           "¿Te has llevado el súper entero a casa? 🏪➡️🏠", "Compra gorda. Que nada acabe en la basura. 🗑️❌",
+           "Esa compra da para un mes de cenas. ¡Aprovéchala!", "Ticket kilométrico. Revísalo, a veces cuelan errores. 🧾"] },
+  casa: {
+    bajo: ["Mantener la casa a punto sin gastar mucho. ¡Bravo! 🧹", "Gastillo de hogar, todo en orden.", "Casa feliz por poco. 😊"],
+    medio:["La casa siempre pide algo. ¡Paciencia! 🏠", "¿Has comparado tarifas de luz este año? ⚡",
+           "Bombillas LED y regletas con interruptor: ahorro asegurado. 💡", "Factura normalita. Que no suba, ¿eh?"],
+    alto: ["El piso se ha llevado un buen bocado. 🦈", "Mes de facturas gordas. Toca apretarse un poco.",
+           "Ese gasto de casa duele, pero hay que pagarlo. 💪", "Tu casa te quiere… pero te sale cara. 🏡💸",
+           "Revisa si se puede negociar alguna de esas facturas. 📞"] },
+  transporte: {
+    bajo: ["¡Transporte barato, persona lista! 🧠", "Moverse sin arruinarse: chapó.", "Así da gusto ir de un lado a otro. 🚲"],
+    medio:["El abono a veces sale más a cuenta que el coche. 🚇", "¿Parking otra vez? Busca zonas gratis. 🅿️",
+           "Moverse cuesta, pero puedes optimizar rutas. 🗺️", "Gasto normal de ir y venir."],
+    alto: ["¡Ese coche está más mimado que un bebé! 👶🚗", "Multa, ITV o taller… duele igual. 😣",
+           "Mes de coche caro. Que no se repita pronto. 🤞", "Transporte de lujo. ¿Ibas en limusina? 🥂",
+           "Compara seguros y talleres: hay mucha diferencia. 🔍"] },
+  ocio: {
+    bajo: ["¡Plan barato y risas aseguradas! 😂", "Diversión económica: lo mejor de lo mejor.", "Disfrutar no tiene por qué ser caro. 🎈",
+           "Planazo low cost. ¡Repite!", "Pasarlo bien por poco: arte puro. 🎨"],
+    medio:["Buen plan, pero el próximo, uno gratis. 🌳", "¿Cine? Los días del espectador sale más barato. 🎬",
+           "Diversión apuntada. Hay que vivir, ¡pero con cabeza!", "Plan de los buenos. Equilibra con uno de sofá. 🛋️",
+           "Pasarlo bien es necesario. Pasarse, no tanto. 😉"],
+    alto: ["¡Fiesta nivel festival! 🎪 Ahora, unos días tranquilitos.", "Has vivido a lo grande. Ahora, a vivir a lo pequeño. 🐜",
+           "Planazo carísimo. Que haya merecido la pena. 🤩", "Tu cartera ha salido de fiesta y no ha vuelto. 🍾",
+           "Esta semana: paseos, pelis en casa y juegos de mesa. 🎲", "¡Menudo despliegue! Mañana, modo ahorro activado. 🔋"] },
+  ropa: {
+    bajo: ["Chollazo detectado. 🕵️‍♀️", "Ropa nueva por poco: ¡bien jugado!", "Capricho textil controlado. 👌", "Renovar sin arruinarse. ¡Top!"],
+    medio:["¿Tienes algo parecido en el armario? Solo pregunto. 👀", "Bonito, pero ¿lo vas a usar mucho? 🤔",
+           "Vende algo en Vinted y compensas. 💰", "Compra pensada… o eso espero. 😜", "Moda sí, pero con cabeza."],
+    alto: ["Has renovado el armario entero, ¿no? 🛍️🛍️🛍️", "Ropa para un año… y gasto para un mes. 😬",
+           "Pasarela de moda en casa, crisis en la cartera. 💸", "Ese armario va a necesitar ampliación. 🚪",
+           "Ahora toca lucir lo que tienes. Cero compras este mes. 🙅", "¡Qué estilazo! A ver si dura hasta fin de mes. 😅"] },
+  salud: {
+    bajo: ["Cuidarse siempre merece la pena. 🌿", "Pequeño gasto de salud, gran inversión.", "Salud primero, siempre. 🍀"],
+    medio:["La salud no se negocia. ¡Ánimo! 💪", "Pregunta siempre por el genérico en la farmacia. 💊", "Bien hecho por cuidarte. ❤️"],
+    alto: ["Gasto gordo, pero la salud es lo primero. 🙏", "¡Que te mejores pronto! Eso es lo importante. 🌈",
+           "Revisa si el seguro cubre algo de esto. 📋", "Cuídate mucho. El dinero va y viene. 💚"] },
+  regalos: {
+    bajo: ["Detallito con cariño. ¡Eso es lo que cuenta! 💝", "Regalo barato, sonrisa cara. 😊", "¡Qué detalle tan bonito!"],
+    medio:["¡Vaya regalazo! Alguien va a alucinar. 🤩", "Regalar es precioso. Planificar el presupuesto, también. 📅",
+           "Generosidad apuntada. ¡Eres un sol! ☀️", "Juntaos para regalos grandes y sale más barato. 🤝"],
+    alto: ["¡Regalazo nivel Reyes Magos! 👑👑👑", "Qué generosidad… tu cartera está llorando de emoción. 😭",
+           "Ese regalo se recordará años. Y tu cuenta, también. 😅", "El próximo, una experiencia casera: vale más y cuesta menos. 🏠",
+           "¡Te has pasado de bueno/a! 😇"] },
+  suscripciones: {
+    bajo: ["Suscripción mini. ¿La usas? Si sí, adelante. 👍", "Cuota pequeñita apuntada.", "Las suscripciones pequeñas también suman. 🧮"],
+    medio:["¿Netflix, HBO, Disney, Spotify…? ¡Haz recuento! 📺", "Rota plataformas: un mes una, el siguiente otra. 🔄",
+           "Plan familiar compartido = mitad de precio. 👨‍👩‍👧", "Si llevas un mes sin usarla, ¡fuera! ✂️"],
+    alto: ["Suscripción de lujo. ¿De verdad compensa? 💎", "Esa cuota es más cara que un menú del día. 🍽️",
+           "Revisa si hay plan anual más barato. 📆", "Cuota gorda cada mes… ¡vigílala de cerca! 👀"] },
+  trabajo: {
+    bajo: ["Material para currar. ¡Bien invertido! 🛠️", "Pequeña herramienta, gran trabajo.", "Inversión en lo tuyo. ¡Bravo! 👏"],
+    medio:["Herramienta de trabajo apuntada. Guarda la factura. 🧾", "Invertir en tu trabajo siempre suma. 📈",
+           "Material nuevo, ganas nuevas. 💪", "¡A sacarle partido desde mañana!"],
+    alto: ["Inversión fuerte en tu trabajo. ¡Que dé frutos! 🍎", "Gasto gordo de curro. Seguro que lo amortizas. 💼",
+           "Esto es apostar por ti. ¡Bien! 🏆", "Guarda bien la factura, que esto desgrava seguro. 🧾"] },
+  belleza: {
+    bajo: ["Mimo exprés a buen precio. 💖", "Belleza sin gastar mucho: ¡reina! 👑", "Pequeño capricho, gran subidón. ✨",
+           "Cuidarse no tiene por qué ser caro. 🌸", "Producto barato y que funciona: ¡oro puro! 🧴"],
+    medio:["¡Lista para brillar! ✨ Pero sin repetir cada semana.", "Mimo apuntado. Te lo mereces… con moderación. 😉",
+           "¿Has probado las marcas blancas? Son buenísimas. 🧴", "Belleza a precio normal. Todo bajo control.",
+           "Guapa por fuera, ahorradora por dentro. 💅", "Ese look va a triunfar. ¡A lucirlo! 📸"],
+    alto: ["¡Tratamiento VIP! Ahora, mascarillas caseras una temporada. 🥒", "Belleza de revista, gasto de revista también. 📰",
+           "¡Estás para portada! Tu cuenta, para urgencias. 🚑😂", "Gasto de princesa. Este mes, modo cenicienta. 👠",
+           "Esto es un spa, no una peluquería. 🧖‍♀️", "Divina… y con la cartera a dieta a partir de hoy. 🥗"] },
+  ahorro: {
+    bajo: ["¡Cada euro guardado es una victoria! 🥇", "Ahorrar poco también es ahorrar. 💚", "La hucha lo nota. ¡Gracias! 🐷",
+           "Paso a paso se llega lejos. 👣", "¡Así empiezan los grandes ahorradores! 🌱"],
+    medio:["¡Ahorro del bueno! Sigue así. 🚀", "Tu cerdito está feliz. 🐷💕", "Qué fuerza de voluntad. ¡Admirable! 🦸",
+           "Guardar dinero es la mejor inversión en tranquilidad. 😌", "¡Eso es tener la cabeza bien amueblada! 🧠"],
+    alto: ["¡ESPECTACULAR! Esto es ahorrar de verdad. 🎉🐷", "¡Has alimentado al cerdito para todo el año! 🐖",
+           "Ahorro de récord. ¡Medalla de oro! 🥇", "Tu yo del futuro te va a invitar a algo muy rico. 🍾",
+           "¡Qué crack! Así se consigue lo que te propongas. 💪", "Colchón de seguridad: ON. 🛡️"] },
+  inversion: {
+    bajo: ["Primer paso del inversor. ¡A por ello! 🚀", "Invertir poco a poco es de sabios. 🦉", "La constancia es la clave. 🔑"],
+    medio:["¡Dinero trabajando mientras tú descansas! 😴💰", "Invertir con cabeza y paciencia. 🧘", "Buena aportación. ¡A largo plazo! 📅"],
+    alto: ["¡Inversión potente! Wall Street tiembla. 🏦", "Eso es pensar a lo grande. 🌍", "¡Gran movimiento! Paciencia y no mires cada día. 🙈",
+           "Futuro millonario en construcción. 🏗️💰"] },
+  otros: {
+    bajo: ["Apuntadito y controlado. 📒", "Gastito pequeño, cero preocupaciones.", "¡Bien por apuntarlo todo! 👏"],
+    medio:["¿Qué ha sido esto? Ponle nota y lo sabremos. 🔍", "Gasto «otros»… sospechoso. 🤨", "Apuntado. Revisa si era necesario. 🤔"],
+    alto: ["Gasto misterioso XL. ¿Algo que contarme? 👀", "Eso no es un gasto, es un enigma. 🧩", "«Otros» de los gordos. ¡Ponle nota! ✍️"] }
+};
+const FRASES_INGRESO_EXTRA = {
+  bajo: ["¡Bienvenido, dinerito! 👋💶", "Poco, pero alegra. 😊", "Ingreso pequeñito, gran sonrisa. 😁", "¡Al cerdito directo! 🐷",
+         "Todo cuenta, hasta lo más pequeño. 🧮", "¡Eso suma para el mes! ➕"],
+  medio:["¡Dinero fresquito! Ahora a cuidarlo. 🌿", "¡Bien trabajado! Te lo has ganado. 🏅", "¡Qué gusto ver esto entrar! 🤩",
+         "Guarda un poquito antes de gastarlo. 😉", "¡Ingreso apuntado! El mes pinta mejor. 📈", "¡Eso es! A seguir así. 💪",
+         "Tus cuentas sonríen hoy. 😃"],
+  alto: ["¡LLUVIA DE EUROS! ☔💶💶💶", "¡Día de cobro, día de alegría! 🥳", "¡Vaya ingreso! Primero ahorra, luego celebra. 🐷🎉",
+         "¡El trabajo duro da sus frutos! 🍇", "¡Mes salvado! Ahora, a gastarlo con cabeza. 🧠", "¡Qué subidón! Aparta un trozo para ti del futuro. 🔮",
+         "¡Cuenta llena, corazón contento! ❤️", "¡Ingreso de los buenos! No lo fundas en dos días, ¿eh? 😜"]
+};
+// Junta las frases extra con las de arriba
+for (const cat in FRASES_EXTRA) for (const n of ["bajo","medio","alto"]) if (FRASES[cat]) FRASES[cat][n] = FRASES[cat][n].concat(FRASES_EXTRA[cat][n] || []);
+for (const n of ["bajo","medio","alto"]) FRASES_INGRESO[n] = FRASES_INGRESO[n].concat(FRASES_INGRESO_EXTRA[n]);
