@@ -3,7 +3,7 @@
    ===================================================================== */
 "use strict";
 const CFG = window.CONFIG || {};
-const VERSION = "2.4";
+const VERSION = "2.5";
 const ADMIN = "p1";   // Raúl es el administrador
 const REMOTO = !!(CFG.supabaseUrl && CFG.supabaseKey);
 const IA = !!CFG.workerUrl;
@@ -47,7 +47,13 @@ const Nube = {
   crearPin(id,pin){ return this.rpc("crear_pin",{p_id:id,p_pin:pin}); },
   entrar(id,pin){ return this.rpc("entrar",{p_id:id,p_pin:pin}); },
   cambiarPin(id,pin,nuevo){ return this.rpc("cambiar_pin",{p_id:id,p_pin:pin,p_nuevo:nuevo}); },
-  guardarMov(id,pin,m){ return this.rpc("guardar_mov",{p_id:id,p_pin:pin,p_tipo:m.tipo,p_cat:m.cat,p_importe:m.importe,p_fecha:m.fecha,p_nota:m.nota}); },
+  guardarMov(id,pin,m){ return this.rpc("guardar_mov",{p_id:id,p_pin:pin,p_tipo:m.tipo,p_cat:m.cat,p_importe:m.importe,p_fecha:m.fecha,p_nota:m.nota,p_meta:m.meta || null}); },
+  editarMov(id,pin,mov,m){ return this.rpc("editar_mov",{p_id:id,p_pin:pin,p_mov:mov,p_cat:m.cat,p_importe:m.importe,p_fecha:m.fecha,p_nota:m.nota,p_meta:m.meta || null}); },
+  guardarPresupuesto(id,pin,cat,lim){ return this.rpc("guardar_presupuesto",{p_id:id,p_pin:pin,p_cat:cat,p_limite:lim}); },
+  guardarMeta(id,pin,m){ return this.rpc("guardar_meta",{p_id:id,p_pin:pin,p_meta:m.id || null,p_nombre:m.nombre,p_emoji:m.emoji,p_objetivo:m.objetivo,p_fecha:m.fecha || null}); },
+  borrarMeta(id,pin,meta){ return this.rpc("borrar_meta",{p_id:id,p_pin:pin,p_meta:meta}); },
+  guardarAviso(id,pin,s,hora){ return this.rpc("guardar_aviso",{p_id:id,p_pin:pin,p_endpoint:s.endpoint,p_p256dh:s.p256dh,p_auth:s.auth,p_hora:hora}); },
+  quitarAviso(id,pin,endpoint){ return this.rpc("quitar_aviso",{p_id:id,p_pin:pin,p_endpoint:endpoint}); },
   borrarMov(id,pin,mov){ return this.rpc("borrar_mov",{p_id:id,p_pin:pin,p_mov:mov}); },
   ultimaCopia(){ return this.rpc("ultima_copia"); },
   adminEstado(pin){ return this.rpc("admin_estado",{p_pin:pin}); },
@@ -74,6 +80,27 @@ const Local = {
   },
   save(d){ lsSet(this.KEY, d); },
   async ultimaCopia(){ return null; },
+  async editarMov(id,pin,mov,m){
+    const d = this.db(), e = await this.check(d,id,pin); if (e !== "OK") return {error:e};
+    const x = d.movs.find(z => z.id === mov && z.persona === id); if (!x) return {error:"NO_EXISTE"};
+    Object.assign(x, { cat:m.cat, importe:m.importe, fecha:m.fecha, nota:m.nota, meta:m.meta || null }); this.save(d); return {ok:true};
+  },
+  async guardarPresupuesto(id,pin,cat,lim){
+    const d = this.db(), e = await this.check(d,id,pin); if (e !== "OK") return {error:e};
+    d.presu = d.presu || {}; d.presu[id] = d.presu[id] || {};
+    if (lim > 0) d.presu[id][cat] = lim; else delete d.presu[id][cat]; this.save(d); return {ok:true};
+  },
+  async guardarMeta(id,pin,m){
+    const d = this.db(), e = await this.check(d,id,pin); if (e !== "OK") return {error:e};
+    d.metas = d.metas || []; const nueva = { id:"m" + Date.now(), persona:id, nombre:m.nombre, emoji:m.emoji, objetivo:m.objetivo, fecha:m.fecha || null, creado:Date.now() };
+    d.metas.push(nueva); this.save(d); return {ok:true, id:nueva.id};
+  },
+  async borrarMeta(id,pin,meta){
+    const d = this.db(), e = await this.check(d,id,pin); if (e !== "OK") return {error:e};
+    d.metas = (d.metas || []).filter(x => !(x.id === meta && x.persona === id)); d.movs.forEach(x => { if (x.meta === meta) x.meta = null; }); this.save(d); return {ok:true};
+  },
+  async guardarAviso(){ return {error:"SOLO_NUBE"}; },
+  async quitarAviso(){ return {ok:true}; },
   async adminEstado(pin){
     const d = this.db(), e = await this.check(d,ADMIN,pin); if (e !== "OK") return {error:e};
     return {ok:true, perfiles:Object.keys(d.perfiles).filter(id => id !== ADMIN).map(id => ({ id, nombre:d.perfiles[id].nombre, emoji:d.perfiles[id].emoji,
@@ -137,6 +164,7 @@ const Local = {
     const d = this.db(), e = await this.check(d,id,pin); if (e !== "OK") return {error:e};
     this.generar(d,id); this.save(d);
     return { ok:true, perfil:this.perfil(d,id), movs:d.movs.filter(m => m.persona === id),
+             presupuestos:(d.presu || {})[id] || {}, metas:(d.metas || []).filter(m => m.persona === id), avisos:[],
              recurrentes:(d.recurrentes || []).filter(r => r.persona === id && r.activo).sort((x,y) => x.dia - y.dia) };
   },
   async cambiarPin(id,pin,nuevo){
@@ -187,7 +215,7 @@ function catOf(m){
 function limpiar(m){
   return { id:String(m.id), tipo: m.tipo === "ingreso" ? "ingreso" : "gasto", cat:String(m.cat || "otros"),
     importe: Math.max(0, Number(m.importe) || 0), fecha: /^\d{4}-\d{2}-\d{2}/.test(m.fecha) ? String(m.fecha).slice(0,10) : ymd(new Date()),
-    nota: String(m.nota || "").slice(0,80), creado: Number(m.creado) || 0, rec: m.rec ? String(m.rec) : null };
+    nota: String(m.nota || "").slice(0,80), creado: Number(m.creado) || 0, rec: m.rec ? String(m.rec) : null, meta: m.meta ? String(m.meta) : null };
 }
 function limpiarRecs(l){
   return (Array.isArray(l) ? l : []).map(r => ({ id:String(r.id), tipo: r.tipo === "ingreso" ? "ingreso" : "gasto", cat:String(r.cat || "otros"),
@@ -333,8 +361,15 @@ $("pinBack").onclick = () => {
 /* =====================================================================
    SESIÓN
    ===================================================================== */
+function aplicarDatos(r){
+  S.perfil = r.perfil || S.perfil; S.movs = (r.movs || []).map(limpiar); S.recs = limpiarRecs(r.recurrentes);
+  S.presu = {}; Object.entries(r.presupuestos || {}).forEach(([k,v]) => { const n = Number(v); if (n > 0) S.presu[String(k)] = n; });
+  S.metas = (Array.isArray(r.metas) ? r.metas : []).map(m => ({ id:String(m.id), nombre:String(m.nombre || "Meta").slice(0,40), emoji:String(m.emoji || "🎯").slice(0,16),
+    objetivo:Math.max(0, Number(m.objetivo) || 0), fecha:/^\d{4}-\d{2}-\d{2}/.test(m.fecha || "") ? String(m.fecha).slice(0,10) : null, creado:Number(m.creado) || Date.now() }));
+  S.avisos = Array.isArray(r.avisos) ? r.avisos : [];
+}
 function abrirSesion(id, pin, r){
-  S = { id, pin, perfil:r.perfil, movs:(r.movs || []).map(limpiar), recs:limpiarRecs(r.recurrentes) };
+  S = { id, pin }; aplicarDatos(r);
   pinState = null; view = "add"; tipo = "gasto"; viewMonth = monthKey(new Date());
   aplicarTema(S.perfil.color, S.perfil.oscuro);
   document.querySelectorAll("#seg button").forEach(x => x.classList.toggle("on", x.dataset.t === "gasto"));
@@ -351,7 +386,7 @@ async function refrescar(){
   if (!S || !REMOTO) return;
   try {
     const r = await Store.entrar(S.id, S.pin);
-    if (r.ok){ S.perfil = r.perfil; S.movs = r.movs.map(limpiar); S.recs = limpiarRecs(r.recurrentes); banner(""); pintarCabecera(); pintarTodo(); }
+    if (r.ok){ aplicarDatos(r); banner(""); pintarCabecera(); pintarTodo(); }
     else if (r.error === "PIN_MAL" || r.error === "SIN_PIN"){ cerrarSesion(); }
   } catch(e){ banner("Sin conexión: lo que ves puede no estar al día."); }
 }
@@ -383,15 +418,23 @@ $("cats").addEventListener("click", e => {
   vibrar(); abrirEntry(cats(tipo).find(c => c.id === b.dataset.c));
 });
 
-function abrirEntry(c){
-  entry = { cat:c, tipo, txt:"", dateMode:"hoy", custom:null, rep: c.id === "suscripciones" };
+function abrirEntry(c, mov){
+  const t = mov ? mov.tipo : tipo;
+  entry = { cat:c, tipo:t, txt:"", dateMode:"hoy", custom:null, rep: !mov && c.id === "suscripciones", edit: mov ? mov.id : null, meta: mov ? mov.meta : null };
+  if (mov){
+    entry.txt = String(mov.importe).replace(".", ",");
+    if (mov.fecha !== ymd(new Date())){ entry.dateMode = "otro"; entry.custom = mov.fecha; }
+  }
+  $("eRep").classList.toggle("hidden", !!mov);
+  $("eCatSel").classList.toggle("hidden", !mov);
+  if (mov) $("eCatSel").innerHTML = cats(t).map(x => `<option value="${x.id}" ${x.id === c.id ? "selected" : ""}>${x.e} ${esc(x.n)}</option>`).join("");
   $("eEm").textContent = c.e; $("eEm").parentElement.style.setProperty("--cb", c.bg);
   $("eEm").style.setProperty("--cb", c.bg);
   $("eName").textContent = c.n;
-  $("eType").textContent = tipo === "gasto" ? "Gasto" : "Ingreso";
-  $("eType").style.color = tipo === "gasto" ? "var(--gasto)" : "var(--ingreso)";
-  $("eNote").value = ""; $("eDate").value = "";
-  $("eSave").className = "btn save-btn " + tipo;
+  $("eType").textContent = (mov ? "Editando · " : "") + (t === "gasto" ? "Gasto" : "Ingreso");
+  $("eType").style.color = t === "gasto" ? "var(--gasto)" : "var(--ingreso)";
+  $("eNote").value = mov ? mov.nota : ""; $("eDate").value = "";
+  $("eSave").className = "btn save-btn " + t;
   pintarEntry(); $("entry").classList.add("show");
 }
 function cerrarEntry(){ $("entry").classList.remove("show"); entry = null; }
@@ -406,8 +449,12 @@ function pintarEntry(){
   const v = importeEntry();
   $("eRep").classList.toggle("on", entry.rep); $("eRepSw").classList.toggle("on", entry.rep); $("eRep").setAttribute("aria-pressed", entry.rep);
   $("eRepTxt").textContent = entry.rep ? `Se apuntará solo el día ${Number(fechaEntry().slice(8))} de cada mes` : "Para Netflix, gimnasio, alquiler, nómina…";
+  const conMetas = entry.tipo === "gasto" && CATS_GUARDADO.includes(entry.cat.id) && (S.metas || []).length && !entry.rep;
+  $("eMetas").classList.toggle("hidden", !conMetas);
+  if (conMetas) $("eMetaChips").innerHTML = [`<button class="chip ${!entry.meta ? "on" : ""}" data-meta="">Ninguna</button>`]
+    .concat(S.metas.map(m => `<button class="chip ${entry.meta === m.id ? "on" : ""}" data-meta="${esc(m.id)}">${esc(m.emoji)} ${esc(m.nombre)}</button>`)).join("");
   $("eSave").disabled = !(v > 0);
-  $("eSave").textContent = v > 0 ? (entry.rep ? `Guardar ${eur(v)} cada mes` : `Guardar ${eur(v)}`) : "Escribe la cantidad";
+  $("eSave").textContent = v > 0 ? (entry.edit ? `Guardar cambios · ${eur(v)}` : entry.rep ? `Guardar ${eur(v)} cada mes` : `Guardar ${eur(v)}`) : "Escribe la cantidad";
 }
 $("ePad").addEventListener("click", e => {
   const b = e.target.closest("button"); if (!b || !entry) return;
@@ -425,6 +472,14 @@ $("ePad").addEventListener("click", e => {
 $("eDates").addEventListener("click", e => { const b = e.target.closest("[data-d]"); if (!b || !entry) return; entry.dateMode = b.dataset.d; entry.custom = null; pintarEntry(); });
 $("eDate").addEventListener("change", e => { if (!entry || !e.target.value) return; entry.dateMode = "otro"; entry.custom = e.target.value; pintarEntry(); });
 $("eClose").onclick = cerrarEntry;
+$("eMetaChips").addEventListener("click", e => { const b = e.target.closest("[data-meta]"); if (!b || !entry) return; vibrar(); entry.meta = b.dataset.meta || null; pintarEntry(); });
+$("eCatSel").addEventListener("change", e => { if (!entry) return; const c = cats(entry.tipo).find(x => x.id === e.target.value); if (c){ entry.cat = c; $("eEm").textContent = c.e; $("eEm").style.setProperty("--cb", c.bg); $("eName").textContent = c.n; if (!CATS_GUARDADO.includes(c.id)) entry.meta = null; pintarEntry(); } });
+document.addEventListener("click", e => {
+  const d = e.target.closest("[data-edit]"); if (!d || !S) return;
+  const m = S.movs.find(x => x.id === d.dataset.edit || x.tmpId === d.dataset.edit); if (!m || m.id.startsWith("tmp")) return;
+  const c = cats(m.tipo).find(x => x.id === m.cat) || catOf(m);
+  vibrar(); abrirEntry({ ...c, id: m.cat }, m);
+});
 $("eRep").onclick = () => { if (!entry) return; vibrar(); entry.rep = !entry.rep; pintarEntry(); };
 function fechaEntry(){
   if (!entry) return ymd(new Date());
@@ -452,15 +507,27 @@ $("eSave").onclick = async () => {
       const res = await Store.guardarRecurrente(S.id, S.pin, r);
       if (!res.ok) throw new Error(res.error);
       const r2 = await Store.entrar(S.id, S.pin);
-      if (r2.ok){ S.movs = r2.movs.map(limpiar); S.recs = limpiarRecs(r2.recurrentes); }
+      if (r2.ok) aplicarDatos(r2);
       pintarTodo(); toast(`🔁 ${c.e} ${eur(v)} el día ${r.dia} de cada mes ✓`, false, fraseApunte(r.tipo, r.cat, v));
     } catch(err){ toast("⚠️ No se ha guardado: " + errTxt(err.message || "RED")); }
     return;
   }
-  const m = { tipo:entry.tipo, cat:entry.cat.id, importe:v, fecha, nota:$("eNote").value.trim().slice(0,80) };
+  const metaSel = CATS_GUARDADO.includes(entry.cat.id) ? entry.meta : null;
+  if (entry.edit){
+    const mov = S.movs.find(x => x.id === entry.edit); if (!mov){ cerrarEntry(); return; }
+    const nuevo = { cat:entry.cat.id, importe:v, fecha, nota:$("eNote").value.trim().slice(0,80), meta:metaSel };
+    const antes = { ...mov }; Object.assign(mov, nuevo); cerrarEntry(); pintarTodo(); vibrar(20);
+    try {
+      const r = await Store.editarMov(S.id, S.pin, mov.id, nuevo);
+      if (!r.ok) throw new Error(r.error);
+      toast(`✏️ Cambiado: ${catOf(mov).e} ${eur(v)} · ${catOf(mov).n}`);
+    } catch(err){ Object.assign(mov, antes); pintarTodo(); toast("⚠️ No se ha guardado el cambio: " + errTxt(err.message || "RED")); }
+    return;
+  }
+  const m = { tipo:entry.tipo, cat:entry.cat.id, importe:v, fecha, nota:$("eNote").value.trim().slice(0,80), meta:metaSel };
   const temp = { id:"tmp" + Date.now(), ...m, creado:Date.now() };
   S.movs.push(temp); cerrarEntry(); pintarTodo(); vibrar(20);
-  const c = catOf(m); toast(`${c.e} ${eur(v)} · ${c.n} ✓`, true, fraseApunte(m.tipo, m.cat, v)); lastAdded = temp.id;
+  const c = catOf(m); toast(`${c.e} ${eur(v)} · ${c.n} ✓`, true, avisoPresupuesto(m) || fraseMeta(m) || fraseApunte(m.tipo, m.cat, v)); lastAdded = temp.id;
   try {
     const r = await Store.guardarMov(S.id, S.pin, m);
     if (!r.ok) throw new Error(r.error);
@@ -504,7 +571,7 @@ document.addEventListener("click", e => {
 function fila(m, conFecha){
   const c = catOf(m), sub = m.nota ? esc(m.nota) : (conFecha ? dayLabel(m.fecha) : "");
   return `<div class="row"><div class="e" style="--cb:${c.bg}">${c.e}</div>
-    <div class="mid"><div class="t">${esc(c.n)}${m.rec ? '<span class="badge">🔁 fijo</span>' : ""}</div>${sub ? `<div class="s">${sub}</div>` : ""}</div>
+    <div class="mid" data-edit="${esc(m.id)}"><div class="t">${esc(c.n)}${m.rec ? '<span class="badge">🔁 fijo</span>' : ""}${m.meta ? '<span class="badge">🎯</span>' : ""}</div>${sub ? `<div class="s">${sub}</div>` : ""}</div>
     <div class="v ${m.tipo === "ingreso" ? "in" : ""}">${m.tipo === "ingreso" ? "+" : "−"}${eur(m.importe)}</div>
     <button class="del" data-id="${esc(m.id)}" aria-label="Borrar">✕</button></div>`;
 }
@@ -529,7 +596,162 @@ function pintarFijos(){
       <button class="del" data-fijo="${esc(r.id)}" aria-label="Dejar de repetir">✕</button></div>`;
   }).join("") : `<div class="empty" style="padding:10px">Al apuntar Netflix, el gimnasio o la nómina, marca <b>🔁 Repetir cada mes</b> y se apuntará solo.</div>`;
 }
+/* ---------- Presupuestos ---------- */
+function gastoMes(cat, k){ return ofMonth(S.movs, k).filter(m => m.tipo === "gasto" && m.cat === cat).reduce((s,m) => s + m.importe, 0); }
+function claseBarra(p){ return p >= 1 ? "alto" : p >= .8 ? "med" : ""; }
+function pintarPresupuestos(){
+  const k = monthKey(new Date()), l = Object.entries(S.presu || {});
+  $("presuCard").classList.toggle("hidden", !l.length);
+  if (!l.length) return;
+  $("presuMes").textContent = monthOnly(k);
+  $("presuList").innerHTML = l.map(([cat, lim]) => {
+    const c = catOf({ tipo:"gasto", cat }), g = gastoMes(cat, k), p = g / lim, queda = lim - g;
+    return `<div class="presu"><div class="ph"><span>${c.e} ${esc(c.n)}</span><span>${eur(g)} de ${eur(lim)}</span></div>
+      <div class="barra"><i class="${claseBarra(p)}" style="width:${Math.min(100, p * 100)}%"></i></div>
+      <small>${queda >= 0 ? `Te quedan ${eur(queda)} · ${Math.round(p * 100)} %` : `⚠️ Te has pasado ${eur(-queda)}`}</small></div>`;
+  }).join("");
+}
+function avisoPresupuesto(m){
+  if (m.tipo !== "gasto" || !S.presu || !S.presu[m.cat]) return null;
+  const k = m.fecha.slice(0,7), lim = S.presu[m.cat], g = gastoMes(m.cat, k), antes = g - m.importe, c = catOf(m);
+  if (g > lim && antes <= lim) return `🚨 ¡Te has pasado del presupuesto de ${c.n}! Llevas ${eur(g)} de ${eur(lim)}.`;
+  if (g > lim) return `🚨 Sigues por encima del presupuesto de ${c.n}: ${eur(g)} de ${eur(lim)}. ¡Frena un poco!`;
+  if (g >= lim * .8 && antes < lim * .8) return `⚠️ Ojo: ya llevas el ${Math.round(g / lim * 100)} % de tu presupuesto de ${c.n} (te quedan ${eur(lim - g)}).`;
+  return null;
+}
+function pintarPresuAjustes(){
+  const box = $("presuSet");
+  if (box.contains(document.activeElement)) return;
+  box.innerHTML = cats("gasto").filter(c => !CATS_GUARDADO.includes(c.id)).map(c =>
+    `<div class="pset"><label>${c.e} ${esc(c.n)}</label><input class="inp" inputmode="decimal" data-presu="${c.id}" placeholder="Sin límite" value="${S.presu[c.id] ? String(S.presu[c.id]).replace(".", ",") : ""}"></div>`).join("");
+}
+$("presuSet").addEventListener("change", async e => {
+  const i = e.target.closest("[data-presu]"); if (!i) return;
+  const n = Number(i.value.replace(/\s|€/g, "").replace(",", ".")), cat = i.dataset.presu, lim = isFinite(n) && n > 0 ? Math.round(n * 100) / 100 : 0;
+  const antes = S.presu[cat];
+  if (lim) S.presu[cat] = lim; else delete S.presu[cat];
+  try { const r = await Store.guardarPresupuesto(S.id, S.pin, cat, lim); if (!r.ok) throw new Error(r.error);
+        toast(lim ? `🎯 Presupuesto de ${catOf({tipo:"gasto",cat}).n}: ${eur(lim)}/mes` : "Presupuesto quitado"); }
+  catch(err){ if (antes) S.presu[cat] = antes; else delete S.presu[cat]; toast("⚠️ No se ha guardado el presupuesto"); }
+  i.value = S.presu[cat] ? String(S.presu[cat]).replace(".", ",") : "";
+});
+
+/* ---------- Metas de ahorro ---------- */
+const META_EMOJIS = ["🎯","✈️","🏖️","🏠","🚗","💍","🎓","💻","📱","🎁","🐶","👶","🏍️","🎸","🏝️","🛋️"];
+function ahorradoMeta(id){ return S.movs.filter(m => m.meta === id).reduce((s,m) => s + m.importe, 0); }
+function fraseMeta(m){
+  if (!m.meta) return null;
+  const meta = (S.metas || []).find(x => x.id === m.meta); if (!meta) return null;
+  const a = ahorradoMeta(meta.id), p = a / meta.objetivo;
+  if (p >= 1) return `🎉 ¡META CONSEGUIDA! ${meta.emoji} ${meta.nombre}: ${eur(a)} de ${eur(meta.objetivo)}. ¡Enhorabuena!`;
+  return `${meta.emoji} ${meta.nombre}: llevas el ${Math.round(p * 100)} % (${eur(a)} de ${eur(meta.objetivo)}). ¡Sigue así!`;
+}
+function metasHTML(){
+  const l = S.metas || [];
+  let h = `<div class="card" style="display:flex;align-items:center;gap:12px"><div style="flex:1"><h2 style="margin:0">🎯 Mis metas de ahorro</h2>
+    <div class="muted small">Al apuntar en 🐷 Ahorro o 📈 Inversión, elige la meta.</div></div><button class="btn p" id="metaNueva" style="width:auto;margin:0;padding:12px 14px">➕ Nueva</button></div>`;
+  if (!l.length) return h + `<div class="card"><div class="empty" style="padding:8px"><span class="e">🐷</span>Crea tu primera meta: un viaje, un capricho, un colchón para imprevistos…</div></div>`;
+  l.forEach(meta => {
+    const a = ahorradoMeta(meta.id), p = Math.min(1, a / meta.objetivo), falta = Math.max(0, meta.objetivo - a);
+    const meses = Math.max(1, (Date.now() - meta.creado) / (30.44 * 86400000)), ritmo = a / meses;
+    let info;
+    if (falta <= 0) info = "🎉 ¡Conseguida! Puedes borrarla o crear una nueva.";
+    else if (meta.fecha){
+      const quedan = Math.max(0.5, (new Date(meta.fecha) - Date.now()) / (30.44 * 86400000));
+      info = new Date(meta.fecha) < new Date() ? `La fecha ya ha pasado. Te faltan ${eur(falta)}.`
+           : `Para llegar el ${new Date(meta.fecha).toLocaleDateString("es-ES",{day:"numeric",month:"long",year:"numeric"})} necesitas apartar unos <b>${eur(falta / quedan)} al mes</b>.`;
+    } else if (ritmo > 0){
+      const fin = new Date(Date.now() + falta / ritmo * 30.44 * 86400000);
+      info = `A tu ritmo (${eur(ritmo)}/mes) la conseguirás hacia <b>${fin.toLocaleDateString("es-ES",{month:"long",year:"numeric"})}</b>.`;
+    } else info = "Apunta tu primer ahorro para esta meta y te diré cuándo llegarás.";
+    h += `<div class="metacard"><div class="mh"><div class="me">${esc(meta.emoji)}</div><div style="flex:1;min-width:0"><b>${esc(meta.nombre)}</b><small>Objetivo: ${eur(meta.objetivo)}</small></div>
+      <button class="del" data-delmeta="${esc(meta.id)}" aria-label="Borrar meta">✕</button></div>
+      <div class="barra"><i style="width:${p * 100}%;background:#e8a33d"></i></div>
+      <div class="mp">${eur(a)} ahorrados · ${Math.round(p * 100)} %</div><div class="mi">${info}</div></div>`;
+  });
+  return h;
+}
+let metaEmoji = "🎯";
+function abrirMeta(){
+  metaEmoji = "🎯"; $("metaNombre").value = ""; $("metaObj").value = ""; $("metaFecha").value = "";
+  pintarMetaEmojis(); $("metaModal").classList.add("show");
+}
+function pintarMetaEmojis(){
+  $("metaEm").textContent = metaEmoji;
+  $("metaEmojis").innerHTML = META_EMOJIS.map(e => `<button data-memoji="${e}" class="${e === metaEmoji ? "on" : ""}">${e}</button>`).join("");
+}
+$("metaEmojis").addEventListener("click", e => { const b = e.target.closest("[data-memoji]"); if (b){ vibrar(); metaEmoji = b.dataset.memoji; pintarMetaEmojis(); } });
+$("metaCerrar").onclick = () => $("metaModal").classList.remove("show");
+$("metaModal").addEventListener("click", e => { if (e.target.id === "metaModal") $("metaModal").classList.remove("show"); });
+$("metaGuardar").onclick = async () => {
+  const nombre = $("metaNombre").value.trim(), obj = Number($("metaObj").value.replace(/\s|€/g, "").replace(/\.(?=\d{3}(\D|$))/g, "").replace(",", "."));
+  if (!nombre){ toast("Ponle un nombre a la meta"); $("metaNombre").focus(); return; }
+  if (!(obj > 0)){ toast("¿Cuánto quieres ahorrar? Escribe la cantidad"); $("metaObj").focus(); return; }
+  const m = { nombre:nombre.slice(0,40), emoji:metaEmoji, objetivo:Math.round(obj * 100) / 100, fecha:$("metaFecha").value || null };
+  $("metaGuardar").disabled = true;
+  try {
+    const r = await Store.guardarMeta(S.id, S.pin, m); if (!r.ok) throw new Error(r.error);
+    S.metas.push({ id:String(r.id), ...m, creado:Date.now() });
+    $("metaModal").classList.remove("show"); pintarTodo(); toast(`${m.emoji} ¡Meta creada! A por esos ${eur(m.objetivo)} 💪`); confetti();
+  } catch(err){ toast("⚠️ No se ha podido crear la meta"); }
+  $("metaGuardar").disabled = false;
+};
+document.addEventListener("click", async e => {
+  if (e.target.closest("#metaNueva")){ vibrar(); abrirMeta(); return; }
+  const b = e.target.closest("[data-delmeta]"); if (!b) return;
+  if (!b.classList.contains("sure")){ b.classList.add("sure"); b.textContent = "¿Borrar?"; setTimeout(() => { if (b.isConnected){ b.classList.remove("sure"); b.textContent = "✕"; } }, 3000); return; }
+  const id = b.dataset.delmeta;
+  try { const r = await Store.borrarMeta(S.id, S.pin, id); if (!r.ok) throw new Error(r.error);
+        S.metas = S.metas.filter(x => x.id !== id); S.movs.forEach(x => { if (x.meta === id) x.meta = null; }); pintarTodo(); toast("Meta borrada. Lo ahorrado sigue apuntado 🐷"); }
+  catch(err){ toast("⚠️ No se ha podido borrar"); }
+});
+
+/* ---------- Recordatorio diario (notificaciones) ---------- */
+const PUSH_OK = "serviceWorker" in navigator && "PushManager" in window && "Notification" in window;
+const ES_IOS = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+const INSTALADA = matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
+function b64aBytes(s){ const p = "=".repeat((4 - s.length % 4) % 4); const r = atob((s + p).replace(/-/g, "+").replace(/_/g, "/")); return Uint8Array.from(r, c => c.charCodeAt(0)); }
+async function miSuscripcion(){ if (!PUSH_OK) return null; const reg = await navigator.serviceWorker.getRegistration(); return reg ? reg.pushManager.getSubscription() : null; }
+async function pintarAviso(){
+  const sw = $("avisoSw"), txt = $("avisoTxt");
+  if (!REMOTO){ txt.textContent = "Solo con la app conectada a la nube"; sw.disabled = true; return; }
+  if (ES_IOS && !INSTALADA){ txt.textContent = "Primero instala la app: Compartir → Añadir a pantalla de inicio"; sw.disabled = true; return; }
+  if (!PUSH_OK || !CFG.vapidPublica){ txt.textContent = "Este navegador no permite avisos"; sw.disabled = true; return; }
+  sw.disabled = false;
+  let sub = null; try { sub = await miSuscripcion(); } catch(e){}
+  const mio = sub && (S.avisos || []).find(a => a.endpoint === sub.endpoint);
+  sw.classList.toggle("on", !!mio);
+  if (mio && document.activeElement !== $("avisoHora")) $("avisoHora").value = mio.hora;
+  txt.textContent = mio ? `Activado en este móvil · ${mio.hora}` : Notification.permission === "denied" ? "Has bloqueado los avisos en los ajustes del móvil" : "Desactivado";
+}
+async function activarAviso(){
+  const hora = $("avisoHora").value || "21:00";
+  const perm = await Notification.requestPermission();
+  if (perm !== "granted"){ toast("Sin permiso no puedo avisarte. Actívalo en los ajustes del móvil."); return; }
+  const reg = await navigator.serviceWorker.ready;
+  let sub = await reg.pushManager.getSubscription();
+  if (!sub) sub = await reg.pushManager.subscribe({ userVisibleOnly:true, applicationServerKey:b64aBytes(CFG.vapidPublica) });
+  const j = sub.toJSON();
+  const r = await Store.guardarAviso(S.id, S.pin, { endpoint:j.endpoint, p256dh:j.keys.p256dh, auth:j.keys.auth }, hora);
+  if (!r.ok) throw new Error(r.error);
+  S.avisos = (S.avisos || []).filter(a => a.endpoint !== j.endpoint).concat({ endpoint:j.endpoint, hora });
+  toast(`🔔 ¡Hecho! Te avisaré cada día a las ${hora} si no has apuntado nada`);
+}
+$("avisoSw").onclick = async () => {
+  const sw = $("avisoSw"); if (sw.disabled) return; vibrar(); sw.disabled = true;
+  try {
+    if (sw.classList.contains("on")){
+      const sub = await miSuscripcion();
+      if (sub){ await Store.quitarAviso(S.id, S.pin, sub.endpoint); S.avisos = (S.avisos || []).filter(a => a.endpoint !== sub.endpoint); await sub.unsubscribe().catch(() => {}); }
+      toast("🔕 Recordatorio desactivado en este móvil");
+    } else await activarAviso();
+  } catch(err){ toast("⚠️ No se ha podido cambiar el recordatorio"); }
+  sw.disabled = false; pintarAviso();
+};
+$("avisoHora").addEventListener("change", async () => { if ($("avisoSw").classList.contains("on")){ try { await activarAviso(); } catch(e){ toast("⚠️ No se ha guardado la hora"); } pintarAviso(); } });
+
 function pintarApuntar(){
+  pintarPresupuestos();
   pintarFijos();
   const r = ordenados(S.movs).slice(0,6);
   $("recent").innerHTML = r.length ? r.map(m => fila(m,true)).join("") : `<div class="empty"><span class="e">🪄</span>Aún no hay nada apuntado.<br>Toca una categoría para empezar.</div>`;
@@ -651,7 +873,7 @@ function pintarAhorro(){
     h += `<div class="card"><h2>✨ Análisis con IA</h2><div class="muted small">La IA mira tus últimos meses y te da un plan de ahorro personalizado.</div>
       <button class="btn p" id="aiBtn">✨ Pedir consejos a la IA</button><div class="ai-out" id="aiOut"></div></div>`;
   }
-  $("saveBody").innerHTML = h;
+  $("saveBody").innerHTML = metasHTML() + h;
 }
 
 function recetasHTML(){
@@ -707,6 +929,8 @@ function pintarAjustes(){
   pintarCopias();
   pintarAdmin();
   pintarHojaGoogle();
+  pintarPresuAjustes();
+  pintarAviso();
   $("foot").textContent = (REMOTO ? "☁️ Tus datos se guardan en la nube y se sincronizan entre móviles" : "🧪 Modo prueba: datos guardados solo en este móvil") + ` · versión ${VERSION}`;
   if (REMOTO) Store.ultimaCopia().then(t => {
     if (!t || view !== "set") return;

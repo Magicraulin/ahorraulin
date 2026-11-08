@@ -235,6 +235,20 @@ select.inp{appearance:none;-webkit-appearance:none;background-image:linear-gradi
 .paso .btn{margin-top:10px;padding:12px;text-decoration:none}
 .paso.aviso{background:#fff4d6;border-radius:16px;padding:12px;border:0}
 body.dark .paso.aviso{background:#3a3016}
+.barra{height:12px;border-radius:8px;background:var(--soft);overflow:hidden;margin:6px 0 2px}
+.barra i{display:block;height:100%;border-radius:8px;background:var(--ingreso);transition:width .3s}
+.barra i.med{background:#e8a33d}.barra i.alto{background:var(--warn)}
+.presu{padding:9px 0;border-top:1px solid var(--line)}.presu:first-child{border-top:0}
+.presu .ph{display:flex;justify-content:space-between;font-weight:900;font-size:14px}
+.presu .ph span:last-child{color:var(--ink2);font-size:13px}
+.presu small{font-size:12px;font-weight:800;color:var(--ink3)}
+.pset{display:flex;align-items:center;gap:10px;padding:7px 0;border-top:1px solid var(--line)}.pset:first-child{border-top:0}
+.pset label{flex:1;font-weight:900;font-size:14px}.pset input{width:110px;text-align:right}
+.metacard{background:var(--card);border-radius:22px;padding:16px;box-shadow:var(--shadow);margin-top:14px;border-top:6px solid #e8a33d}
+.metacard .mh{display:flex;align-items:center;gap:12px}.metacard .me{width:48px;height:48px;border-radius:16px;background:#ffe3ef;display:grid;place-items:center;font-size:26px}
+.metacard .mh b{font-family:Fredoka,sans-serif;font-size:18px;font-weight:600;display:block}.metacard .mh small{font-weight:800;color:var(--ink3);font-size:12px}
+.metacard .mp{font-weight:900;font-size:14px;margin-top:6px}.metacard .mi{font-size:13px;font-weight:700;color:var(--ink2);margin-top:6px;line-height:1.4}
+.row .mid[data-edit]{cursor:pointer}
 .foot{text-align:center;font-size:12px;font-weight:800;color:var(--ink3);margin:18px 0 6px}
 
 /* nav */
@@ -343,6 +357,7 @@ nav button.on .e{filter:none;opacity:1;transform:translateY(-1px) scale(1.08)}
         <div class="seg" id="seg"><button data-t="gasto" class="on">💸 Gasto</button><button data-t="ingreso">💰 Ingreso</button></div>
         <div class="cats" id="cats"></div>
       </div>
+      <div class="card hidden" id="presuCard"><h2>🎯 Presupuestos de <span id="presuMes"></span></h2><div id="presuList"></div></div>
       <div class="card"><h2>🔁 Pagos fijos cada mes <small id="recTot"></small></h2><div id="recList"></div></div>
       <div class="card"><h2>Lo último</h2><div id="recent"></div></div>
     </div>
@@ -397,6 +412,17 @@ nav button.on .e{filter:none;opacity:1;transform:translateY(-1px) scale(1.08)}
         <div id="adminList"></div>
       </div>
       <div class="card">
+        <h2>🔔 Recordatorio diario</h2>
+        <div class="muted small" style="margin-bottom:6px">Un aviso en este móvil para que no se te olvide apuntar. Si ese día ya has apuntado algo, no te molesta.</div>
+        <div class="set-row"><label>Avisarme cada día<small id="avisoTxt">Desactivado</small></label><button class="switch" id="avisoSw" role="switch" aria-label="Recordatorio diario"></button></div>
+        <div class="set-row"><label>¿A qué hora?</label><input type="time" class="inp" id="avisoHora" value="21:00" style="width:130px"></div>
+      </div>
+      <div class="card">
+        <h2>🎯 Presupuestos mensuales</h2>
+        <div class="muted small" style="margin-bottom:6px">Pon cuánto quieres gastar como mucho al mes en cada cosa. Te avisaré al llegar al 80 %. Déjalo vacío para no poner límite.</div>
+        <div id="presuSet"></div>
+      </div>
+      <div class="card">
         <h2>Seguridad y datos</h2>
         <button class="opt" id="xlBtn"><span class="e">📥</span><span>Descargar una copia en Excel<small id="xlSub">Crea un archivo nuevo cada vez</small></span></button>
         <button class="opt" id="chPin"><span class="e">🔑</span><span>Cambiar mi código<small>Elige 4 números nuevos</small></span></button>
@@ -429,6 +455,8 @@ nav button.on .e{filter:none;opacity:1;transform:translateY(-1px) scale(1.08)}
     <button class="chip" data-d="ayer">Ayer</button>
     <span class="chip" id="eOther"><span>📅 Otro día</span><input type="date" id="eDate" aria-label="Elegir fecha"></span>
   </div>
+  <select class="inp hidden" id="eCatSel" aria-label="Categoría" style="margin-bottom:10px"></select>
+  <div class="hidden" id="eMetas" style="margin-bottom:10px"><div class="muted small" style="margin-bottom:6px">¿Para qué meta? 🎯</div><div class="chips" id="eMetaChips" style="justify-content:flex-start;margin:0"></div></div>
   <input class="note" id="eNote" maxlength="80" placeholder="✏️ Nota (opcional) · p. ej. Netflix">
   <button class="rep" id="eRep" type="button" aria-pressed="false"><span class="re">🔁</span><span class="rt"><b>Repetir cada mes</b><small id="eRepTxt">Se apuntará solo todos los meses</small></span><span class="switch" id="eRepSw"></span></button>
   <div class="pad" id="ePad">
@@ -455,12 +483,25 @@ nav button.on .e{filter:none;opacity:1;transform:translateY(-1px) scale(1.08)}
   </div>
 </div></div>
 
+<div class="modal" id="metaModal"><div class="sheet" role="dialog" aria-modal="true" aria-labelledby="metaTit">
+  <div class="grab"></div>
+  <div class="e-head"><div class="e" id="metaEm" style="--cb:#ffe3ef">🎯</div><div><b id="metaTit">Nueva meta de ahorro</b><small style="color:var(--ink3)">¿Para qué estás ahorrando?</small></div><button class="x" id="metaCerrar" aria-label="Cerrar">✕</button></div>
+  <div style="margin-top:14px">
+    <input class="inp" id="metaNombre" maxlength="40" placeholder="Nombre · p. ej. Viaje a Japón">
+    <div class="emojis" id="metaEmojis" style="margin-top:10px"></div>
+    <input class="inp" id="metaObj" inputmode="decimal" placeholder="¿Cuánto necesitas? (€)" style="margin-top:10px">
+    <div class="muted small" style="margin:10px 0 4px">¿Para cuándo? (opcional)</div>
+    <input class="inp" id="metaFecha" type="date">
+    <button class="btn p" id="metaGuardar">Crear meta</button>
+  </div>
+</div></div>
+
 <div class="toast" id="toast"><div class="tt"><b id="toastFrase" class="hidden"></b><span id="toastTxt"></span></div><button id="undo">Deshacer</button></div>
 
-<script src="config.js?v=20"></script>
-<script src="datos.js?v=20"></script>
-<script src="excel.js?v=20"></script>
+<script src="config.js?v=21"></script>
+<script src="datos.js?v=21"></script>
+<script src="excel.js?v=21"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js" defer></script>
-<script src="app.js?v=20"></script>
+<script src="app.js?v=21"></script>
 </body>
 </html>

@@ -9,6 +9,9 @@ window.CONFIG = {
   supabaseUrl: "https://fbjwnfvmrfaqyvvproyv.supabase.co",
   supabaseKey: "sb_publishable_mI68ZSEPKber-LPoMai5Wg_Qq1YTs5G",   // clave pública: se puede ver sin problema
 
+  // Clave pública de las notificaciones (es pública, no pasa nada)
+  vapidPublica: "BDh51KiBFtPIF91gF1WGluveqZrIqLdmQnzQ8axQAzaaozOx35KS941_bNNei2C96vfYz6QcZojm8sJrHBB1tFI",
+
   // 2) Opcional: dirección de tu Worker de Cloudflare (consejos con IA)
   workerUrl: ""             // ejemplo: "https://ahorraulin-ia.tuusuario.workers.dev"
 };
