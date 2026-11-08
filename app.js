@@ -3,7 +3,7 @@
    ===================================================================== */
 "use strict";
 const CFG = window.CONFIG || {};
-const VERSION = "1.7";
+const VERSION = "1.8";
 const ADMIN = "p1";   // Raúl es el administrador
 const REMOTO = !!(CFG.supabaseUrl && CFG.supabaseKey);
 const IA = !!CFG.workerUrl;
@@ -795,7 +795,8 @@ $("chPin").onclick = () => { pinState = { id:S.id, nombre:S.perfil.nombre, emoji
    EXCEL
    ===================================================================== */
 async function crearExcel(movs, generado){
-  return crearExcelAhorraulin({ nombre:S.perfil.nombre, movs:(movs || S.movs), catOf, generado });
+  const P = PALETAS[S.perfil.color] || PALETAS.violeta;
+  return crearExcelAhorraulin({ nombre:S.perfil.nombre, emoji:S.perfil.emoji, color:P[0], movs:(movs || S.movs), catOf, generado });
 }
 async function entregarExcel(blob, nombre){
   const file = new File([blob], nombre, { type: blob.type });
