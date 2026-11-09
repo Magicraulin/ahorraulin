@@ -125,7 +125,9 @@ begin
   if p_endpoint !~ '^https://' or p_hora !~ '^\d{2}:\d{2}$' then return jsonb_build_object('error','DATOS'); end if;
   insert into public.avisos (endpoint, persona, p256dh, auth, hora)
   values (left(p_endpoint,1000), p_id, left(p_p256dh,200), left(p_auth,100), p_hora)
-  on conflict (endpoint) do update set persona = excluded.persona, p256dh = excluded.p256dh, auth = excluded.auth, hora = excluded.hora;
+  on conflict (endpoint) do update set persona = excluded.persona, p256dh = excluded.p256dh, auth = excluded.auth, hora = excluded.hora,
+    -- si cambias la hora, vuelve a contar para hoy
+    ultimo = case when public.avisos.hora is distinct from excluded.hora then null else public.avisos.ultimo end;
   return jsonb_build_object('ok',true);
 end $$;
 

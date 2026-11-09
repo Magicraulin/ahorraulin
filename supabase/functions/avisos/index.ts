@@ -2,7 +2,7 @@
 //  AHORRAULIN · Servicio de recordatorios (Supabase Edge Function «avisos»)
 //  Cada 5 minutos la base de datos llama a esta función. Ella pregunta a
 //  quién le toca el recordatorio y le manda una notificación al móvil.
-//  La notificación va sin contenido: el texto lo pone la propia app (sw.js).
+//  La notificación lleva el texto dentro, cifrado (estándar Web Push aes128gcm).
 //  Secretos necesarios (Edge Functions → Secrets):
 //    VAPID_PRIVADA  →  {"x":"…","y":"…","d":"…"}   (no se sube a GitHub)
 //  SUPABASE_URL y SUPABASE_SERVICE_ROLE_KEY los pone Supabase solo.
@@ -41,24 +41,61 @@ async function cabeceraVapid(endpoint: string, clave: { x: string; y: string; d:
   return `vapid t=${cuerpo}.${b64url(firma)}, k=${publica}`;
 }
 
+// Cifrado estándar de Web Push (RFC 8291, aes128gcm) para mandar el texto dentro del aviso
+async function hkdf(salt: Uint8Array, ikm: Uint8Array, info: Uint8Array, bytes: number) {
+  const k = await crypto.subtle.importKey("raw", ikm, "HKDF", false, ["deriveBits"]);
+  return new Uint8Array(await crypto.subtle.deriveBits({ name: "HKDF", hash: "SHA-256", salt, info }, k, bytes * 8));
+}
+const unir = (...p: Uint8Array[]) => { const o = new Uint8Array(p.reduce((s, x) => s + x.length, 0)); let i = 0; for (const x of p) { o.set(x, i); i += x.length; } return o; };
+async function cifrar(texto: string, p256dh: string, auth: string) {
+  const te = new TextEncoder();
+  const uaPub = deB64url(p256dh), secreto = deB64url(auth);
+  const efimera = await crypto.subtle.generateKey({ name: "ECDH", namedCurve: "P-256" }, true, ["deriveBits"]);
+  const asPub = new Uint8Array(await crypto.subtle.exportKey("raw", efimera.publicKey));
+  const uaKey = await crypto.subtle.importKey("raw", uaPub, { name: "ECDH", namedCurve: "P-256" }, false, []);
+  const comun = new Uint8Array(await crypto.subtle.deriveBits({ name: "ECDH", public: uaKey }, efimera.privateKey, 256));
+  const ikm = await hkdf(secreto, comun, unir(te.encode("WebPush: info\0"), uaPub, asPub), 32);
+  const sal = crypto.getRandomValues(new Uint8Array(16));
+  const cek = await hkdf(sal, ikm, te.encode("Content-Encoding: aes128gcm\0"), 16);
+  const nonce = await hkdf(sal, ikm, te.encode("Content-Encoding: nonce\0"), 12);
+  const k = await crypto.subtle.importKey("raw", cek, "AES-GCM", false, ["encrypt"]);
+  const cifrado = new Uint8Array(await crypto.subtle.encrypt({ name: "AES-GCM", iv: nonce }, k, unir(te.encode(texto), new Uint8Array([2]))));
+  return unir(sal, new Uint8Array([0, 0, 16, 0]), new Uint8Array([asPub.length]), asPub, cifrado);
+}
+
+const TEXTOS = [
+  "¿Has apuntado lo de hoy? 🐷 Son 10 segundos.",
+  "¡Ey! Tu hucha quiere saber qué has gastado hoy 💸",
+  "Un momento de cuentas claras: apunta lo de hoy ✍️",
+  "¿Café, gasolina, cena…? Apúntalo antes de que se te olvide ☕",
+  "Tus cuentas te echan de menos 🥺 ¿Apuntamos lo de hoy?",
+  "Recordatorio mágico 🎩: lo que no se apunta, desaparece… ¡de la cartera!",
+  "Hoy también cuenta. Apunta tus gastos e ingresos 💪",
+  "¿Ha entrado o salido dinero hoy? Cuéntaselo a Ahorraulin 😉",
+];
+
 Deno.serve(async () => {
   try {
     const clave = JSON.parse(Deno.env.get("VAPID_PRIVADA") || "{}");
     if (!clave.d) return new Response("Falta el secreto VAPID_PRIVADA", { status: 500 });
-    const pendientes: { endpoint: string }[] = (await rpc("avisos_pendientes")) || [];
-    let enviados = 0, caducados = 0;
+    const pendientes: { endpoint: string; p256dh: string; auth: string }[] = (await rpc("avisos_pendientes")) || [];
+    let enviados = 0, caducados = 0; const errores: string[] = [];
     for (const s of pendientes) {
       try {
+        const texto = TEXTOS[Math.floor(Math.random() * TEXTOS.length)];
+        const cuerpo = await cifrar(JSON.stringify({ titulo: "Ahorraulin", texto }), s.p256dh, s.auth);
         const r = await fetch(s.endpoint, {
           method: "POST",
-          headers: { Authorization: await cabeceraVapid(s.endpoint, clave), TTL: "43200", Urgency: "normal", "Content-Length": "0" },
+          headers: { Authorization: await cabeceraVapid(s.endpoint, clave), TTL: "43200", Urgency: "high",
+                     "Content-Encoding": "aes128gcm", "Content-Type": "application/octet-stream" },
+          body: cuerpo,
         });
         if (r.status === 404 || r.status === 410) { await rpc("quitar_aviso_caducado", { p_endpoint: s.endpoint }); caducados++; }
         else if (r.ok) enviados++;
-        else console.log("Aviso no aceptado", r.status, await r.text());
-      } catch (e) { console.log("Error enviando", e); }
+        else { const t = await r.text(); console.log("Aviso no aceptado", r.status, t); errores.push(`${r.status} ${t.slice(0, 120)}`); }
+      } catch (e) { console.log("Error enviando", e); errores.push(String(e).slice(0, 120)); }
     }
-    return new Response(JSON.stringify({ pendientes: pendientes.length, enviados, caducados }), { headers: { "Content-Type": "application/json" } });
+    return new Response(JSON.stringify({ pendientes: pendientes.length, enviados, caducados, errores }), { headers: { "Content-Type": "application/json" } });
   } catch (e) {
     console.log(e);
     return new Response(String(e), { status: 500 });

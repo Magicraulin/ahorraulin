@@ -1,6 +1,6 @@
 /* Hace que la app se abra rápido y funcione aunque falle la cobertura.
    Si cambias algún archivo, sube el número de versión para que se actualice. */
-const VERSION = "ahorraulin-v24";
+const VERSION = "ahorraulin-v25";
 const ARCHIVOS = ["./", "index.html", "app.js", "datos.js", "config.js", "excel.js", "manifest.webmanifest",
                   "icon-192.png", "icon-512.png", "apple-touch-icon.png"];
 
@@ -38,8 +38,9 @@ const AVISOS = [
 ];
 self.addEventListener("push", e => {
   let texto = AVISOS[Math.floor(Math.random() * AVISOS.length)];
-  try { const d = e.data && e.data.json(); if (d && d.texto) texto = d.texto; } catch(err){}
-  e.waitUntil(self.registration.showNotification("Ahorraulin", {
+  let titulo = "Ahorraulin";
+  try { const d = e.data && e.data.json(); if (d && d.texto) texto = d.texto; if (d && d.titulo) titulo = d.titulo; } catch(err){}
+  e.waitUntil(self.registration.showNotification(titulo, {
     body: texto, icon: "icon-192.png", badge: "icon-192.png", tag: "recordatorio-diario", renotify: true, data: { url: "./" }
   }));
 });
