@@ -1,6 +1,6 @@
 /* Hace que la app se abra rápido y funcione aunque falle la cobertura.
    Si cambias algún archivo, sube el número de versión para que se actualice. */
-const VERSION = "ahorraulin-v41";
+const VERSION = "ahorraulin-v42";
 const ARCHIVOS = ["./", "index.html", "app.js", "datos.js", "config.js", "excel.js", "logros.js", "tutorial.js", "cuentas.js", "manifest.webmanifest",
                   "icon-192.png", "icon-512.png", "apple-touch-icon.png"];
 

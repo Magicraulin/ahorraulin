@@ -184,7 +184,7 @@ function pintarCuentaCard(){
   const c = cuentaGuardada() || {}, dias = P.caduca ? diasHasta(P.caduca) : 999;
   const msg = encodeURIComponent(`¡Hola! Quiero renovar mi año de Ahorraulin. Soy ${P.nombre}${c.codigo ? " (código " + c.codigo + ")" : ""} 😊`);
   card.innerHTML = `<h2>📱 Tu cuenta</h2>
-    <div class="muted small">${P.caduca ? `Tu acceso está activo hasta el <b>${fechaLarga(P.caduca)}</b>${dias <= 45 ? ` (quedan ${dias} días)` : ""}.` : "Tu acceso está activo."}</div>
+    <div class="muted small">${P.caduca ? `Tu acceso está activo hasta el <b>${fechaLarga(P.caduca)}</b>${dias <= 45 ? ` (quedan ${dias} días)` : ""}.` : "Tu acceso es ilimitado ♾️"}</div>
     ${c.codigo ? `<div class="muted small" style="margin-top:4px">Tu código de acceso: <b>${esc(c.codigo)}</b></div>` : ""}
     <div class="set-row" style="margin-top:8px"><label>Pedir mi código al abrir la app<small>Más privado: tendrás que escribir tus 4 cifras cada vez</small></label><button class="switch ${c.pinAbrir ? "on" : ""}" id="pinAbrirSw" role="switch" aria-checked="${!!c.pinAbrir}" aria-label="Pedir código al abrir"></button></div>
     ${dias <= 45 ? `<a class="opt" style="text-decoration:none;color:inherit" target="_blank" rel="noopener" href="https://wa.me/${WHATSAPP_PREMIOS}?text=${msg}"><span class="e">💬</span><span>Renovar otro año<small>Escribe al administrador por WhatsApp</small></span></a>` : ""}`;
@@ -211,12 +211,12 @@ async function olvidarMovil(){
 /* =====================================================================
    PANEL «USUARIOS» DEL ADMINISTRADOR
    ===================================================================== */
-let usDatos = null, usAbierto = null, usResultado = null, usBorrar = null;
+let usDatos = null, usAbierto = null, usResultado = null;
 const msgAlta = (nombre, c) => `¡Hola ${nombre}! 🎉 Aquí tienes tu acceso a *Ahorraulin*, la app para controlar tus gastos y ahorrar.\n\n` +
   `1️⃣ Abre este enlace: ${APP_URL}?codigo=${c}\n2️⃣ Crea tu cuenta (tu código ya viene puesto: *${c}*)\n3️⃣ Añádela a la pantalla de inicio del móvil para tenerla como una app\n\n` +
   `📌 Guarda este mensaje: si cambias de móvil, entrarás con este código y tus 4 cifras.\nTu acceso dura 1 año. ¡A ahorrar! 💸`;
 const msgRecuperar = (nombre, c) => `¡Hola ${nombre}! 🔑 Aquí tienes tu acceso nuevo a *Ahorraulin*:\n\n${APP_URL}?codigo=${c}\n\nÁbrelo y elige un código nuevo de 4 cifras. Tus apuntes siguen todos ahí 😊\nTu código de acceso nuevo es *${c}*: guárdalo por si cambias de móvil.`;
-const msgRenovar = (nombre, ms) => `¡Hola ${nombre}! ✅ Tu acceso a *Ahorraulin* ya está renovado hasta el ${fechaLarga(ms)}. ¡Gracias por seguir ahorrando! 💸`;
+const msgRenovar = (nombre, ms) => `¡Hola ${nombre}! ✅ Tu acceso a *Ahorraulin* ya está renovado ${ms ? "hasta el " + fechaLarga(ms) : "para siempre ♾️"}. ¡Gracias por seguir ahorrando! 💸`;
 const waLink = t => `https://wa.me/?text=${encodeURIComponent(t)}`;
 
 async function pintarUsuarios(){
@@ -258,8 +258,9 @@ function listaCodigos(){
 }
 function estadoUsuario(u){
   if (!u.activo) return ["mal","⛔ Desactivada"];
-  if (u.caduca && u.caduca < Date.now()) return ["mal","⏳ Caducada"];
-  if (u.caduca && diasHasta(u.caduca) <= 30) return ["pronto",`⚠️ Caduca en ${diasHasta(u.caduca)} d`];
+  if (!u.caduca) return ["","♾️ Ilimitada"];
+  if (u.caduca < Date.now()) return ["mal","⏳ Caducada"];
+  if (diasHasta(u.caduca) <= 30) return ["pronto",`⚠️ Caduca en ${diasHasta(u.caduca)} d`];
   return ["","✅ Activa"];
 }
 function haceCuanto(ms){
@@ -269,30 +270,43 @@ function haceCuanto(ms){
   const h = Math.round(m / 60); if (h < 24) return `usada hace ${h} h`;
   const d = Math.round(h / 24); return `usada hace ${d} ${d === 1 ? "día" : "días"}`;
 }
+// Qué hace cada acción (se enseña antes de pedir el código)
+const US_ACC = {
+  renovar:      { t:"📅 Renovar el acceso", d:"Elige cuánto tiempo. Se suma a lo que le quede; si ya había caducado, cuenta desde hoy. Si estaba desactivada, se vuelve a activar.", b:"Renovar" },
+  nuevo_acceso: { t:"🔑 Darle un acceso nuevo", d:"Para cuando olvida su código de 4 cifras. Se cierra la sesión en todos sus móviles y te sale un código nuevo para mandarle por WhatsApp. Al abrirlo elegirá 4 cifras nuevas. Sus apuntes no se tocan.", b:"Crear acceso nuevo" },
+  echar:        { t:"📵 Echarle de todos sus móviles", d:"Para un móvil robado o perdido. Se cierra la sesión en todos los móviles donde tenga la app. Su cuenta y sus apuntes siguen intactos: volverá a entrar con su código de acceso y sus 4 cifras.", b:"Echar de sus móviles" },
+  desactivar:   { t:"⛔ Desactivar la cuenta", d:"Deja de poder entrar (por ejemplo, si no paga). No se borra nada: cuando la actives, todo estará como lo dejó.", b:"Desactivar" },
+  activar:      { t:"✅ Activar la cuenta", d:"Vuelve a poder entrar con todos sus datos.", b:"Activar" },
+  eliminar:     { t:"🗑️ Eliminar la cuenta", d:"Se borra la cuenta con todos sus apuntes, metas y premios. Durante 30 días quedan en las copias de seguridad de cada noche (se pueden recuperar a mano); después, desaparecen para siempre.", b:"Eliminar para siempre", peligro:true }
+};
+const PLAZOS = [["renovar_1m","1 mes"],["renovar_6m","6 meses"],["renovar_1a","1 año"],["ilimitado","♾️ Ilimitado"]];
+let usPend = null;   // { id, acc, plazo }
 function listaUsuarios(){
   const l = usDatos ? usDatos.usuarios : [];
   if (!usDatos) return "";
   if (!l.length) return `<div class="card"><div class="empty" style="padding:10px"><span class="e">👥</span>Aún no hay usuarios. Crea un código arriba y mándalo por WhatsApp.</div></div>`;
-  return `<div class="card"><h2>📋 Cuentas</h2><div class="muted small">Toca una cuenta para ver qué puedes hacer.</div>
-    ${l.map(u => { const [cls, txt] = estadoUsuario(u), abierto = usAbierto === u.id;
+  return `<div class="card"><h2>📋 Cuentas</h2><div class="muted small">Toca una cuenta para ver qué puedes hacer. Todo te pedirá tu código.</div>
+    ${l.map(u => { const [cls, txt] = estadoUsuario(u), abierto = usAbierto === u.id, pend = usPend && usPend.id === u.id ? usPend : null, A = pend ? US_ACC[pend.acc] : null;
       return `<div class="us-card"><button class="us-top" data-us="abrir" data-id="${esc(u.id)}">
         <span class="em">${esc(u.emoji)}</span><span style="flex:1;min-width:0"><b>${esc(u.nombre)}</b>
-        <small>${u.caduca ? "Hasta el " + fechaLarga(u.caduca) : ""} · ${u.moviles} ${u.moviles === 1 ? "móvil" : "móviles"} · ${haceCuanto(u.ultimo)}</small></span>
+        <small>${u.caduca ? "Hasta el " + fechaLarga(u.caduca) : "Sin fecha de fin"} · ${u.moviles} ${u.moviles === 1 ? "móvil" : "móviles"} · ${haceCuanto(u.ultimo)}</small></span>
         <span class="us-est ${cls}">${txt}</span></button>
-        ${abierto ? `<div class="us-acc">
-          <button data-us="renovar" data-id="${esc(u.id)}">📅 Renovar 1 año</button>
-          <button data-us="nuevo_acceso" data-id="${esc(u.id)}">🔑 Acceso nuevo<br><small style="font-weight:700;color:var(--ink3)">si olvida su código</small></button>
-          <button data-us="echar" data-id="${esc(u.id)}">📵 Echar de sus móviles<br><small style="font-weight:700;color:var(--ink3)">móvil robado o perdido</small></button>
-          <button data-us="${u.activo ? "desactivar" : "activar"}" data-id="${esc(u.id)}">${u.activo ? "⛔ Desactivar" : "✅ Activar"}</button>
-          <button class="peligro" data-us="pedirBorrar" data-id="${esc(u.id)}" style="grid-column:1/-1">🗑️ Eliminar cuenta</button>
-        </div>${usBorrar === u.id ? `<div class="us-borrar"><b>⚠️ Eliminar la cuenta de ${esc(u.nombre)}</b>
-          <div class="muted small">Se borra la cuenta con todos sus apuntes, metas y premios. Durante 30 días quedan en las copias de seguridad de cada noche; después, desaparecen para siempre.</div>
-          ${campoPin("usPinBorrar", "Tu código")}
-          <div class="us-acc"><button data-us="noBorrar">Cancelar</button><button class="sure" data-us="eliminar" data-id="${esc(u.id)}">Eliminar</button></div></div>` : ""}${u.codigo ? `<div class="muted small" style="margin-top:8px;text-align:center">Código de alta: <b>${esc(u.codigo)}</b></div>` : ""}` : ""}</div>`; }).join("")}</div>`;
+        ${abierto && !pend ? `<div class="us-acc">
+          <button data-us="pedir" data-acc="renovar" data-id="${esc(u.id)}">📅 Renovar</button>
+          <button data-us="pedir" data-acc="nuevo_acceso" data-id="${esc(u.id)}">🔑 Acceso nuevo<br><small style="font-weight:700;color:var(--ink3)">si olvida su código</small></button>
+          <button data-us="pedir" data-acc="echar" data-id="${esc(u.id)}">📵 Echar de sus móviles<br><small style="font-weight:700;color:var(--ink3)">móvil robado o perdido</small></button>
+          <button data-us="pedir" data-acc="${u.activo ? "desactivar" : "activar"}" data-id="${esc(u.id)}">${u.activo ? "⛔ Desactivar" : "✅ Activar"}</button>
+          <button class="peligro" data-us="pedir" data-acc="eliminar" data-id="${esc(u.id)}" style="grid-column:1/-1">🗑️ Eliminar cuenta</button>
+        </div>${u.codigo ? `<div class="muted small" style="margin-top:8px;text-align:center">Código de acceso: <b>${esc(u.codigo)}</b></div>` : ""}` : ""}
+        ${pend ? `<div class="us-borrar ${A.peligro ? "" : "suave"}"><b>${A.t} · ${esc(u.nombre)}</b>
+          <div class="muted small">${A.d}</div>
+          ${pend.acc === "renovar" ? `<div class="us-plazos">${PLAZOS.map(([k, n]) => `<button data-us="plazo" data-p="${k}" class="${pend.plazo === k ? "on" : ""}">${n}</button>`).join("")}</div>` : ""}
+          ${campoPin("usPinAcc", "Tu código")}
+          <div class="us-acc"><button data-us="cancelar">Cancelar</button><button class="${A.peligro ? "sure" : "ok"}" data-us="hacer" data-id="${esc(u.id)}">${A.b}</button></div></div>` : ""}</div>`; }).join("")}</div>`;
 }
-const US_CONFIRMAR = { echar:"¿Echar de todos sus móviles?", desactivar:"¿Desactivar?", nuevo_acceso:"¿Seguro? Se cierra en sus móviles" };
-const US_HECHO = { renovar:"📅 Renovada 1 año más", activar:"✅ Cuenta activada", desactivar:"⛔ Cuenta desactivada. Ya no puede entrar", echar:"📵 Fuera de todos sus móviles. Tendrá que entrar con su código y sus 4 cifras",
-  eliminar:"🗑️ Cuenta eliminada" };
+const US_HECHO = { renovar_1m:"📅 Renovada 1 mes más", renovar_6m:"📅 Renovada 6 meses más", renovar_1a:"📅 Renovada 1 año más", ilimitado:"♾️ Ahora tiene acceso ilimitado",
+  activar:"✅ Cuenta activada", desactivar:"⛔ Cuenta desactivada. Ya no puede entrar", echar:"📵 Fuera de todos sus móviles. Volverá a entrar con su código y sus 4 cifras",
+  nuevo_acceso:"🔑 Acceso nuevo creado: mándaselo por WhatsApp", eliminar:"🗑️ Cuenta eliminada" };
 document.addEventListener("click", async e => {
   if (e.target.closest("#usCrear")){
     const n = $("usNombre").value.trim(); if (!n){ toast("Escribe el nombre de quien lo compra"); $("usNombre").focus(); return; }
@@ -304,9 +318,10 @@ document.addEventListener("click", async e => {
   }
   const b = e.target.closest("[data-us]"); if (!b || !S || S.id !== ADMIN) return;
   const acc = b.dataset.us, id = b.dataset.id;
-  if (acc === "abrir"){ vibrar(); usAbierto = usAbierto === id ? null : id; usBorrar = null; pintarUsuarios(); return; }
-  if (acc === "pedirBorrar"){ vibrar(); usBorrar = id; pintarUsuarios(); setTimeout(() => $("usPinBorrar") && $("usPinBorrar").focus(), 100); return; }
-  if (acc === "noBorrar"){ usBorrar = null; pintarUsuarios(); return; }
+  if (acc === "abrir"){ vibrar(); usAbierto = usAbierto === id ? null : id; usPend = null; pintarUsuarios(); return; }
+  if (acc === "pedir"){ vibrar(); usPend = { id, acc:b.dataset.acc, plazo:"renovar_1a" }; pintarUsuarios(); setTimeout(() => $("usPinAcc") && $("usPinAcc").focus(), 100); return; }
+  if (acc === "plazo"){ vibrar(); usPend.plazo = b.dataset.p; b.parentElement.querySelectorAll("button").forEach(x => x.classList.toggle("on", x === b)); return; }
+  if (acc === "cancelar"){ usPend = null; pintarUsuarios(); return; }
   if (acc === "cerrarRes"){ usResultado = null; pintarUsuarios(); return; }
   if (acc === "copiar"){
     try { await navigator.clipboard.writeText(usResultado.msg); toast("📋 Mensaje copiado. Pégalo en WhatsApp"); } catch(err){ toast("⚠️ No se ha podido copiar"); }
@@ -317,31 +332,25 @@ document.addEventListener("click", async e => {
     try { const r = await Store.adminAnularCodigo(S.pin, b.dataset.c); if (!r.ok) throw new Error(r.error); toast("Código anulado: ya no sirve"); } catch(err){ toast("⚠️ No se ha podido anular"); }
     pintarUsuarios(); return;
   }
-  if (US_CONFIRMAR[acc] && !b.classList.contains("sure")){
-    b.classList.add("sure"); b.dataset.txt = b.innerHTML; b.textContent = US_CONFIRMAR[acc]; vibrar();
-    setTimeout(() => { if (b.isConnected){ b.classList.remove("sure"); b.innerHTML = b.dataset.txt; } }, 3500); return;
-  }
-  let pinUsar = S.pin;
-  if (acc === "eliminar"){
-    pinUsar = ($("usPinBorrar") || {}).value || "";
-    if (!/^\d{4}$/.test(pinUsar)){ toast("Escribe tu código de 4 cifras para eliminar"); sacudir($("usPinBorrar")); return; }
-  }
-  b.disabled = true;
+  if (acc !== "hacer" || !usPend) return;
+  const pin = ($("usPinAcc") || {}).value || "";
+  if (!/^\d{4}$/.test(pin)){ toast("Escribe tu código de 4 cifras"); sacudir($("usPinAcc")); return; }
+  const accion = usPend.acc === "renovar" ? usPend.plazo : usPend.acc;
+  b.disabled = true; b.innerHTML = '<span class="spin"></span>';
   try {
-    const r = await Store.adminCliente(pinUsar, id, acc); if (!r.ok) throw new Error(r.error);
+    const r = await Store.adminCliente(pin, id, accion); if (!r.ok) throw new Error(r.error);
     const u = (usDatos.usuarios || []).find(x => x.id === id) || {};
-    if (acc === "nuevo_acceso") usResultado = { titulo:`🔑 Acceso nuevo para ${esc(r.nombre)}`, codigo:r.codigo, msg:msgRecuperar(r.nombre, r.codigo) };
-    else if (acc === "renovar"){
-      const fin = Math.max(u.caduca || Date.now(), Date.now()) + 365 * 86400000;
-      usResultado = { titulo:`📅 ${esc(u.nombre)} renovado hasta el ${fechaLarga(fin)}`, msg:msgRenovar(u.nombre, fin) };
-    }
-    if (acc === "eliminar"){ usAbierto = null; usBorrar = null; }
-    toast(US_HECHO[acc] || "✓ Hecho"); vibrar(20);
+    if (accion === "nuevo_acceso") usResultado = { titulo:`🔑 Acceso nuevo para ${esc(r.nombre)}`, codigo:r.codigo, msg:msgRecuperar(r.nombre, r.codigo) };
+    else if (accion.startsWith("renovar") || accion === "ilimitado") usResultado = { titulo:`📅 ${esc(u.nombre)}: ${r.caduca ? "acceso hasta el " + fechaLarga(r.caduca) : "acceso ilimitado ♾️"}`, msg:msgRenovar(u.nombre, r.caduca) };
+    if (accion === "eliminar") usAbierto = null;
+    usPend = null;
+    toast(US_HECHO[accion] || "✓ Hecho"); vibrar(20);
     if (usResultado) window.scrollTo({ top:0, behavior:"smooth" });
   } catch(err){
     const m = err.message || "RED";
-    if (acc === "eliminar" && (m === "PIN_MAL" || m === "BLOQUEADO")){ b.disabled = false; $("usPinBorrar").value = ""; sacudir($("usPinBorrar")); toast(m === "PIN_MAL" ? "❌ Código incorrecto. No se ha borrado nada" : errTxt(m)); return; }
-    toast("⚠️ No se ha podido: " + errTxt(m));
+    b.disabled = false; b.textContent = US_ACC[usPend.acc].b;
+    if (m === "PIN_MAL" || m === "BLOQUEADO"){ $("usPinAcc").value = ""; sacudir($("usPinAcc")); toast(m === "PIN_MAL" ? "❌ Código incorrecto. No se ha hecho nada" : errTxt(m)); return; }
+    toast("⚠️ No se ha podido: " + errTxt(m)); return;
   }
   pintarUsuarios();
 });
