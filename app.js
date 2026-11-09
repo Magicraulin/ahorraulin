@@ -3,7 +3,7 @@
    ===================================================================== */
 "use strict";
 const CFG = window.CONFIG || {};
-const VERSION = "3.12";
+const VERSION = "3.13";
 const ADMIN = "p1";   // Raúl es el administrador
 const DEMO = "p4";    // perfil de prueba: oculto en el menú, solo entra el administrador
 const REMOTO = !!(CFG.supabaseUrl && CFG.supabaseKey);
@@ -666,7 +666,7 @@ async function borrar(id){
   catch(err){ S.movs.push(m); pintarTodo(); toast("⚠️ No se ha podido borrar"); }
 }
 document.addEventListener("click", e => {
-  const b = e.target.closest(".del"); if (!b) return;
+  const b = e.target.closest(".del"); if (!b || b.dataset.delmeta) return;   // las metas tienen su propio aviso
   if (b.classList.contains("sure")){ if (b.dataset.fijo) pararFijo(b.dataset.fijo); else borrar(b.dataset.id); return; }
   document.querySelectorAll(".del.sure").forEach(x => { x.classList.remove("sure"); x.textContent = "✕"; });
   b.classList.add("sure"); b.textContent = b.dataset.fijo ? "¿Dejar de repetir?" : "¿Borrar?"; vibrar();
