@@ -3,7 +3,7 @@
    ===================================================================== */
 "use strict";
 const CFG = window.CONFIG || {};
-const VERSION = "2.6";
+const VERSION = "2.7";
 const ADMIN = "p1";   // Raúl es el administrador
 const REMOTO = !!(CFG.supabaseUrl && CFG.supabaseKey);
 const IA = !!CFG.workerUrl;
@@ -713,6 +713,15 @@ const ES_IOS = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platf
 const INSTALADA = matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
 function b64aBytes(s){ const p = "=".repeat((4 - s.length % 4) % 4); const r = atob((s + p).replace(/-/g, "+").replace(/_/g, "/")); return Uint8Array.from(r, c => c.charCodeAt(0)); }
 async function miSuscripcion(){ if (!PUSH_OK) return null; const reg = await navigator.serviceWorker.getRegistration(); return reg ? reg.pushManager.getSubscription() : null; }
+// Estado real del permiso: en iPhone Notification.permission a veces se queda "atascado",
+// así que preguntamos también al sistema de avisos (pushManager), que es el que manda.
+async function estadoPermiso(){
+  let n = "default", p = null;
+  try { n = Notification.permission; } catch(e){}
+  try { const reg = await navigator.serviceWorker.ready;
+        p = await reg.pushManager.permissionState({ userVisibleOnly:true, applicationServerKey:b64aBytes(CFG.vapidPublica) }); } catch(e){}
+  return { n, p, ok: n === "granted" || p === "granted", bloqueado: n === "denied" && p !== "granted" && p !== "prompt" };
+}
 async function pintarAviso(){
   const sw = $("avisoSw"), txt = $("avisoTxt");
   if (!REMOTO){ txt.textContent = "Solo con la app conectada a la nube"; sw.disabled = true; return; }
@@ -723,21 +732,44 @@ async function pintarAviso(){
   const mio = sub && (S.avisos || []).find(a => a.endpoint === sub.endpoint);
   sw.classList.toggle("on", !!mio);
   if (mio && document.activeElement !== $("avisoHora")) $("avisoHora").value = mio.hora;
-  txt.textContent = mio ? `Activado en este móvil · ${mio.hora}` : Notification.permission === "denied" ? "Has bloqueado los avisos en los ajustes del móvil" : "Desactivado";
+  const est = await estadoPermiso();
+  txt.textContent = mio ? `Activado en este móvil · ${mio.hora}` : est.bloqueado ? "El móvil no da permiso aún · toca para ver cómo arreglarlo" : "Desactivado";
+  txt.dataset.diag = `n:${est.n} p:${est.p}`;
 }
 async function activarAviso(){
   const hora = $("avisoHora").value || "21:00";
-  const perm = await Notification.requestPermission();
-  if (perm !== "granted"){ toast("Sin permiso no puedo avisarte. Actívalo en los ajustes del móvil."); return; }
+  // Se pide el permiso lo primero, sin esperas, para que iPhone lo acepte como un toque del usuario
+  let perm = "default";
+  try { perm = Notification.permission === "granted" ? "granted" : await Notification.requestPermission(); } catch(e){}
   const reg = await navigator.serviceWorker.ready;
   let sub = await reg.pushManager.getSubscription();
-  if (!sub) sub = await reg.pushManager.subscribe({ userVisibleOnly:true, applicationServerKey:b64aBytes(CFG.vapidPublica) });
+  if (!sub){
+    // Aunque el permiso diga que no, lo intentamos: a veces el móvil sí lo tiene dado y solo falla el aviso
+    try { sub = await reg.pushManager.subscribe({ userVisibleOnly:true, applicationServerKey:b64aBytes(CFG.vapidPublica) }); }
+    catch(e){ sub = null; }
+  }
+  if (!sub){ ayudaAvisos(perm); return; }
   const j = sub.toJSON();
   const r = await Store.guardarAviso(S.id, S.pin, { endpoint:j.endpoint, p256dh:j.keys.p256dh, auth:j.keys.auth }, hora);
   if (!r.ok) throw new Error(r.error);
   S.avisos = (S.avisos || []).filter(a => a.endpoint !== j.endpoint).concat({ endpoint:j.endpoint, hora });
   toast(`🔔 ¡Hecho! Te avisaré cada día a las ${hora} si no has apuntado nada`);
 }
+function ayudaAvisos(perm){
+  const est = $("avisoTxt").dataset.diag || "";
+  $("avisoAyuda").innerHTML = ES_IOS
+    ? `<b>El iPhone todavía no deja a Ahorraulin mandar avisos.</b> Prueba esto, en orden:
+       <ol><li>Ajustes del iPhone → <b>Notificaciones</b> → <b>Ahorraulin</b> → activa «Permitir notificaciones».</li>
+       <li><b>Cierra la app del todo</b>: desliza hacia arriba desde abajo y quítala de la lista. Vuelve a abrirla desde el icono y activa otra vez el recordatorio.</li>
+       <li>Si sigue igual: borra el icono de Ahorraulin de la pantalla de inicio (y cualquier icono repetido), ábrela en <b>Safari</b> → Compartir → «Añadir a pantalla de inicio», entra desde el icono nuevo y actívalo. Al preguntarte, pulsa <b>Permitir</b>.</li></ol>
+       <small>Código para Raúl: ${esc(perm)} · ${esc(est)}</small>`
+    : `<b>El móvil no deja a Ahorraulin mandar avisos.</b> Ve a los ajustes del navegador o del móvil → Notificaciones → permite Ahorraulin, cierra la app del todo y vuelve a activarlo.<br><small>Código para Raúl: ${esc(perm)} · ${esc(est)}</small>`;
+  $("avisoAyuda").classList.remove("hidden");
+}
+$("avisoTxt").closest(".set-row").addEventListener("click", e => {
+  if (e.target.closest("#avisoSw")) return;
+  if (/no da permiso/.test($("avisoTxt").textContent)) ayudaAvisos(Notification.permission);
+});
 $("avisoSw").onclick = async () => {
   const sw = $("avisoSw"); if (sw.disabled) return; vibrar(); sw.disabled = true;
   try {
@@ -745,7 +777,7 @@ $("avisoSw").onclick = async () => {
       const sub = await miSuscripcion();
       if (sub){ await Store.quitarAviso(S.id, S.pin, sub.endpoint); S.avisos = (S.avisos || []).filter(a => a.endpoint !== sub.endpoint); await sub.unsubscribe().catch(() => {}); }
       toast("🔕 Recordatorio desactivado en este móvil");
-    } else await activarAviso();
+    } else { $("avisoAyuda").classList.add("hidden"); await activarAviso(); }
   } catch(err){ toast("⚠️ No se ha podido cambiar el recordatorio"); }
   sw.disabled = false; pintarAviso();
 };

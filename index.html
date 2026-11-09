@@ -267,6 +267,9 @@ details.fold[open]>summary{margin-bottom:12px}
 .perfil-top small{display:block;color:var(--ink3);font-weight:800;font-size:12.5px}
 .btn-ideas{display:flex;align-items:center;gap:10px;width:100%;margin-top:14px;padding:16px;border-radius:20px;background:var(--p-soft);color:var(--p);font-weight:900;font-size:15px;text-align:left}
 .btn-ideas span{font-size:24px}
+.ayuda-aviso{background:#fff4d6;color:#5a4000;border-radius:16px;padding:12px 14px;font-size:13.5px;font-weight:700;line-height:1.45;margin:8px 0}
+.ayuda-aviso ol{margin:6px 0 6px;padding-left:20px}.ayuda-aviso li{margin:4px 0}.ayuda-aviso small{opacity:.6;font-size:11px}
+body.dark .ayuda-aviso{background:#3a3016;color:#f3e3b5}
 /* nav */
 nav{position:fixed;left:0;right:0;bottom:0;background:color-mix(in srgb,var(--card) 92%,transparent);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-top:1px solid var(--line);padding:6px 6px calc(6px + var(--sb));z-index:10}
 nav .in{display:grid;grid-template-columns:repeat(6,1fr);gap:2px;max-width:560px;margin:0 auto}
@@ -432,6 +435,7 @@ nav button.on .e{filter:none;opacity:1;transform:translateY(-1px) scale(1.08)}
         <h2>🔔 Recordatorio diario</h2>
         <div class="muted small" style="margin-bottom:6px">Un aviso en este móvil para que no se te olvide apuntar. Si ese día ya has apuntado algo, no te molesta.</div>
         <div class="set-row"><label>Avisarme cada día<small id="avisoTxt">Desactivado</small></label><button class="switch" id="avisoSw" role="switch" aria-label="Recordatorio diario"></button></div>
+        <div class="ayuda-aviso hidden" id="avisoAyuda"></div>
         <div class="set-row"><label>¿A qué hora?</label><input type="time" class="inp" id="avisoHora" value="21:00" style="width:130px"></div>
       </div>
       <div class="card">
@@ -523,10 +527,10 @@ nav button.on .e{filter:none;opacity:1;transform:translateY(-1px) scale(1.08)}
 
 <div class="toast" id="toast"><div class="tt"><b id="toastFrase" class="hidden"></b><span id="toastTxt"></span></div><button id="undo">Deshacer</button></div>
 
-<script src="config.js?v=22"></script>
-<script src="datos.js?v=22"></script>
-<script src="excel.js?v=22"></script>
+<script src="config.js?v=23"></script>
+<script src="datos.js?v=23"></script>
+<script src="excel.js?v=23"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js" defer></script>
-<script src="app.js?v=22"></script>
+<script src="app.js?v=23"></script>
 </body>
 </html>
