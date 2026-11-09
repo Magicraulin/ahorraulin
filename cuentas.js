@@ -219,6 +219,11 @@ const msgRecuperar = (nombre, c) => `¡Hola ${nombre}! 🔑 Aquí tienes tu acce
 const msgRenovar = (nombre, ms) => `¡Hola ${nombre}! ✅ Tu acceso a *Ahorraulin* ya está renovado ${ms ? "hasta el " + fechaLarga(ms) : "para siempre ♾️"}. ¡Gracias por seguir ahorrando! 💸`;
 const waLink = t => `https://wa.me/?text=${encodeURIComponent(t)}`;
 
+function pintarUsuariosYa(){
+  const box = $("usuariosBody"); if (!box || !S || S.id !== ADMIN || !usDatos) return;
+  box.innerHTML = cabeceraUsuarios() + listaCodigos() + listaUsuarios();
+  if (usPend && $("usPinAcc")){ $("usPinAcc").value = usPend.pin || ""; }
+}
 async function pintarUsuarios(){
   const box = $("usuariosBody"); if (!box || !S || S.id !== ADMIN) return;
   if (!usDatos) box.innerHTML = cabeceraUsuarios() + `<div class="card"><div class="skeleton"></div><div class="skeleton"></div></div>`;
@@ -229,9 +234,11 @@ async function pintarUsuarios(){
     if (!usDatos){ box.innerHTML = cabeceraUsuarios() + `<div class="card"><div class="empty" style="padding:10px">${errTxt(e.message || "RED")}</div></div>`; return; }
   }
   if (!S || view !== "usuarios") return;
-  const foco = document.activeElement && document.activeElement.id === "usNombre" ? $("usNombre").value : null;
+  const foco = document.activeElement ? document.activeElement.id : null, nombre = $("usNombre") ? $("usNombre").value : "";
   box.innerHTML = cabeceraUsuarios() + listaCodigos() + listaUsuarios();
-  if (foco !== null){ $("usNombre").value = foco; $("usNombre").focus(); }
+  $("usNombre").value = nombre;
+  if (usPend && $("usPinAcc")) $("usPinAcc").value = usPend.pin || "";
+  if (foco && $(foco)) $(foco).focus();
 }
 function cabeceraUsuarios(){
   const u = usDatos ? usDatos.usuarios : [], act = u.filter(x => x.activo && (!x.caduca || x.caduca > Date.now())).length;
@@ -280,7 +287,15 @@ const US_ACC = {
   eliminar:     { t:"🗑️ Eliminar la cuenta", d:"Se borra la cuenta con todos sus apuntes, metas y premios. Durante 30 días quedan en las copias de seguridad de cada noche (se pueden recuperar a mano); después, desaparecen para siempre.", b:"Eliminar para siempre", peligro:true }
 };
 const PLAZOS = [["renovar_1m","1 mes"],["renovar_6m","6 meses"],["renovar_1a","1 año"],["ilimitado","♾️ Ilimitado"]];
-let usPend = null;   // { id, acc, plazo }
+let usPend = null;   // { id, acc, plazo, pin }
+document.addEventListener("keydown", e => { if (e.target.id === "usPinAcc" && e.key === "Enter"){ e.preventDefault(); const h = document.querySelector('[data-us="hacer"]'); if (h) h.click(); } });
+document.addEventListener("input", e => {
+  if (e.target.id !== "usPinAcc") return;
+  const v = e.target.value.replace(/\D/g, "").slice(0, 4);
+  if (e.target.value !== v) e.target.value = v;
+  if (usPend) usPend.pin = v;
+  const er = $("usErr"); if (er) er.textContent = "";
+});
 function listaUsuarios(){
   const l = usDatos ? usDatos.usuarios : [];
   if (!usDatos) return "";
@@ -301,7 +316,8 @@ function listaUsuarios(){
         ${pend ? `<div class="us-borrar ${A.peligro ? "" : "suave"}"><b>${A.t} · ${esc(u.nombre)}</b>
           <div class="muted small">${A.d}</div>
           ${pend.acc === "renovar" ? `<div class="us-plazos">${PLAZOS.map(([k, n]) => `<button data-us="plazo" data-p="${k}" class="${pend.plazo === k ? "on" : ""}">${n}</button>`).join("")}</div>` : ""}
-          ${campoPin("usPinAcc", "Tu código")}
+          ${campoPin("usPinAcc", "Tu código de 4 cifras")}
+          <div class="us-err" id="usErr"></div>
           <div class="us-acc"><button data-us="cancelar">Cancelar</button><button class="${A.peligro ? "sure" : "ok"}" data-us="hacer" data-id="${esc(u.id)}">${A.b}</button></div></div>` : ""}</div>`; }).join("")}</div>`;
 }
 const US_HECHO = { renovar_1m:"📅 Renovada 1 mes más", renovar_6m:"📅 Renovada 6 meses más", renovar_1a:"📅 Renovada 1 año más", ilimitado:"♾️ Ahora tiene acceso ilimitado",
@@ -318,10 +334,10 @@ document.addEventListener("click", async e => {
   }
   const b = e.target.closest("[data-us]"); if (!b || !S || S.id !== ADMIN) return;
   const acc = b.dataset.us, id = b.dataset.id;
-  if (acc === "abrir"){ vibrar(); usAbierto = usAbierto === id ? null : id; usPend = null; pintarUsuarios(); return; }
-  if (acc === "pedir"){ vibrar(); usPend = { id, acc:b.dataset.acc, plazo:"renovar_1a" }; pintarUsuarios(); setTimeout(() => $("usPinAcc") && $("usPinAcc").focus(), 100); return; }
+  if (acc === "abrir"){ vibrar(); usAbierto = usAbierto === id ? null : id; usPend = null; pintarUsuariosYa(); return; }
+  if (acc === "pedir"){ vibrar(); usPend = { id, acc:b.dataset.acc, plazo:"renovar_1a", pin:"" }; pintarUsuariosYa(); setTimeout(() => $("usPinAcc") && $("usPinAcc").focus(), 60); return; }
   if (acc === "plazo"){ vibrar(); usPend.plazo = b.dataset.p; b.parentElement.querySelectorAll("button").forEach(x => x.classList.toggle("on", x === b)); return; }
-  if (acc === "cancelar"){ usPend = null; pintarUsuarios(); return; }
+  if (acc === "cancelar"){ usPend = null; pintarUsuariosYa(); return; }
   if (acc === "cerrarRes"){ usResultado = null; pintarUsuarios(); return; }
   if (acc === "copiar"){
     try { await navigator.clipboard.writeText(usResultado.msg); toast("📋 Mensaje copiado. Pégalo en WhatsApp"); } catch(err){ toast("⚠️ No se ha podido copiar"); }
@@ -333,8 +349,9 @@ document.addEventListener("click", async e => {
     pintarUsuarios(); return;
   }
   if (acc !== "hacer" || !usPend) return;
-  const pin = ($("usPinAcc") || {}).value || "";
-  if (!/^\d{4}$/.test(pin)){ toast("Escribe tu código de 4 cifras"); sacudir($("usPinAcc")); return; }
+  const pin = (($("usPinAcc") || {}).value || usPend.pin || "").replace(/\D/g, "");
+  const errPanel = t => { const er = $("usErr"); if (er) er.textContent = t; if ($("usPinAcc")) sacudir($("usPinAcc")); };
+  if (!/^\d{4}$/.test(pin)){ errPanel(pin ? "Faltan números: son 4 cifras" : "Escribe tu código de 4 cifras"); return; }
   const accion = usPend.acc === "renovar" ? usPend.plazo : usPend.acc;
   b.disabled = true; b.innerHTML = '<span class="spin"></span>';
   try {
@@ -349,8 +366,8 @@ document.addEventListener("click", async e => {
   } catch(err){
     const m = err.message || "RED";
     b.disabled = false; b.textContent = US_ACC[usPend.acc].b;
-    if (m === "PIN_MAL" || m === "BLOQUEADO"){ $("usPinAcc").value = ""; sacudir($("usPinAcc")); toast(m === "PIN_MAL" ? "❌ Código incorrecto. No se ha hecho nada" : errTxt(m)); return; }
-    toast("⚠️ No se ha podido: " + errTxt(m)); return;
+    if (m === "PIN_MAL" || m === "BLOQUEADO"){ $("usPinAcc").value = ""; usPend.pin = ""; errPanel(m === "PIN_MAL" ? "❌ Código incorrecto. No se ha hecho nada" : errTxt(m)); return; }
+    errPanel("⚠️ No se ha podido: " + errTxt(m)); return;
   }
   pintarUsuarios();
 });
