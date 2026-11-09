@@ -9,12 +9,13 @@ const GASTOS_BASE = [
 ];
 const BELLEZA = ["belleza","💅","Belleza","#fde3f3"];
 const DEPORTE = ["deporte","🏓","Pádel","#e6f6df"];   // se guarda como "deporte"
+const TABACO = ["tabaco","🚬","Tabaco","#ecebe6"];
 // Mete una categoría justo detrás de otra
 const meterDetras = (lista, id, cat) => { const i = lista.findIndex(c => c[0] === id); return [...lista.slice(0, i + 1), cat, ...lista.slice(i + 1)]; };
 const CATEGORIAS = {
   mago: {
     // Raúl: con Pádel (detrás de Viajes)
-    gasto: meterDetras(GASTOS_BASE.map(c => c[0] === "trabajo" ? ["trabajo","🪄","Material de magia","#efe6ff"] : c), "viajes", DEPORTE),
+    gasto: meterDetras(meterDetras(GASTOS_BASE.map(c => c[0] === "trabajo" ? ["trabajo","🪄","Material de magia","#efe6ff"] : c), "viajes", DEPORTE), "ocio", TABACO),
     ingreso: [["bolos","🎩","Actuaciones","#ece5ff"],["bodas","💍","Bodas y eventos","#fbe3f1"],["teatro","🎭","Teatro","#ffe4dc"],
               ["sueldo","💰","Sueldo","#e1f4e6"],["bizum","💸","Bizum / me devuelven","#e0f5f5"],["ventas","🏷️","Ventas","#fff1d6"],
               ["regalo","🎁","Regalo","#fff0dc"],["otros_in","✨","Otros ingresos","#f0eef5"]]
@@ -135,6 +136,13 @@ const CONSEJOS = {
     "Pon alertas de precio en las webs de vuelos y compara antes de comprar.",
     "Apartamento con cocina: desayunar y cenar algún día en casa ahorra muchísimo.",
     "Crea una hucha solo para viajes y aparta un poco cada mes (categoría Ahorro)."
+  ],
+  tabaco: [
+    "Apunta cada paquete: ver lo que suma al mes (y al año) es el mejor motivo para ir bajando.",
+    "Prueba a comprar de uno en uno en vez de cartones: cuesta más tener a mano, y se fuma menos.",
+    "Pon una meta de ahorro con lo que te gastas en tabaco a la semana y mira cómo crece cada día que no compras.",
+    "Si quieres dejarlo, el médico de cabecera y la farmacia te pueden ayudar gratis o casi gratis.",
+    "Cambia el momento del cigarro por otro hábito (café sin cigarro, paseo corto): los primeros días son los más difíciles."
   ],
   deporte: [
     "Reserva pista en horas valle (mañanas o mediodía): suelen ser bastante más baratas.",
@@ -280,6 +288,15 @@ const FRASES_INGRESO = {
   alto: ["¡BOOM! 💰 Hoy invitas tú… ¡pero no te pases!", "¡Qué alegría! Aparta un 20 % antes de que se escape.", "¡Cobrado! Ahora el reto es que llegue a fin de mes. 💪",
          "¡Lluvia de billetes! 🌧️💶 Guarda paraguas para los gastos.", "¡Nómina/bolo top! Primero ahorra, luego disfruta. 🏆", "¡Toma ya! Este mes empieza fuerte. 🚀"]
 };
+/* Frases de Tabaco (un paquete ronda los 5-6 €; un cartón, 50-60 €) */
+FRASES.tabaco = { lim:[6, 15],
+  bajo: ["Un paquete. Al mes, si es uno al día, son más de 150 €. Solo lo dejo ahí. 🚬", "Apuntado. Cada paquete que no compras va directo a tu bolsillo. 💪",
+         "Paquete apuntado. ¿Y si este dura un día más que el anterior? ⏳", "Humo que se va, euros que no vuelven. Ánimo con ir bajando. 🌬️",
+         "Uno más a la cuenta. Mira en Gráficas lo que suma este mes: impresiona. 📊"],
+  medio:["Varios paquetes de golpe. Lo que se tiene a mano, se fuma antes. 😬", "Esto ya es un pico. ¿Y si pruebas una semana con un paquete menos? 🗓️",
+         "Ese dinero en una meta de ahorro en un año serían cientos de euros. 🐷", "Tus pulmones y tu cartera piden tregua. Un paquete menos esta semana. 🫁"],
+  alto: ["¡Un cartón! Eso es dinero para una escapada de fin de semana. ✈️", "Cartón apuntado. Al año, esto son más de 2.000 €. Piénsalo con calma. 🧮",
+         "Con lo de este cartón te ibas a cenar dos veces. Solo lo dejo caer. 🍽️", "Gasto gordo en humo. ¿Y si el próximo lo cambias por una meta de ahorro? 🎯"] };
 /* Frases de Viajes y Deporte */
 FRASES.viajes = { lim:[50, 200],
   bajo: ["Escapada barata. ¡Así se viaja! Y para la próxima, hucha de viajes. 🐷", "Poco gasto de viaje. Reservar con tiempo ayuda a que siga así. 📅", "Bien. Desayunar en el alojamiento y comer de súper te lo deja aún más bajo. ☕", "Viajar barato es posible. Que siga así. 🎒"],

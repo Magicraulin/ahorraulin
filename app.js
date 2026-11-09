@@ -3,7 +3,7 @@
    ===================================================================== */
 "use strict";
 const CFG = window.CONFIG || {};
-const VERSION = "3.20";
+const VERSION = "3.21";
 const ADMIN = "p1";   // Raúl es el administrador
 const DEMO = "p4";    // perfil de prueba: oculto en el menú, solo entra el administrador
 const REMOTO = !!(CFG.supabaseUrl && CFG.supabaseKey);
@@ -809,7 +809,7 @@ function fraseContexto(m){
   }
   // Muchos gastos pequeños seguidos en la misma categoría
   const veces = ofMonth(S.movs, k).filter(x => x.tipo === "gasto" && x.cat === m.cat).length;
-  if (["comer","ocio","belleza","ropa","otros"].includes(m.cat) && veces >= 6 && veces % 3 === 0){
+  if (["comer","ocio","belleza","ropa","otros","tabaco"].includes(m.cat) && veces >= 6 && veces % 3 === 0){
     const dia = Number(m.fecha.slice(8)) || 1, anual = g / dia * 365;
     return `🔁 Ya van ${veces} gastos de ${c.n} este mes (${eur(g)}). A este ritmo, unos ${eur(Math.round(anual / 10) * 10)} al año. ¿Recortamos?`;
   }
