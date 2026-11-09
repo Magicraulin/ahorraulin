@@ -3,7 +3,7 @@
    ===================================================================== */
 "use strict";
 const CFG = window.CONFIG || {};
-const VERSION = "2.5";
+const VERSION = "2.6";
 const ADMIN = "p1";   // Raúl es el administrador
 const REMOTO = !!(CFG.supabaseUrl && CFG.supabaseKey);
 const IA = !!CFG.workerUrl;
@@ -634,6 +634,7 @@ $("presuSet").addEventListener("change", async e => {
         toast(lim ? `🎯 Presupuesto de ${catOf({tipo:"gasto",cat}).n}: ${eur(lim)}/mes` : "Presupuesto quitado"); }
   catch(err){ if (antes) S.presu[cat] = antes; else delete S.presu[cat]; toast("⚠️ No se ha guardado el presupuesto"); }
   i.value = S.presu[cat] ? String(S.presu[cat]).replace(".", ",") : "";
+  const nPresu = Object.keys(S.presu).length; $("presuResumen").textContent = nPresu ? `${nPresu} puesto${nPresu === 1 ? "" : "s"}` : "ninguno";
 });
 
 /* ---------- Metas de ahorro ---------- */
@@ -822,9 +823,21 @@ function barras(el, data, colors, showLabel){
 }
 
 /* =====================================================================
-   AHORRO: análisis + consejos + recetas + IA opcional
+   AHORRO (metas) · IDEAS (análisis + consejos + recetas + IA opcional)
    ===================================================================== */
+function apartadoMes(mes){
+  return ofMonth(S.movs, mes).filter(m => m.tipo === "gasto" && CATS_GUARDADO.includes(m.cat)).reduce((s,m) => s + m.importe, 0);
+}
 function pintarAhorro(){
+  const k = monthKey(new Date()), guardado = apartadoMes(k);
+  let h = metasHTML();
+  h += guardado > 0
+    ? `<div class="card"><div class="verdict"><div class="big">🐷</div><div><b>Este mes has apartado ${eur(guardado)}</b><div class="muted small">Entre ahorro e inversión. ¡Así se hace! Es dinero que trabaja para ti.</div></div></div></div>`
+    : `<div class="card"><div class="verdict"><div class="big">🐷</div><div><b>Este mes aún no has apartado nada</b><div class="muted small">Apunta en 🐷 Ahorro o 📈 Inversión lo que guardes y lo verás aquí sumando.</div></div></div></div>`;
+  h += `<button class="btn-ideas" id="irIdeas"><span>💡</span>Ideas para gastar menos y ahorrar más ›</button>`;
+  $("saveBody").innerHTML = h;
+}
+function pintarIdeas(){
   const k = monthKey(new Date()), prev = shiftMonth(k,-1);
   // Si este mes casi no hay datos, analizamos el anterior
   let mes = k, l = ofMonth(S.movs, k);
@@ -847,7 +860,6 @@ function pintarAhorro(){
     else { em = "🚨"; tit = `Has gastado ${eur(g-i)} más de lo que ha entrado`; txt = "Toca frenar un poco. Empieza por la categoría de arriba del todo: es donde más se nota."; }
   }
   h += `<div class="card"><div class="verdict"><div class="big">${em}</div><div><b>${esc(tit)}</b><div class="muted small">${esc(txt)}</div></div></div></div>`;
-  if (guardado > 0) h += `<div class="card"><div class="verdict"><div class="big">🐷</div><div><b>Has apartado ${eur(guardado)} en ahorro e inversión</b><div class="muted small">¡Así se hace! Ese dinero no cuenta como gasto en tus consejos: es dinero que trabaja para ti.</div></div></div></div>`;
 
   // Tarjetas de las 3 categorías donde más se gasta
   let recetasPuestas = false;
@@ -868,13 +880,27 @@ function pintarAhorro(){
     h += `<div class="tcard" style="--cb:#ffe4dc;--cbd:var(--line)"><div class="thead"><div class="e">🍳</div><div><b>Recetas baratas y fáciles</b><small>Para comer bien gastando poco</small></div></div>${recetasHTML()}</div>`;
   }
 
+  // Más ideas, por categoría (desplegables)
+  const top = rows.slice(0,3).map(r => r[0]);
+  const resto = cats("gasto").filter(c => !CATS_GUARDADO.includes(c.id) && !top.includes(c.id) && CONSEJOS[c.id]);
+  if (resto.length){
+    h += `<div class="card"><h2>📚 Más ideas para ahorrar</h2><div class="muted small" style="margin-bottom:4px">Toca una categoría para ver los trucos.</div>
+      ${resto.map(c => `<details class="fold ideas-cat"><summary><div class="thead" style="flex:1"><div class="e" style="background:${c.bg}">${c.e}</div><div><b>${esc(c.n)}</b><small>${esc(TITULO_IDEAS[c.id] || "Trucos para gastar menos")}</small></div></div></summary>
+        <ul class="tips">${CONSEJOS[c.id].map(t => `<li>${esc(t)}</li>`).join("")}</ul></details>`).join("")}</div>`;
+  }
+
   // IA (solo si está configurada)
   if (IA){
     h += `<div class="card"><h2>✨ Análisis con IA</h2><div class="muted small">La IA mira tus últimos meses y te da un plan de ahorro personalizado.</div>
       <button class="btn p" id="aiBtn">✨ Pedir consejos a la IA</button><div class="ai-out" id="aiOut"></div></div>`;
   }
-  $("saveBody").innerHTML = metasHTML() + h;
+  $("ideasBody").innerHTML = h;
 }
+const TITULO_IDEAS = { casa:"Gastar menos en tu casa", comer:"Comer fuera sin arruinarte", super:"Llenar el carro por menos", gasolina:"Repostar más barato",
+  transporte:"Moverte gastando menos", ocio:"Divertirte por menos", ropa:"Vestir bien sin derrochar", salud:"Cuidarte sin gastar de más",
+  regalos:"Regalar sin arruinarte", suscripciones:"Pagar menos cada mes", trabajo:"Material más barato", viajes:"Viajar más por menos",
+  deporte:"Pádel más barato", belleza:"Belleza a buen precio", otros:"Ideas generales" };
+document.addEventListener("click", e => { if (e.target.closest("#irIdeas")){ vibrar(); irA("ideas"); } });
 
 function recetasHTML(){
   return `<div class="sub-h">🍳 Recetas baratas para hacer en casa</div><div class="hscroll">${RECETAS.map((r,i) => `
@@ -919,17 +945,22 @@ document.addEventListener("click", async e => {
 /* =====================================================================
    AJUSTES
    ===================================================================== */
-function pintarAjustes(){
+function pintarPerfil(){
   const P = S.perfil;
+  $("pAv").textContent = P.emoji; $("pNombre").textContent = P.nombre;
   if (document.activeElement !== $("setName")) $("setName").value = P.nombre;
   $("emojiGrid").innerHTML = EMOJIS.map(e => `<button data-em="${e}" class="${e === P.emoji ? "on" : ""}" aria-label="${e}">${e}</button>`).join("");
   $("swatches").innerHTML = Object.entries(PALETAS).map(([k,v]) => `<button class="sw ${k === P.color ? "on" : ""}" data-col="${k}" style="background:linear-gradient(135deg,${v[0]},${v[1]})">${v[2]}</button>`).join("");
   $("darkSw").classList.toggle("on", !!P.oscuro); $("darkSw").setAttribute("aria-checked", !!P.oscuro);
+  pintarAdmin();
+}
+function pintarAjustes(){
   $("xlSub").textContent = `Archivo nuevo con tus ${S.movs.length === 1 ? "1 movimiento" : S.movs.length + " movimientos"} · para enviarlo o guardarlo`;
   pintarCopias();
-  pintarAdmin();
   pintarHojaGoogle();
   pintarPresuAjustes();
+  const nPresu = Object.keys(S.presu || {}).length;
+  $("presuResumen").textContent = nPresu ? `${nPresu} puesto${nPresu === 1 ? "" : "s"}` : "ninguno";
   pintarAviso();
   $("foot").textContent = (REMOTO ? "☁️ Tus datos se guardan en la nube y se sincronizan entre móviles" : "🧪 Modo prueba: datos guardados solo en este móvil") + ` · versión ${VERSION}`;
   if (REMOTO) Store.ultimaCopia().then(t => {
@@ -1013,7 +1044,7 @@ async function pintarAdmin(){
   try {
     const r = await Store.adminEstado(S.pin);
     if (!r.ok) throw new Error(r.error);
-    if (!S || view !== "set") return;
+    if (!S || view !== "perfil") return;
     box.innerHTML = r.perfiles.map(p => `<div class="copia adm"><div class="ci" style="background:var(--soft)">${esc(p.emoji)}</div>
       <div class="cm"><b>${esc(p.nombre)}</b><span>${p.bloqueado ? "🔒 Bloqueado por intentos fallidos" : p.tiene_pin ? "Tiene código" : "Sin código: lo creará al entrar"}</span></div>
       ${p.tiene_pin ? `<button class="reset" data-reset="${esc(p.id)}" data-nombre="${esc(p.nombre)}">Restablecer</button>` : ""}</div>`).join("");
@@ -1036,7 +1067,7 @@ $("adminList").addEventListener("click", async e => {
 let ajustesT;
 async function guardarAjustes(cambios, inmediato){
   Object.assign(S.perfil, cambios);
-  aplicarTema(S.perfil.color, S.perfil.oscuro); pintarCabecera(); pintarAjustes();
+  aplicarTema(S.perfil.color, S.perfil.oscuro); pintarCabecera(); if (view === "perfil") pintarPerfil(); else pintarAjustes();
   clearTimeout(ajustesT);
   ajustesT = setTimeout(async () => {
     try {
@@ -1083,25 +1114,31 @@ $("xlBtn").onclick = async () => {
 /* =====================================================================
    NAVEGACIÓN
    ===================================================================== */
+function irA(v){
+  view = v;
+  document.querySelectorAll("nav button").forEach(x => x.classList.toggle("on", x.dataset.v === v));
+  window.scrollTo({top:0}); pintarTodo();
+}
 document.querySelector("nav").addEventListener("click", e => {
   const b = e.target.closest("button"); if (!b) return;
-  vibrar(); view = b.dataset.v;
-  document.querySelectorAll("nav button").forEach(x => x.classList.toggle("on", x === b));
-  window.scrollTo({top:0}); pintarTodo();
+  vibrar(); irA(b.dataset.v);
 });
+["hAv","hHi"].forEach(id => $(id).addEventListener("click", () => { if (!S) return; vibrar(); irA("perfil"); }));
 document.querySelectorAll(".mPrev").forEach(b => b.onclick = () => { viewMonth = shiftMonth(viewMonth,-1); pintarTodo(); });
 document.querySelectorAll(".mNext").forEach(b => b.onclick = () => { viewMonth = shiftMonth(viewMonth, 1); pintarTodo(); });
 
 function pintarTodo(){
   if (!S) return;
-  ["add","list","charts","save","set"].forEach(v => $("v-"+v).classList.toggle("hidden", v !== view));
-  $("balance").classList.toggle("hidden", view === "set");
+  ["add","list","charts","save","ideas","perfil","set"].forEach(v => $("v-"+v).classList.toggle("hidden", v !== view));
+  $("balance").classList.toggle("hidden", ["set","ideas","perfil"].includes(view));
   document.querySelectorAll(".mName").forEach(x => x.textContent = monthName(viewMonth));
   pintarBalance();
   if (view === "add") pintarApuntar();
   if (view === "list") pintarLista();
   if (view === "charts") pintarGraficas();
   if (view === "save") pintarAhorro();
+  if (view === "ideas") pintarIdeas();
+  if (view === "perfil") pintarPerfil();
   if (view === "set") pintarAjustes();
 }
 

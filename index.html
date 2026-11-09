@@ -251,10 +251,26 @@ body.dark .paso.aviso{background:#3a3016}
 .row .mid[data-edit]{cursor:pointer}
 .foot{text-align:center;font-size:12px;font-weight:800;color:var(--ink3);margin:18px 0 6px}
 
+details.fold>summary{list-style:none;cursor:pointer;display:flex;align-items:center}
+details.fold>summary::-webkit-details-marker{display:none}
+details.fold>summary h2{margin:0;flex:1}
+details.fold>summary::after{content:"›";font-size:26px;font-weight:900;color:var(--ink3);transform:rotate(90deg);transition:.2s;margin-left:8px}
+details.fold[open]>summary::after{transform:rotate(-90deg)}
+details.fold[open]>summary{margin-bottom:12px}
+.ideas-cat .tips{margin-top:2px}
+.hero .av,.hero .hi{cursor:pointer}
+.hero .av{position:relative}
+.hero .av::after{content:"✏️";position:absolute;right:-5px;bottom:-5px;font-size:12px;background:#fff;border-radius:50%;width:20px;height:20px;display:grid;place-items:center;box-shadow:0 1px 4px rgba(0,0,0,.2)}
+.perfil-top{display:flex;align-items:center;gap:14px}
+.perfil-top .pav{width:60px;height:60px;border-radius:20px;background:var(--p-soft);display:grid;place-items:center;font-size:34px;flex:0 0 auto}
+.perfil-top b{display:block;font-family:Fredoka,sans-serif;font-size:22px}
+.perfil-top small{display:block;color:var(--ink3);font-weight:800;font-size:12.5px}
+.btn-ideas{display:flex;align-items:center;gap:10px;width:100%;margin-top:14px;padding:16px;border-radius:20px;background:var(--p-soft);color:var(--p);font-weight:900;font-size:15px;text-align:left}
+.btn-ideas span{font-size:24px}
 /* nav */
 nav{position:fixed;left:0;right:0;bottom:0;background:color-mix(in srgb,var(--card) 92%,transparent);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-top:1px solid var(--line);padding:6px 6px calc(6px + var(--sb));z-index:10}
-nav .in{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;max-width:560px;margin:0 auto}
-nav button{display:flex;flex-direction:column;align-items:center;gap:1px;padding:7px 2px;border-radius:16px;font-size:11px;font-weight:900;color:var(--ink3);min-height:54px}
+nav .in{display:grid;grid-template-columns:repeat(6,1fr);gap:2px;max-width:560px;margin:0 auto}
+nav button{display:flex;flex-direction:column;align-items:center;gap:1px;padding:7px 0;border-radius:16px;font-size:10.5px;min-width:0;font-weight:900;color:var(--ink3);min-height:54px}
 nav button .e{font-size:22px;line-height:1.1;filter:grayscale(.7);opacity:.7;transition:.15s}
 nav button.on{color:var(--p);background:var(--p-soft)}
 nav button.on .e{filter:none;opacity:1;transform:translateY(-1px) scale(1.08)}
@@ -381,8 +397,17 @@ nav button.on .e{filter:none;opacity:1;transform:translateY(-1px) scale(1.08)}
     <!-- Ahorro -->
     <div id="v-save" class="hidden"><div id="saveBody"></div></div>
 
-    <!-- Ajustes -->
-    <div id="v-set" class="hidden">
+    <!-- Ideas -->
+    <div id="v-ideas" class="hidden"><div id="ideasBody"></div></div>
+
+    <!-- Mi perfil -->
+    <div id="v-perfil" class="hidden">
+      <div class="card perfil-top"><div class="pav" id="pAv"></div><div><b id="pNombre"></b><small>Toca tu nombre o tu emoticono arriba para volver aquí</small></div></div>
+      <div class="card hidden" id="adminCard">
+        <h2>👑 Administrador</h2>
+        <div class="muted small" style="margin-bottom:6px">Si alguien olvida su código, restablécelo aquí. La próxima vez que entre creará uno nuevo. Sus gastos no se tocan.</div>
+        <div id="adminList"></div>
+      </div>
       <div class="card">
         <h2>Tu perfil</h2>
         <input class="inp" id="setName" maxlength="20" placeholder="Tu nombre" aria-label="Tu nombre">
@@ -394,10 +419,20 @@ nav button.on .e{filter:none;opacity:1;transform:translateY(-1px) scale(1.08)}
         <div class="swatches" id="swatches"></div>
         <div class="set-row" style="margin-top:8px"><label>Modo oscuro<small>Más cómodo por la noche</small></label><button class="switch" id="darkSw" role="switch" aria-label="Modo oscuro"></button></div>
       </div>
+    </div>
+
+    <!-- Ajustes -->
+    <div id="v-set" class="hidden">
+      <details class="card fold" id="presuFold">
+        <summary><h2>🎯 Presupuestos mensuales <small id="presuResumen"></small></h2></summary>
+        <div class="muted small" style="margin-bottom:6px">Pon cuánto quieres gastar como mucho al mes en cada cosa. Te avisaré al llegar al 80 %. Déjalo vacío para no poner límite.</div>
+        <div id="presuSet"></div>
+      </details>
       <div class="card">
-        <h2>🛡️ Copias de seguridad</h2>
-        <div class="muted small" style="margin-bottom:6px">Cada noche a las 00:00 se guarda sola una copia de tus cuentas. Aquí tienes las de los últimos 30 días para descargarlas en Excel. Solo las ves tú.</div>
-        <div id="copias"></div>
+        <h2>🔔 Recordatorio diario</h2>
+        <div class="muted small" style="margin-bottom:6px">Un aviso en este móvil para que no se te olvide apuntar. Si ese día ya has apuntado algo, no te molesta.</div>
+        <div class="set-row"><label>Avisarme cada día<small id="avisoTxt">Desactivado</small></label><button class="switch" id="avisoSw" role="switch" aria-label="Recordatorio diario"></button></div>
+        <div class="set-row"><label>¿A qué hora?</label><input type="time" class="inp" id="avisoHora" value="21:00" style="width:130px"></div>
       </div>
       <div class="card">
         <h2>📊 Mi hoja de Google</h2>
@@ -406,21 +441,10 @@ nav button.on .e{filter:none;opacity:1;transform:translateY(-1px) scale(1.08)}
         <input class="inp" id="gsUrl" placeholder="Pega aquí el enlace de tu hoja de Google" style="margin-top:10px" inputmode="url" autocomplete="off">
         <button class="opt" id="gsGuiaBtn"><span class="e">📖</span><span>Cómo crear mi hoja, paso a paso<small>5 minutos, una sola vez, desde el ordenador</small></span></button>
       </div>
-      <div class="card hidden" id="adminCard">
-        <h2>👑 Administrador</h2>
-        <div class="muted small" style="margin-bottom:6px">Si alguien olvida su código, restablécelo aquí. La próxima vez que entre creará uno nuevo. Sus gastos no se tocan.</div>
-        <div id="adminList"></div>
-      </div>
       <div class="card">
-        <h2>🔔 Recordatorio diario</h2>
-        <div class="muted small" style="margin-bottom:6px">Un aviso en este móvil para que no se te olvide apuntar. Si ese día ya has apuntado algo, no te molesta.</div>
-        <div class="set-row"><label>Avisarme cada día<small id="avisoTxt">Desactivado</small></label><button class="switch" id="avisoSw" role="switch" aria-label="Recordatorio diario"></button></div>
-        <div class="set-row"><label>¿A qué hora?</label><input type="time" class="inp" id="avisoHora" value="21:00" style="width:130px"></div>
-      </div>
-      <div class="card">
-        <h2>🎯 Presupuestos mensuales</h2>
-        <div class="muted small" style="margin-bottom:6px">Pon cuánto quieres gastar como mucho al mes en cada cosa. Te avisaré al llegar al 80 %. Déjalo vacío para no poner límite.</div>
-        <div id="presuSet"></div>
+        <h2>🛡️ Copias de seguridad</h2>
+        <div class="muted small" style="margin-bottom:6px">Cada noche a las 00:00 se guarda sola una copia de tus cuentas. Aquí tienes las de los últimos 30 días para descargarlas en Excel. Solo las ves tú.</div>
+        <div id="copias"></div>
       </div>
       <div class="card">
         <h2>Seguridad y datos</h2>
@@ -437,7 +461,8 @@ nav button.on .e{filter:none;opacity:1;transform:translateY(-1px) scale(1.08)}
   <button data-v="add" class="on"><span class="e">➕</span>Apuntar</button>
   <button data-v="list"><span class="e">📋</span>Lista</button>
   <button data-v="charts"><span class="e">📊</span>Gráficas</button>
-  <button data-v="save"><span class="e">💡</span>Ahorro</button>
+  <button data-v="save"><span class="e">🐷</span>Ahorro</button>
+  <button data-v="ideas"><span class="e">💡</span>Ideas</button>
   <button data-v="set"><span class="e">⚙️</span>Ajustes</button>
 </div></nav>
 
@@ -498,10 +523,10 @@ nav button.on .e{filter:none;opacity:1;transform:translateY(-1px) scale(1.08)}
 
 <div class="toast" id="toast"><div class="tt"><b id="toastFrase" class="hidden"></b><span id="toastTxt"></span></div><button id="undo">Deshacer</button></div>
 
-<script src="config.js?v=21"></script>
-<script src="datos.js?v=21"></script>
-<script src="excel.js?v=21"></script>
+<script src="config.js?v=22"></script>
+<script src="datos.js?v=22"></script>
+<script src="excel.js?v=22"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js" defer></script>
-<script src="app.js?v=21"></script>
+<script src="app.js?v=22"></script>
 </body>
 </html>
