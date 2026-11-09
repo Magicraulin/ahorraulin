@@ -152,9 +152,7 @@ begin
     returning a.endpoint, a.p256dh, a.auth, a.persona
   )
   select coalesce(jsonb_agg(jsonb_build_object('endpoint',t.endpoint,'p256dh',t.p256dh,'auth',t.auth)), '[]'::jsonb) into r
-    from toca t
-   where not exists (select 1 from public.movs m where m.persona = t.persona
-                       and (m.creado at time zone 'Europe/Madrid')::date = ahora::date and m.recurrente is null);
+    from toca t;   -- avisa todos los días a su hora, se haya apuntado algo o no
   return r;
 end $$;
 revoke all on function public.avisos_pendientes() from public, anon, authenticated;

@@ -3,7 +3,7 @@
    ===================================================================== */
 "use strict";
 const CFG = window.CONFIG || {};
-const VERSION = "2.7";
+const VERSION = "2.8";
 const ADMIN = "p1";   // Raúl es el administrador
 const REMOTO = !!(CFG.supabaseUrl && CFG.supabaseKey);
 const IA = !!CFG.workerUrl;
