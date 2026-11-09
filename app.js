@@ -3,7 +3,7 @@
    ===================================================================== */
 "use strict";
 const CFG = window.CONFIG || {};
-const VERSION = "3.2";
+const VERSION = "3.8";
 const ADMIN = "p1";   // Raúl es el administrador
 const REMOTO = !!(CFG.supabaseUrl && CFG.supabaseKey);
 const IA = !!CFG.workerUrl;
@@ -58,6 +58,10 @@ const Nube = {
   ultimaCopia(){ return this.rpc("ultima_copia"); },
   adminEstado(pin){ return this.rpc("admin_estado",{p_pin:pin}); },
   adminResetear(pin,obj){ return this.rpc("admin_resetear_pin",{p_pin:pin,p_objetivo:obj}); },
+  reclamarPremio(id,pin,tipo,temp){ return this.rpc("reclamar_premio",{p_id:id,p_pin:pin,p_tipo:tipo,p_temporada:temp}); },
+  misPremios(id,pin){ return this.rpc("mis_premios",{p_id:id,p_pin:pin}); },
+  adminPremios(pin){ return this.rpc("admin_premios",{p_pin:pin}); },
+  adminUsarPremio(pin,codigo,usado){ return this.rpc("admin_usar_premio",{p_pin:pin,p_codigo:codigo,p_usado:usado}); },
   guardarRecurrente(id,pin,r){ return this.rpc("guardar_recurrente",{p_id:id,p_pin:pin,p_tipo:r.tipo,p_cat:r.cat,p_importe:r.importe,p_dia:r.dia,p_nota:r.nota}); },
   pararRecurrente(id,pin,rec){ return this.rpc("parar_recurrente",{p_id:id,p_pin:pin,p_rec:rec}); },
   misCopias(id,pin){ return this.rpc("mis_copias",{p_id:id,p_pin:pin}); },
@@ -105,6 +109,26 @@ const Local = {
     const d = this.db(), e = await this.check(d,ADMIN,pin); if (e !== "OK") return {error:e};
     return {ok:true, perfiles:Object.keys(d.perfiles).filter(id => id !== ADMIN).map(id => ({ id, nombre:d.perfiles[id].nombre, emoji:d.perfiles[id].emoji,
       tiene_pin:!!d.perfiles[id].pin, bloqueado:!!(d.perfiles[id].bloq && d.perfiles[id].bloq > Date.now()) }))};
+  },
+  async reclamarPremio(id,pin,tipo,temp){
+    const d = this.db(), e = await this.check(d,id,pin); if (e !== "OK") return {error:e};
+    d.premios = d.premios || [];
+    if (!d.premios.some(p => p.persona === id && p.tipo === tipo && p.temporada === temp)){
+      const L = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; let c;
+      do { c = "AHR-" + Array.from({length:5}, () => L[Math.floor(Math.random() * L.length)]).join(""); } while (d.premios.some(p => p.codigo === c));
+      d.premios.push({ persona:id, tipo, temporada:temp, codigo:c, creado:Date.now(), usado:null }); this.save(d);
+    }
+    return {ok:true, premios:d.premios.filter(p => p.persona === id)};
+  },
+  async misPremios(id,pin){ const d = this.db(), e = await this.check(d,id,pin); if (e !== "OK") return {error:e}; return {ok:true, premios:(d.premios || []).filter(p => p.persona === id)}; },
+  async adminPremios(pin){
+    const d = this.db(), e = await this.check(d,ADMIN,pin); if (e !== "OK") return {error:e};
+    return {ok:true, premios:(d.premios || []).map(p => ({ ...p, nombre:d.perfiles[p.persona].nombre, emoji:d.perfiles[p.persona].emoji }))};
+  },
+  async adminUsarPremio(pin,codigo,usado){
+    const d = this.db(), e = await this.check(d,ADMIN,pin); if (e !== "OK") return {error:e};
+    const p = (d.premios || []).find(x => x.codigo === codigo); if (!p) return {error:"NO_EXISTE"};
+    p.usado = usado ? Date.now() : null; this.save(d); return {ok:true};
   },
   async adminResetear(pin,obj){
     const d = this.db(), e = await this.check(d,ADMIN,pin); if (e !== "OK") return {error:e};
@@ -409,9 +433,14 @@ function abrirSesion(id, pin, r){
   document.querySelectorAll("#seg button").forEach(x => x.classList.toggle("on", x.dataset.t === "gasto"));
   document.querySelectorAll("nav button").forEach(x => x.classList.toggle("on", x.dataset.v === "add"));
   show("app"); pintarCabecera(); pintarCats(); pintarTodo();
+  cargarPremios();
+  const rk = resumenPendiente(); if (rk) setTimeout(() => { if (S && S.id === id) abrirResumen(rk); }, 700);
 }
 function cerrarSesion(){
   if (window.__actualizar){ window.__actualizar(); return; }
+  if (resumen){ $("resumen").classList.remove("show"); resumen = null; }
+  $("valeModal").classList.remove("show");
+  valePendiente = null;
   S = null; copiasCache = null; $("adminCard").classList.add("hidden"); $("adminList").innerHTML = ""; cerrarEntry(); show("menu"); cargarMenu();
 }
 $("lockBtn").onclick = cerrarSesion; $("logout").onclick = cerrarSesion;
@@ -434,7 +463,7 @@ document.addEventListener("visibilitychange", () => {
 function pintarCabecera(){
   const h = new Date().getHours(), P = S.perfil;
   $("hAv").textContent = P.emoji;
-  $("hHi").innerHTML = `${h < 14 ? "Buenos días" : h < 21 ? "Buenas tardes" : "Buenas noches"}, ${esc(P.nombre)}<small>${REMOTO ? "Guardado en la nube ☁️" : "Modo prueba · solo en este móvil"}</small>`;
+  $("hHi").innerHTML = `${h < 14 ? "Buenos días" : h < 21 ? "Buenas tardes" : "Buenas noches"}, ${esc(P.nombre)}${typeof tieneOro === "function" && tieneOro() ? " 👑" : ""}<small>${REMOTO ? "Guardado en la nube ☁️" : "Modo prueba · solo en este móvil"}</small>`;
 }
 
 /* =====================================================================
@@ -818,6 +847,7 @@ $("avisoSw").onclick = async () => {
 $("avisoHora").addEventListener("change", async () => { if ($("avisoSw").classList.contains("on")){ try { await activarAviso(); } catch(e){ toast("⚠️ No se ha guardado la hora"); } pintarAviso(); } });
 
 function pintarApuntar(){
+  pintarRacha();
   pintarPresupuestos();
   pintarFijos();
   const r = ordenados(S.movs).slice(0,6);
@@ -1016,7 +1046,7 @@ function pintarPerfil(){
   $("pAv").textContent = P.emoji; $("pNombre").textContent = P.nombre;
   if (document.activeElement !== $("setName")) $("setName").value = P.nombre;
   $("emojiGrid").innerHTML = EMOJIS.map(e => `<button data-em="${e}" class="${e === P.emoji ? "on" : ""}" aria-label="${e}">${e}</button>`).join("");
-  $("swatches").innerHTML = Object.entries(PALETAS).map(([k,v]) => `<button class="sw ${k === P.color ? "on" : ""}" data-col="${k}" style="background:linear-gradient(135deg,${v[0]},${v[1]})">${v[2]}</button>`).join("");
+  $("swatches").innerHTML = Object.entries(PALETAS).filter(([k]) => k !== "oro" || k === P.color || (typeof tieneOro === "function" && tieneOro())).map(([k,v]) => `<button class="sw ${k === P.color ? "on" : ""}" data-col="${k}" style="background:linear-gradient(135deg,${v[0]},${v[1]})">${v[2]}</button>`).join("");
   $("darkSw").classList.toggle("on", !!P.oscuro); $("darkSw").setAttribute("aria-checked", !!P.oscuro);
   pintarAdmin();
 }
@@ -1110,6 +1140,7 @@ $("copias").addEventListener("click", async e => {
   b.disabled = false; b.textContent = txt;
 });
 async function pintarAdmin(){
+  pintarAdminPremios();
   const card = $("adminCard");
   card.classList.toggle("hidden", S.id !== ADMIN);
   if (S.id !== ADMIN) return;
@@ -1202,8 +1233,8 @@ document.querySelectorAll(".mNext").forEach(b => b.onclick = () => { viewMonth =
 
 function pintarTodo(){
   if (!S) return;
-  ["add","list","charts","save","ideas","perfil","set"].forEach(v => $("v-"+v).classList.toggle("hidden", v !== view));
-  $("balance").classList.toggle("hidden", ["set","ideas","perfil"].includes(view));
+  ["add","list","charts","save","ideas","premios","perfil","set"].forEach(v => $("v-"+v).classList.toggle("hidden", v !== view));
+  $("balance").classList.toggle("hidden", ["set","ideas","perfil","premios"].includes(view));
   document.querySelectorAll(".mName").forEach(x => x.textContent = monthName(viewMonth));
   pintarBalance();
   if (view === "add") pintarApuntar();
@@ -1211,8 +1242,10 @@ function pintarTodo(){
   if (view === "charts") pintarGraficas();
   if (view === "save") pintarAhorro();
   if (view === "ideas") pintarIdeas();
+  if (view === "premios") pintarRecompensas();
   if (view === "perfil") pintarPerfil();
   if (view === "set") pintarAjustes();
+  revisarMedallas();
 }
 
 /* =====================================================================

@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="utf-8"><title>Trucos para ahorrar · Guía Ahorraulin</title>
+<style>
+:root{--p1:#6250d6;--p2:#9a7cf3}
+@page{size:148mm 210mm;margin:0}
+*{box-sizing:border-box}
+body{margin:0;font-family:Inter,"Noto Color Emoji",sans-serif;color:#231c3d;font-size:10.2pt;line-height:1.45;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.pag{width:148mm;height:210mm;padding:16mm 14mm 14mm;position:relative;overflow:hidden;page-break-after:always;background:#fbfaff}
+.pag:last-child{page-break-after:auto}
+h1,h2,h3{font-family:"Inter Display",Inter,"Noto Color Emoji",sans-serif;margin:0}
+.portada{background:linear-gradient(155deg,var(--p1) 0%,var(--p2) 100%);color:#fff;display:flex;flex-direction:column;justify-content:center}
+.portada::before{content:"";position:absolute;width:120mm;height:120mm;border-radius:50%;background:rgba(255,255,255,.1);right:-40mm;top:-40mm}
+.portada::after{content:"";position:absolute;width:70mm;height:70mm;border-radius:50%;background:rgba(255,255,255,.08);left:-20mm;bottom:-20mm}
+.portada .cerdo{font-size:62pt;line-height:1}
+.portada h1{font-size:34pt;font-weight:900;line-height:1.02;margin:6mm 0 4mm;letter-spacing:-.5pt}
+.portada p{font-size:12pt;font-weight:600;opacity:.92;max-width:105mm;margin:0}
+.portada .sello{position:absolute;bottom:14mm;left:14mm;right:14mm;display:flex;justify-content:space-between;font-weight:700;font-size:9pt;opacity:.9}
+.chip{display:inline-block;background:rgba(255,255,255,.2);border-radius:99px;padding:1.5mm 4mm;font-weight:800;font-size:9pt;margin-bottom:6mm;width:max-content}
+.cab{display:flex;align-items:center;gap:4mm;margin-bottom:5mm}
+.cab .e{width:15mm;height:15mm;border-radius:5mm;display:grid;place-items:center;font-size:22pt;flex:0 0 auto}
+.cab h2{font-size:19pt;font-weight:900;letter-spacing:-.3pt;line-height:1.05}
+.cab small{display:block;color:#7b7396;font-weight:700;font-size:9pt;margin-top:1mm}
+ol.trucos{list-style:none;counter-reset:t;padding:0;margin:0}
+ol.trucos li{counter-increment:t;position:relative;padding:0 0 0 9mm;margin:0 0 3.2mm}
+ol.trucos li::before{content:counter(t);position:absolute;left:0;top:.2mm;width:6mm;height:6mm;border-radius:50%;background:var(--c,var(--p1));color:#fff;font-weight:900;font-size:8pt;display:grid;place-items:center}
+ol.trucos b{color:#16112b}
+.caja{background:#fff;border-radius:5mm;padding:4mm 4.5mm;box-shadow:0 1mm 4mm rgba(60,40,140,.08);margin-top:4mm}
+.caja h3{font-size:11pt;margin-bottom:1.5mm}
+.pie{position:absolute;bottom:7mm;left:14mm;right:14mm;display:flex;justify-content:space-between;font-size:7.5pt;color:#9a93b4;font-weight:700}
+.regla{display:grid;grid-template-columns:repeat(3,1fr);gap:3mm;margin:4mm 0}
+.regla div{border-radius:5mm;padding:4mm 3mm;text-align:center;color:#fff}
+.regla b{display:block;font-family:"Inter Display",Inter;font-size:20pt;font-weight:900}
+.regla span{font-size:8.5pt;font-weight:700}
+table.reto{width:100%;border-collapse:collapse;font-size:8.6pt;margin-top:3mm}
+table.reto td{border:.3mm solid #e4def5;padding:1.4mm 2mm;text-align:center}
+table.reto td.s{color:#7b7396;font-weight:700;background:#f4f1ff}
+.check li{list-style:none;padding-left:7mm;position:relative;margin-bottom:2.4mm}
+.check li::before{content:"☐";position:absolute;left:0;font-size:11pt;line-height:1.1;color:var(--p1)}
+.check{padding:0;margin:0}
+.indice li{display:flex;justify-content:space-between;border-bottom:.3mm dashed #d8d1ef;padding:2.4mm 0;font-weight:700}
+.indice{list-style:none;padding:0;margin:0}
+.final{background:linear-gradient(155deg,var(--p1) 0%,var(--p2) 100%);color:#fff;display:flex;flex-direction:column;justify-content:center;text-align:center;align-items:center}
+.final h2{font-size:26pt;font-weight:900;margin:4mm 0}
+.final p{max-width:100mm;font-weight:600;opacity:.95}
+</style></head><body>
+
+<!-- PORTADA -->
+<section class="pag portada">
+  <span class="chip">🏅 Premio · 7 días seguidos</span>
+  <div class="cerdo">🐷</div>
+  <h1>Trucos para<br>ahorrar</h1>
+  <p>La guía exclusiva de Ahorraulin para gastar menos sin vivir peor: casa, súper, coche, ocio y un plan sencillo para que el dinero te dure más.</p>
+  <div class="sello"><span>Ahorraulin</span><span>Edición 2026</span></div>
+</section>
+
+<!-- BIENVENIDA + ÍNDICE -->
+<section class="pag">
+  <div class="cab"><div class="e" style="background:#ffe3ef">🎉</div><div><h2>¡Enhorabuena!</h2><small>7 días seguidos apuntando. El hábito ya está en marcha.</small></div></div>
+  <p>Si has llegado hasta aquí es porque ya tienes el hábito más difícil: <b>saber en qué se te va el dinero</b>. Ahora toca lo divertido: hacer que se vaya menos.</p>
+  <p>Esta guía no va de privarte de todo. Va de recortar donde no lo notas para poder gastar sin culpa en lo que de verdad te hace feliz.</p>
+  <div class="caja"><h3>📖 Qué hay dentro</h3>
+    <ul class="indice">
+      <li><span>1 · La regla de oro: 50 / 30 / 20</span><span>3</span></li>
+      <li><span>2 · En el súper 🛒</span><span>4</span></li>
+      <li><span>3 · En casa: luz, agua y facturas 🏠</span><span>5</span></li>
+      <li><span>4 · Coche y transporte 🚗</span><span>6</span></li>
+      <li><span>5 · Comer fuera y ocio 🍔</span><span>7</span></li>
+      <li><span>6 · Suscripciones y compras 📱</span><span>8</span></li>
+      <li><span>7 · Reto de las 52 semanas 🐷</span><span>9</span></li>
+      <li><span>8 · Tu plan de 5 minutos al mes ✅</span><span>10</span></li>
+    </ul>
+  </div>
+  <div class="pie"><span>Guía Ahorraulin · Trucos para ahorrar</span><span>2</span></div>
+</section>
+
+<!-- 1. REGLA -->
+<section class="pag">
+  <div class="cab"><div class="e" style="background:#ece5ff">⚖️</div><div><h2>La regla de oro</h2><small>Una forma sencilla de repartir lo que entra cada mes</small></div></div>
+  <p>Cuando cobras, imagina que tu dinero se divide en tres botes:</p>
+  <div class="regla">
+    <div style="background:var(--p1)"><b>50 %</b><span>Necesidades<br>casa, súper, facturas, transporte</span></div>
+    <div style="background:#e0622a"><b>30 %</b><span>Caprichos<br>comer fuera, ocio, ropa, viajes</span></div>
+    <div style="background:#13a383"><b>20 %</b><span>Ahorro<br>colchón, metas, inversión</span></div>
+  </div>
+  <p>No hace falta clavarlo. Es una brújula: si tus necesidades se comen el 70 %, ya sabes por dónde empezar a recortar.</p>
+  <div class="caja"><h3>💡 Págate a ti primero</h3>
+    El truco que más funciona: el mismo día que cobras, aparta tu ahorro <b>antes</b> de gastar nada. Lo que no ves, no lo gastas. Apúntalo en Ahorraulin en <b>🐷 Ahorro</b> y asígnalo a una meta.</div>
+  <div class="caja"><h3>🛟 Primero, el colchón</h3>
+    Antes de invertir o hacer planes grandes, intenta juntar un fondo para imprevistos de unos <b>3 a 6 meses de tus gastos básicos</b>. Crea una meta en Ahorraulin llamada «Colchón» y ve sumando.</div>
+  <div class="pie"><span>Guía Ahorraulin · Trucos para ahorrar</span><span>3</span></div>
+</section>
+
+<!-- 2. SÚPER -->
+<section class="pag">
+  <div class="cab"><div class="e" style="background:#e1f4e6">🛒</div><div><h2>En el súper</h2><small>Donde se escapan más euros sin darte cuenta</small></div></div>
+  <ol class="trucos" style="--c:#13a383">
+    <li><b>Nunca vayas con hambre.</b> Compras más caprichos y más caros.</li>
+    <li><b>Lista cerrada.</b> Haz la lista mirando la nevera y el menú de la semana, y cíñete a ella.</li>
+    <li><b>Menú semanal.</b> Planificar 5 cenas evita pedir comida a domicilio «porque no hay nada».</li>
+    <li><b>Marca blanca.</b> En básicos (leche, arroz, pasta, limpieza) suele ser igual de buena y bastante más barata.</li>
+    <li><b>Mira el precio por kilo o litro,</b> no el del paquete: está en la etiqueta pequeña de la estantería.</li>
+    <li><b>Cuidado con las ofertas 3x2.</b> Solo son ahorro si ibas a comprarlo igualmente y no se te va a caducar.</li>
+    <li><b>Lo caro, a la altura de tus ojos.</b> Mira arriba y abajo en la estantería: ahí suele estar lo barato.</li>
+    <li><b>Fruta y verdura de temporada,</b> en el mercado o la frutería del barrio: más sabor y mejor precio.</li>
+    <li><b>Cocina doble y congela.</b> Un táper del domingo es una comida fuera menos el martes.</li>
+    <li><b>Una compra grande a la semana</b> en lugar de «pasar un momento» cada día: cada visita trae algo que no necesitabas.</li>
+  </ol>
+  <div class="pie"><span>Guía Ahorraulin · Trucos para ahorrar</span><span>4</span></div>
+</section>
+
+<!-- 3. CASA -->
+<section class="pag">
+  <div class="cab"><div class="e" style="background:#e3ecff">🏠</div><div><h2>En casa</h2><small>Luz, agua, calefacción y facturas</small></div></div>
+  <ol class="trucos" style="--c:#2a78d6">
+    <li><b>Compara tu tarifa de luz y gas</b> una vez al año. El comparador de ofertas de energía de la CNMC es oficial y gratuito.</li>
+    <li><b>Ajusta la potencia contratada.</b> Muchas casas pagan más potencia de la que usan. Revisa tu factura.</li>
+    <li><b>Lavadora y lavavajillas, siempre llenos</b> y en programa eco, en las horas más baratas de tu tarifa.</li>
+    <li><b>Bombillas LED</b> en toda la casa: gastan mucho menos y duran años.</li>
+    <li><b>Adiós al standby.</b> Regletas con interruptor para la tele, consola y cargadores.</li>
+    <li><b>Calefacción a 19–21 °C</b> en invierno y aire a 25–27 °C en verano. Cada grado de más se nota en la factura.</li>
+    <li><b>Cortinas a tu favor:</b> abiertas cuando da el sol en invierno, cerradas en las horas de calor en verano.</li>
+    <li><b>Ducha corta y grifo cerrado</b> mientras te enjabonas o te lavas los dientes.</li>
+    <li><b>Llama a tu compañía de internet y móvil</b> y pregunta por una oferta mejor. Muchas veces la hay y no te la ofrecen.</li>
+    <li><b>Revisa los seguros</b> (hogar, coche) antes de que se renueven solos: pide precio en otras compañías.</li>
+  </ol>
+  <div class="pie"><span>Guía Ahorraulin · Trucos para ahorrar</span><span>5</span></div>
+</section>
+
+<!-- 4. COCHE -->
+<section class="pag">
+  <div class="cab"><div class="e" style="background:#fff1d6">🚗</div><div><h2>Coche y transporte</h2><small>Para que el depósito dure más</small></div></div>
+  <ol class="trucos" style="--c:#e0a01a">
+    <li><b>Compara gasolineras</b> antes de repostar: en la misma zona puede haber varios céntimos de diferencia por litro. El Geoportal de gasolineras del Ministerio muestra los precios.</li>
+    <li><b>Conduce suave:</b> sin acelerones ni frenazos, con marchas largas. Puede ahorrar bastante combustible.</li>
+    <li><b>Presión de las ruedas</b> correcta: con las ruedas bajas, el coche gasta más.</li>
+    <li><b>Quita peso y la baca</b> si no la usas: todo lo que llevas de más es gasolina de más.</li>
+    <li><b>Abono de transporte:</b> si vas a diario al trabajo o a clase, calcula si te sale más barato que el coche.</li>
+    <li><b>Comparte coche</b> con compañeros que hagan tu misma ruta y dividid la gasolina.</li>
+    <li><b>Trayectos cortos, andando o en bici.</b> Ganas salud y ahorras.</li>
+    <li><b>Mantenimiento a tiempo:</b> un cambio de aceite a su hora sale más barato que una avería.</li>
+  </ol>
+  <div class="caja"><h3>🧮 Haz la cuenta</h3>Mira en Ahorraulin → Gráficas cuánto te gastas al mes en ⛽ Gasolina y 🚗 Transporte. Multiplícalo por 12: suele asustar lo justo para motivar.</div>
+  <div class="pie"><span>Guía Ahorraulin · Trucos para ahorrar</span><span>6</span></div>
+</section>
+
+<!-- 5. COMER FUERA Y OCIO -->
+<section class="pag">
+  <div class="cab"><div class="e" style="background:#ffe4dc">🍔</div><div><h2>Comer fuera y ocio</h2><small>Disfrutar sin que la cartera llore</small></div></div>
+  <ol class="trucos" style="--c:#e04f5f">
+    <li><b>Ponte un límite semanal</b> de comidas fuera (por ejemplo, 2) y guárdalas para planes que te hagan ilusión.</li>
+    <li><b>Usa los presupuestos de Ahorraulin:</b> pon uno en 🍔 Comer fuera y te avisará al llegar al 80 %.</li>
+    <li><b>Menú del día</b> en vez de carta: a mediodía suele salir mucho más barato.</li>
+    <li><b>Táper al trabajo</b> tres días por semana. Es de los ahorros que más se notan a final de mes.</li>
+    <li><b>Café en casa o en termo.</b> El café diario fuera, al año, es un viaje.</li>
+    <li><b>Cenas en casa con amigos:</b> cada uno trae algo. Más risas y menos cuenta.</li>
+    <li><b>Ocio gratis o barato:</b> museos en sus días gratuitos, parques, rutas, planes del ayuntamiento, biblioteca.</li>
+    <li><b>Teatro y espectáculos:</b> busca funciones con descuento y sesiones familiares. ¡Y no te pierdas un buen show de magia! 🎩</li>
+  </ol>
+  <div class="caja"><h3>🎯 La regla de las 24 horas</h3>Para cualquier capricho de más de 30 €, espera un día antes de comprarlo. Si mañana lo sigues queriendo, adelante. Muchas veces se te habrá pasado.</div>
+  <div class="pie"><span>Guía Ahorraulin · Trucos para ahorrar</span><span>7</span></div>
+</section>
+
+<!-- 6. SUSCRIPCIONES -->
+<section class="pag">
+  <div class="cab"><div class="e" style="background:#e0f5f5">📱</div><div><h2>Suscripciones y compras</h2><small>Los gastos hormiga que se comen el mes</small></div></div>
+  <ol class="trucos" style="--c:#0f8fa8">
+    <li><b>Haz inventario:</b> mira en Ahorraulin tus 🔁 Pagos fijos y pregúntate de cada uno: ¿lo he usado este mes?</li>
+    <li><b>Rota las plataformas:</b> un mes una, otro mes otra. No hace falta tenerlas todas a la vez.</li>
+    <li><b>Planes compartidos o familiares,</b> dentro de lo que permita cada servicio, divididos entre varios.</li>
+    <li><b>Ojo con las pruebas gratis:</b> pon un recordatorio el día antes de que empiecen a cobrar.</li>
+    <li><b>Gimnasio:</b> si vas menos de dos veces por semana, quizá te sale mejor pagar por sesión o entrenar fuera.</li>
+    <li><b>Compras online:</b> deja las cosas en la cesta un par de días. Muchas veces ya no las quieres.</li>
+    <li><b>Segunda mano</b> para muebles, electrónica, ropa de niños o material de deporte: mucho más barato.</li>
+    <li><b>Regalos con cabeza:</b> pon un presupuesto por persona y apúntalo en 🎁 Regalos. Diciembre te lo agradecerá.</li>
+  </ol>
+  <div class="caja"><h3>🔎 Los gastos hormiga</h3>Un café, un snack, un envío… Apúntalos también en Ahorraulin durante un mes. Ver el total de todos juntos es lo que de verdad hace cambiar el hábito.</div>
+  <div class="pie"><span>Guía Ahorraulin · Trucos para ahorrar</span><span>8</span></div>
+</section>
+
+<!-- 7. RETO 52 SEMANAS -->
+<section class="pag">
+  <div class="cab"><div class="e" style="background:#ffe3ef">🐷</div><div><h2>Reto de las 52 semanas</h2><small>Empieza con 1 € y acaba el año con 1.378 €</small></div></div>
+  <p>La semana 1 apartas 1 €, la semana 2 apartas 2 €… y así hasta la semana 52, que apartas 52 €. Al final del año habrás guardado <b>1.378 €</b> casi sin notarlo. Tacha cada semana cuando lo apartes y apúntalo en 🐷 Ahorro.</p>
+  <table class="reto">
+    <tr><td class="s">Sem.</td><td>1</td><td>2</td><td>3</td><td>4</td><td>5</td><td>6</td><td>7</td><td>8</td><td>9</td><td>10</td><td>11</td><td>12</td><td>13</td></tr>
+    <tr><td class="s">€</td><td>1</td><td>2</td><td>3</td><td>4</td><td>5</td><td>6</td><td>7</td><td>8</td><td>9</td><td>10</td><td>11</td><td>12</td><td>13</td></tr>
+    <tr><td class="s">Sem.</td><td>14</td><td>15</td><td>16</td><td>17</td><td>18</td><td>19</td><td>20</td><td>21</td><td>22</td><td>23</td><td>24</td><td>25</td><td>26</td></tr>
+    <tr><td class="s">€</td><td>14</td><td>15</td><td>16</td><td>17</td><td>18</td><td>19</td><td>20</td><td>21</td><td>22</td><td>23</td><td>24</td><td>25</td><td>26</td></tr>
+    <tr><td class="s">Sem.</td><td>27</td><td>28</td><td>29</td><td>30</td><td>31</td><td>32</td><td>33</td><td>34</td><td>35</td><td>36</td><td>37</td><td>38</td><td>39</td></tr>
+    <tr><td class="s">€</td><td>27</td><td>28</td><td>29</td><td>30</td><td>31</td><td>32</td><td>33</td><td>34</td><td>35</td><td>36</td><td>37</td><td>38</td><td>39</td></tr>
+    <tr><td class="s">Sem.</td><td>40</td><td>41</td><td>42</td><td>43</td><td>44</td><td>45</td><td>46</td><td>47</td><td>48</td><td>49</td><td>50</td><td>51</td><td>52</td></tr>
+    <tr><td class="s">€</td><td>40</td><td>41</td><td>42</td><td>43</td><td>44</td><td>45</td><td>46</td><td>47</td><td>48</td><td>49</td><td>50</td><td>51</td><td>52</td></tr>
+  </table>
+  <div class="caja"><h3>🔄 Versión fácil</h3>¿Diciembre te pilla justo? Hazlo al revés: empieza por 52 € en enero, cuando hay más ganas, y acaba con 1 € en Navidad.</div>
+  <div class="caja"><h3>🎯 Ponle nombre</h3>En Ahorraulin crea una meta «Reto 52 semanas» de 1.378 € y asigna cada apunte. Verás la barra llenarse semana a semana.</div>
+  <div class="pie"><span>Guía Ahorraulin · Trucos para ahorrar</span><span>9</span></div>
+</section>
+
+<!-- 8. PLAN 5 MINUTOS -->
+<section class="pag">
+  <div class="cab"><div class="e" style="background:#e1f4e6">✅</div><div><h2>Tu plan de 5 minutos</h2><small>Una vez al mes, con Ahorraulin</small></div></div>
+  <p>El primer día de cada mes, antes de mirar el móvil para cualquier otra cosa:</p>
+  <ul class="check">
+    <li><b>Mira tu resumen del mes 🎬.</b> ¿Cuál fue tu categoría estrella? ¿Gastaste más o menos que el mes anterior?</li>
+    <li><b>Revisa tus pagos fijos 🔁.</b> ¿Sobra alguna suscripción?</li>
+    <li><b>Ajusta tus presupuestos 🎯</b> en la categoría donde más se te fue.</li>
+    <li><b>Apártate tu ahorro 🐷</b> nada más cobrar, y asígnalo a una meta.</li>
+    <li><b>Elige un solo reto</b> para este mes: táper 3 días, una semana sin comer fuera, cero compras online…</li>
+    <li><b>Sigue tu racha 🔥.</b> Apuntar cada día es lo que hace que todo lo demás funcione.</li>
+  </ul>
+  <div class="caja"><h3>🧠 Lo importante</h3>No se trata de no gastar nunca, sino de que cada euro vaya donde tú decides. Pequeños cambios mantenidos todo el año valen más que un gran sacrificio que dura una semana.</div>
+  <div class="pie"><span>Guía Ahorraulin · Trucos para ahorrar</span><span>10</span></div>
+</section>
+
+<!-- CIERRE -->
+<section class="pag final">
+  <div style="font-size:56pt">🏆</div>
+  <h2>¡A por el siguiente premio!</h2>
+  <p>Consigue todas las medallas de la temporada en Ahorraulin y ganarás un <b>show de magia privado de 30 minutos en tu casa</b> 🎩✨</p>
+  <p style="margin-top:8mm;font-size:9pt;opacity:.85">Esta guía es orientativa y no es asesoramiento financiero profesional.<br>Ahorraulin · Edición 2026</p>
+</section>
+</body></html>

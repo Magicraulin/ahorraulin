@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="utf-8"><title>Táperes de la semana · Recetario Ahorraulin</title>
+<style>
+:root{--p1:#6250d6;--p2:#9a7cf3}
+@page{size:148mm 210mm;margin:0}
+*{box-sizing:border-box}
+body{margin:0;font-family:Inter,"Noto Color Emoji",sans-serif;color:#231c3d;font-size:9.8pt;line-height:1.42;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.pag{width:148mm;height:210mm;padding:15mm 14mm 14mm;position:relative;overflow:hidden;page-break-after:always;background:#fbfaff}
+.pag:last-child{page-break-after:auto}
+h1,h2,h3{font-family:"Inter Display",Inter,"Noto Color Emoji",sans-serif;margin:0}
+.portada{background:linear-gradient(155deg,var(--p1) 0%,var(--p2) 100%);color:#fff;display:flex;flex-direction:column;justify-content:center}
+.portada::before{content:"";position:absolute;width:120mm;height:120mm;border-radius:50%;background:rgba(255,255,255,.1);right:-40mm;top:-40mm}
+.portada::after{content:"";position:absolute;width:70mm;height:70mm;border-radius:50%;background:rgba(255,255,255,.08);left:-20mm;bottom:-20mm}
+.portada .big{font-size:62pt;line-height:1}
+.portada h1{font-size:34pt;font-weight:900;line-height:1.02;margin:6mm 0 4mm;letter-spacing:-.5pt}
+.portada p{font-size:12pt;font-weight:600;opacity:.92;max-width:105mm;margin:0}
+.portada .sello{position:absolute;bottom:14mm;left:14mm;right:14mm;display:flex;justify-content:space-between;font-weight:700;font-size:9pt;opacity:.9}
+.chip{display:inline-block;background:rgba(255,255,255,.2);border-radius:99px;padding:1.5mm 4mm;font-weight:800;font-size:9pt;margin-bottom:6mm;width:max-content}
+.cab{display:flex;align-items:center;gap:4mm;margin-bottom:4.5mm}
+.cab .e{width:15mm;height:15mm;border-radius:5mm;display:grid;place-items:center;font-size:22pt;flex:0 0 auto}
+.cab h2{font-size:19pt;font-weight:900;letter-spacing:-.3pt;line-height:1.05}
+.cab small{display:block;color:#7b7396;font-weight:700;font-size:9pt;margin-top:1mm}
+.caja{background:#fff;border-radius:5mm;padding:3.6mm 4.5mm;box-shadow:0 1mm 4mm rgba(60,40,140,.08);margin-top:3.5mm}
+.caja h3{font-size:10.5pt;margin-bottom:1.2mm}
+.pie{position:absolute;bottom:7mm;left:14mm;right:14mm;display:flex;justify-content:space-between;font-size:7.5pt;color:#9a93b4;font-weight:700}
+ol.pasos{padding-left:4.5mm;margin:1mm 0 0}
+ol.pasos li{margin-bottom:1mm}
+ul.ing{padding:0;margin:0;list-style:none;columns:2;column-gap:5mm}
+ul.ing li{padding-left:3.5mm;position:relative;margin-bottom:.6mm;break-inside:avoid}
+ul.ing li::before{content:"";position:absolute;left:0;top:1.9mm;width:1.4mm;height:1.4mm;border-radius:50%;background:var(--p1)}
+.receta{background:#fff;border-radius:5mm;padding:4mm 4.5mm 3.6mm;box-shadow:0 1mm 4mm rgba(60,40,140,.08);margin-bottom:4mm}
+.receta .rt{display:flex;align-items:center;gap:3mm;margin-bottom:2mm}
+.receta .rt .e{font-size:20pt}
+.receta h3{font-size:12.5pt;line-height:1.1}
+.etqs{display:flex;gap:1.5mm;margin-top:1mm;flex-wrap:wrap}
+.etq{font-size:7.4pt;font-weight:800;border-radius:99px;padding:.6mm 2.4mm;background:#f1edff;color:var(--p1)}
+.sub{font-size:8pt;font-weight:900;text-transform:uppercase;letter-spacing:.6pt;color:#9a93b4;margin:2mm 0 1mm}
+.indice li{display:flex;justify-content:space-between;border-bottom:.3mm dashed #d8d1ef;padding:2mm 0;font-weight:700}
+.indice{list-style:none;padding:0;margin:0}
+table.plan{width:100%;border-collapse:separate;border-spacing:1.5mm;font-size:8.6pt;margin:2mm -1.5mm 0}
+table.plan td{background:#fff;border-radius:3mm;padding:2.4mm 3mm;vertical-align:top;box-shadow:0 .5mm 2mm rgba(60,40,140,.06)}
+table.plan td.d{background:var(--p1);color:#fff;font-weight:900;width:20mm;text-align:center;vertical-align:middle}
+.compra{columns:2;column-gap:6mm;padding:0;margin:0;list-style:none}
+.compra li{break-inside:avoid;padding-left:6mm;position:relative;margin-bottom:1.4mm}
+.compra li::before{content:"☐";position:absolute;left:0;color:var(--p1)}
+.compra h4{margin:2mm 0 1.2mm;font-size:9.5pt;break-after:avoid}
+.final{background:linear-gradient(155deg,var(--p1) 0%,var(--p2) 100%);color:#fff;display:flex;flex-direction:column;justify-content:center;text-align:center;align-items:center}
+.final h2{font-size:26pt;font-weight:900;margin:4mm 0}
+.final p{max-width:100mm;font-weight:600;opacity:.95}
+</style></head><body>
+
+<!-- PORTADA -->
+<section class="pag portada">
+  <span class="chip">🥗 Premio · Semana de táper</span>
+  <div class="big">🍱</div>
+  <h1>Táperes de<br>la semana</h1>
+  <p>El recetario exclusivo de Ahorraulin: comidas ricas, baratas y fáciles para llevar al trabajo y olvidarte de comer fuera todos los días.</p>
+  <div class="sello"><span>Ahorraulin</span><span>Edición 2026</span></div>
+</section>
+
+<!-- BIENVENIDA -->
+<section class="pag">
+  <div class="cab"><div class="e" style="background:#e1f4e6">🥗</div><div><h2>¡Una semana entera!</h2><small>Siete días sin comer fuera. Eso merece un premio.</small></div></div>
+  <p>Comer fuera cada día es de los gastos que más se notan a final de mes. La solución no es pasar hambre ni comer siempre lo mismo: es tener <b>un plan</b>. Con dos horas el domingo, tienes la semana resuelta.</p>
+  <div class="caja"><h3>📖 Qué hay dentro</h3>
+    <ul class="indice">
+      <li><span>Las reglas del buen táper 📦</span><span>3</span></li>
+      <li><span>El domingo de cocina 👩‍🍳</span><span>4</span></li>
+      <li><span>10 recetas para la semana 🍲</span><span>5</span></li>
+      <li><span>Tu semana de táperes 🗓️</span><span>10</span></li>
+      <li><span>La lista de la compra 🛒</span><span>11</span></li>
+    </ul>
+  </div>
+  <div class="caja"><h3>🍽️ Cómo leer las recetas</h3>Todas están pensadas para <b>4 táperes</b>. Cada una te dice cuántos días aguanta en la nevera y si se puede congelar, para que planifiques la semana sin miedo a que se te estropee nada.</div>
+  <div class="pie"><span>Recetario Ahorraulin · Táperes de la semana</span><span>2</span></div>
+</section>
+
+<!-- REGLAS -->
+<section class="pag">
+  <div class="cab"><div class="e" style="background:#e3ecff">📦</div><div><h2>Las reglas del buen táper</h2><small>Para que llegue al viernes igual de rico</small></div></div>
+  <div class="caja"><h3>❄️ A la nevera, rápido</h3>Deja que la comida se temple y métela en la nevera en cuanto deje de echar vapor. No la tengas horas en la encimera.</div>
+  <div class="caja"><h3>📅 Tres o cuatro días</h3>La comida cocinada aguanta bien en la nevera unos 3–4 días. Lo del jueves y el viernes, mejor congelarlo el domingo y pasarlo a la nevera la noche antes.</div>
+  <div class="caja"><h3>🏷️ Ponle fecha</h3>Un trozo de cinta de carrocero y un rotulador. Parece una tontería, pero evita tirar comida «por si acaso».</div>
+  <div class="caja"><h3>🥫 Recipientes que cierren bien</h3>Mejor de vidrio si los vas a calentar en el microondas. Uno por ración: así no tienes que pensar por la mañana.</div>
+  <div class="caja"><h3>🥬 Lo fresco, aparte</h3>La ensalada, el aliño o el pan, en un táper pequeño separado. Así nada se queda blando.</div>
+  <div class="caja"><h3>🔥 Bien caliente</h3>Al recalentar, que quede bien caliente por dentro, removiendo a mitad de tiempo en el microondas.</div>
+  <div class="pie"><span>Recetario Ahorraulin · Táperes de la semana</span><span>3</span></div>
+</section>
+
+<!-- DOMINGO -->
+<section class="pag">
+  <div class="cab"><div class="e" style="background:#fff1d6">👩‍🍳</div><div><h2>El domingo de cocina</h2><small>Dos horas y la semana resuelta</small></div></div>
+  <p>El truco es no cocinar 5 platos distintos, sino <b>bases que se combinan</b>. Mientras una cosa está en el horno, la otra está en el fuego.</p>
+  <div class="receta"><div class="rt"><span class="e">1️⃣</span><h3>Enciende el horno</h3></div>Mete una bandeja de verduras (pimiento, calabacín, cebolla, calabaza) y otra con pollo y patatas. Se hacen solas mientras tú sigues.</div>
+  <div class="receta"><div class="rt"><span class="e">2️⃣</span><h3>Una olla de legumbres</h3></div>Lentejas o garbanzos con verduras. Es la base más barata y la que mejor aguanta.</div>
+  <div class="receta"><div class="rt"><span class="e">3️⃣</span><h3>Un cereal</h3></div>Arroz, pasta o cuscús. Haz cantidad: sirve para tres recetas distintas.</div>
+  <div class="receta"><div class="rt"><span class="e">4️⃣</span><h3>Reparte y congela</h3></div>Lunes, martes y miércoles a la nevera. Jueves y viernes al congelador. Pon música y se pasa volando 🎶</div>
+  <div class="pie"><span>Recetario Ahorraulin · Táperes de la semana</span><span>4</span></div>
+</section>
+
+<!-- RECETAS 1-2 -->
+<section class="pag">
+  <div class="cab"><div class="e" style="background:#ffe4dc">🍲</div><div><h2>Recetas</h2><small>Para 4 táperes cada una</small></div></div>
+  <div class="receta"><div class="rt"><span class="e">🫘</span><div><h3>Lentejas estofadas con verduras</h3><div class="etqs"><span class="etq">⏱ 40 min</span><span class="etq">Nevera 4 días</span><span class="etq">Se congela</span></div></div></div>
+    <div class="sub">Ingredientes</div>
+    <ul class="ing"><li>300 g de lentejas pardinas</li><li>1 cebolla y 1 pimiento</li><li>2 zanahorias</li><li>1 patata</li><li>1 diente de ajo</li><li>Pimentón, laurel, aceite y sal</li></ul>
+    <div class="sub">Pasos</div>
+    <ol class="pasos"><li>Sofríe la cebolla, el pimiento, el ajo y la zanahoria picados.</li><li>Añade el pimentón, las lentejas lavadas, la patata en trozos y el laurel.</li><li>Cubre con agua y cuece a fuego medio unos 30 minutos, hasta que estén tiernas.</li></ol></div>
+  <div class="receta"><div class="rt"><span class="e">🍛</span><div><h3>Arroz con pollo al curry suave</h3><div class="etqs"><span class="etq">⏱ 30 min</span><span class="etq">Nevera 3 días</span></div></div></div>
+    <div class="sub">Ingredientes</div>
+    <ul class="ing"><li>300 g de arroz</li><li>2 pechugas de pollo</li><li>1 cebolla</li><li>1 calabacín</li><li>1 lata de leche de coco o un poco de nata</li><li>Curry, aceite y sal</li></ul>
+    <div class="sub">Pasos</div>
+    <ol class="pasos"><li>Cuece el arroz y resérvalo.</li><li>Dora el pollo en dados con la cebolla y el calabacín.</li><li>Añade el curry y la leche de coco, deja 5 minutos y sirve sobre el arroz.</li></ol></div>
+  <div class="pie"><span>Recetario Ahorraulin · Táperes de la semana</span><span>5</span></div>
+</section>
+
+<!-- RECETAS 3-4 -->
+<section class="pag">
+  <div class="receta"><div class="rt"><span class="e">🥬</span><div><h3>Garbanzos salteados con espinacas</h3><div class="etqs"><span class="etq">⏱ 15 min</span><span class="etq">Nevera 4 días</span><span class="etq">Sin horno</span></div></div></div>
+    <div class="sub">Ingredientes</div>
+    <ul class="ing"><li>2 botes de garbanzos cocidos</li><li>300 g de espinacas</li><li>2 dientes de ajo</li><li>4 huevos (opcional)</li><li>Comino, pimentón, aceite y sal</li></ul>
+    <div class="sub">Pasos</div>
+    <ol class="pasos"><li>Enjuaga los garbanzos y escúrrelos bien.</li><li>Dora el ajo, añade los garbanzos con las especias y saltéalos 5 minutos.</li><li>Incorpora las espinacas hasta que se ablanden. Si quieres, acompaña con un huevo cocido.</li></ol></div>
+  <div class="receta"><div class="rt"><span class="e">🍝</span><div><h3>Ensalada de pasta con atún</h3><div class="etqs"><span class="etq">⏱ 15 min</span><span class="etq">Nevera 3 días</span><span class="etq">Se come fría</span></div></div></div>
+    <div class="sub">Ingredientes</div>
+    <ul class="ing"><li>300 g de pasta corta</li><li>2 latas de atún</li><li>Tomates cherry</li><li>1 lata de maíz</li><li>Aceitunas</li><li>Aceite, vinagre y sal</li></ul>
+    <div class="sub">Pasos</div>
+    <ol class="pasos"><li>Cuece la pasta y enfríala con agua fría.</li><li>Mézclala con el atún, el maíz, los tomates y las aceitunas.</li><li>Lleva el aliño aparte y échalo justo antes de comer.</li></ol></div>
+  <div class="pie"><span>Recetario Ahorraulin · Táperes de la semana</span><span>6</span></div>
+</section>
+
+<!-- RECETAS 5-6 -->
+<section class="pag">
+  <div class="receta"><div class="rt"><span class="e">🍗</span><div><h3>Bandeja de pollo, patatas y pimientos</h3><div class="etqs"><span class="etq">⏱ 50 min (horno)</span><span class="etq">Nevera 3 días</span><span class="etq">Se congela</span></div></div></div>
+    <div class="sub">Ingredientes</div>
+    <ul class="ing"><li>8 contramuslos de pollo</li><li>4 patatas</li><li>2 pimientos</li><li>1 cebolla</li><li>Ajo, romero o tomillo</li><li>Aceite y sal</li></ul>
+    <div class="sub">Pasos</div>
+    <ol class="pasos"><li>Corta las verduras y las patatas en trozos y ponlas en una bandeja con aceite, sal y hierbas.</li><li>Coloca el pollo encima, salpimentado.</li><li>Hornea a 200 °C unos 45 minutos, dando la vuelta al pollo a mitad.</li></ol></div>
+  <div class="receta"><div class="rt"><span class="e">🥔</span><div><h3>Tortilla de patata y calabacín</h3><div class="etqs"><span class="etq">⏱ 35 min</span><span class="etq">Nevera 2–3 días</span><span class="etq">Fría o templada</span></div></div></div>
+    <div class="sub">Ingredientes</div>
+    <ul class="ing"><li>4 patatas medianas</li><li>1 calabacín</li><li>1 cebolla</li><li>6 huevos</li><li>Aceite y sal</li></ul>
+    <div class="sub">Pasos</div>
+    <ol class="pasos"><li>Pocha las patatas, la cebolla y el calabacín en láminas finas a fuego suave.</li><li>Escúrrelos y mézclalos con los huevos batidos y sal.</li><li>Cuaja la tortilla por los dos lados. Córtala en cuatro y acompáñala con una ensalada.</li></ol></div>
+  <div class="pie"><span>Recetario Ahorraulin · Táperes de la semana</span><span>7</span></div>
+</section>
+
+<!-- RECETAS 7-8 -->
+<section class="pag">
+  <div class="receta"><div class="rt"><span class="e">🍅</span><div><h3>Albóndigas en salsa de tomate</h3><div class="etqs"><span class="etq">⏱ 45 min</span><span class="etq">Nevera 3 días</span><span class="etq">Se congela</span></div></div></div>
+    <div class="sub">Ingredientes</div>
+    <ul class="ing"><li>500 g de carne picada</li><li>1 huevo</li><li>Pan rallado</li><li>1 cebolla y 1 ajo</li><li>1 bote de tomate triturado</li><li>Perejil, aceite y sal</li></ul>
+    <div class="sub">Pasos</div>
+    <ol class="pasos"><li>Mezcla la carne con el huevo, el ajo picado, el perejil, el pan rallado y la sal. Forma bolitas.</li><li>Dóralas en una sartén y resérvalas.</li><li>Pocha la cebolla, añade el tomate y las albóndigas y cuece 15 minutos. Van genial con arroz o pasta.</li></ol></div>
+  <div class="receta"><div class="rt"><span class="e">🥙</span><div><h3>Cuscús con verduras asadas y garbanzos</h3><div class="etqs"><span class="etq">⏱ 30 min</span><span class="etq">Nevera 4 días</span><span class="etq">Fría o caliente</span></div></div></div>
+    <div class="sub">Ingredientes</div>
+    <ul class="ing"><li>300 g de cuscús</li><li>Verduras asadas del domingo</li><li>1 bote de garbanzos</li><li>Pasas o frutos secos (opcional)</li><li>Comino, aceite y sal</li></ul>
+    <div class="sub">Pasos</div>
+    <ol class="pasos"><li>Hidrata el cuscús con el mismo peso de agua hirviendo y un poco de aceite. Tapa 5 minutos y suéltalo con un tenedor.</li><li>Mézclalo con las verduras asadas, los garbanzos y el comino.</li></ol></div>
+  <div class="pie"><span>Recetario Ahorraulin · Táperes de la semana</span><span>8</span></div>
+</section>
+
+<!-- RECETAS 9-10 -->
+<section class="pag">
+  <div class="receta"><div class="rt"><span class="e">🎃</span><div><h3>Crema de calabaza</h3><div class="etqs"><span class="etq">⏱ 35 min</span><span class="etq">Nevera 4 días</span><span class="etq">Se congela</span></div></div></div>
+    <div class="sub">Ingredientes</div>
+    <ul class="ing"><li>1 kg de calabaza</li><li>1 patata</li><li>1 cebolla</li><li>1 zanahoria</li><li>Aceite y sal</li><li>Picatostes o semillas para encima</li></ul>
+    <div class="sub">Pasos</div>
+    <ol class="pasos"><li>Pocha la cebolla, añade la calabaza, la zanahoria y la patata en trozos.</li><li>Cubre con agua y cuece 20 minutos.</li><li>Tritura bien. Lleva los picatostes aparte para que no se ablanden.</li></ol></div>
+  <div class="receta"><div class="rt"><span class="e">🍚</span><div><h3>Bol de arroz, huevo y atún</h3><div class="etqs"><span class="etq">⏱ 20 min</span><span class="etq">Nevera 3 días</span><span class="etq">Aprovecha el arroz</span></div></div></div>
+    <div class="sub">Ingredientes</div>
+    <ul class="ing"><li>Arroz cocido del domingo</li><li>4 huevos</li><li>2 latas de atún</li><li>1 pepino y 1 zanahoria</li><li>Salsa de soja o aceite y limón</li></ul>
+    <div class="sub">Pasos</div>
+    <ol class="pasos"><li>Cuece los huevos 10 minutos y pélalos.</li><li>Reparte el arroz en los táperes y pon encima el atún, el huevo partido y las verduras ralladas.</li><li>Lleva la salsa aparte.</li></ol></div>
+  <div class="pie"><span>Recetario Ahorraulin · Táperes de la semana</span><span>9</span></div>
+</section>
+
+<!-- PLAN SEMANA -->
+<section class="pag">
+  <div class="cab"><div class="e" style="background:#ece5ff">🗓️</div><div><h2>Tu semana de táperes</h2><small>Un ejemplo que aprovecha lo del domingo</small></div></div>
+  <table class="plan">
+    <tr><td class="d">Lunes</td><td><b>Lentejas estofadas</b><br>+ una pieza de fruta</td></tr>
+    <tr><td class="d">Martes</td><td><b>Bandeja de pollo, patatas y pimientos</b><br>+ ensalada aparte</td></tr>
+    <tr><td class="d">Miércoles</td><td><b>Cuscús con verduras asadas</b> (de la bandeja del domingo)</td></tr>
+    <tr><td class="d">Jueves</td><td><b>Albóndigas con arroz</b> (del congelador)</td></tr>
+    <tr><td class="d">Viernes</td><td><b>Ensalada de pasta con atún</b><br>¡y el finde, a disfrutar!</td></tr>
+  </table>
+  <div class="caja"><h3>🔁 Ve rotando</h3>Cambia dos recetas cada semana y no te aburrirás nunca. Las legumbres y la bandeja al horno son las que más ahorran.</div>
+  <div class="caja"><h3>📲 Apúntalo</h3>Cada día que comas de táper, en vez de fuera, es una medalla más cerca. Mira en Ahorraulin cuánto baja tu categoría <b>🍔 Comer fuera</b> a final de mes.</div>
+  <div class="pie"><span>Recetario Ahorraulin · Táperes de la semana</span><span>10</span></div>
+</section>
+
+<!-- COMPRA -->
+<section class="pag">
+  <div class="cab"><div class="e" style="background:#e1f4e6">🛒</div><div><h2>La lista de la compra</h2><small>Para la semana de ejemplo</small></div></div>
+  <ul class="compra">
+    <h4>🥕 Fruta y verdura</h4>
+    <li>Cebollas (4)</li><li>Pimientos (3)</li><li>Zanahorias (4)</li><li>Calabacines (2)</li><li>Patatas (6)</li><li>Tomates cherry</li><li>Lechuga para ensaladas</li><li>Fruta de temporada</li>
+    <h4>🥩 Carne y pescado</h4>
+    <li>8 contramuslos de pollo</li><li>500 g de carne picada</li><li>2 latas de atún</li>
+    <h4>🥫 Despensa</h4>
+    <li>Lentejas pardinas (300 g)</li><li>Garbanzos cocidos (1 bote)</li><li>Pasta corta (300 g)</li><li>Arroz</li><li>Cuscús (300 g)</li><li>Tomate triturado</li><li>Maíz en lata</li><li>Aceitunas</li><li>Pan rallado</li>
+    <h4>🥚 Otros</h4>
+    <li>Huevos (1 docena)</li><li>Ajos</li><li>Especias: pimentón, comino, laurel</li>
+  </ul>
+  <div class="caja"><h3>💡 Ahorra todavía más</h3>Compra las legumbres, el arroz y la pasta en paquetes grandes de marca blanca, y la fruta y verdura en el mercado o la frutería del barrio.</div>
+  <div class="pie"><span>Recetario Ahorraulin · Táperes de la semana</span><span>11</span></div>
+</section>
+
+<!-- CIERRE -->
+<section class="pag final">
+  <div style="font-size:56pt">🍱</div>
+  <h2>¡Que aproveche!</h2>
+  <p>Cada táper es una comida fuera que te ahorras. Sigue sumando medallas en Ahorraulin: el premio gordo es un <b>show de magia privado en tu casa</b> 🎩✨</p>
+  <p style="margin-top:8mm;font-size:9pt;opacity:.85">Revisa siempre las etiquetas si tienes alguna alergia o intolerancia.<br>Ahorraulin · Edición 2026</p>
+</section>
+</body></html>

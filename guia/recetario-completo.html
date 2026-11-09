@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="utf-8"><title>Comidas y cenas · Recetario Ahorraulin</title>
+<style>
+:root{--p1:#6250d6;--p2:#9a7cf3}
+@page{size:148mm 210mm;margin:0}
+*{box-sizing:border-box}
+body{margin:0;font-family:Inter,"Noto Color Emoji",sans-serif;color:#231c3d;font-size:9.8pt;line-height:1.42;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.pag{width:148mm;height:210mm;padding:15mm 14mm 14mm;position:relative;overflow:hidden;page-break-after:always;background:#fbfaff}
+.pag:last-child{page-break-after:auto}
+h1,h2,h3{font-family:"Inter Display",Inter,"Noto Color Emoji",sans-serif;margin:0}
+.portada{background:linear-gradient(155deg,var(--p1) 0%,var(--p2) 100%);color:#fff;display:flex;flex-direction:column;justify-content:center}
+.portada::before{content:"";position:absolute;width:120mm;height:120mm;border-radius:50%;background:rgba(255,255,255,.1);right:-40mm;top:-40mm}
+.portada::after{content:"";position:absolute;width:70mm;height:70mm;border-radius:50%;background:rgba(255,255,255,.08);left:-20mm;bottom:-20mm}
+.portada .big{font-size:62pt;line-height:1}
+.portada h1{font-size:34pt;font-weight:900;line-height:1.02;margin:6mm 0 4mm;letter-spacing:-.5pt}
+.portada p{font-size:12pt;font-weight:600;opacity:.92;max-width:105mm;margin:0}
+.portada .sello{position:absolute;bottom:14mm;left:14mm;right:14mm;display:flex;justify-content:space-between;font-weight:700;font-size:9pt;opacity:.9}
+.chip{display:inline-block;background:rgba(255,255,255,.2);border-radius:99px;padding:1.5mm 4mm;font-weight:800;font-size:9pt;margin-bottom:6mm;width:max-content}
+.cab{display:flex;align-items:center;gap:4mm;margin-bottom:4.5mm}
+.cab .e{width:15mm;height:15mm;border-radius:5mm;display:grid;place-items:center;font-size:22pt;flex:0 0 auto}
+.cab h2{font-size:19pt;font-weight:900;letter-spacing:-.3pt;line-height:1.05}
+.cab small{display:block;color:#7b7396;font-weight:700;font-size:9pt;margin-top:1mm}
+.caja{background:#fff;border-radius:5mm;padding:3.6mm 4.5mm;box-shadow:0 1mm 4mm rgba(60,40,140,.08);margin-top:3.5mm}
+.caja h3{font-size:10.5pt;margin-bottom:1.2mm}
+.pie{position:absolute;bottom:7mm;left:14mm;right:14mm;display:flex;justify-content:space-between;font-size:7.5pt;color:#9a93b4;font-weight:700}
+ol.pasos{padding-left:4.5mm;margin:1mm 0 0}
+ol.pasos li{margin-bottom:1mm}
+ul.ing{padding:0;margin:0;list-style:none;columns:2;column-gap:5mm}
+ul.ing li{padding-left:3.5mm;position:relative;margin-bottom:.6mm;break-inside:avoid}
+ul.ing li::before{content:"";position:absolute;left:0;top:1.9mm;width:1.4mm;height:1.4mm;border-radius:50%;background:var(--p1)}
+.receta{background:#fff;border-radius:5mm;padding:4mm 4.5mm 3.6mm;box-shadow:0 1mm 4mm rgba(60,40,140,.08);margin-bottom:4mm}
+.receta .rt{display:flex;align-items:center;gap:3mm;margin-bottom:2mm}
+.receta .rt .e{font-size:20pt}
+.receta h3{font-size:12.5pt;line-height:1.1}
+.etqs{display:flex;gap:1.5mm;margin-top:1mm;flex-wrap:wrap}
+.etq{font-size:7.4pt;font-weight:800;border-radius:99px;padding:.6mm 2.4mm;background:#f1edff;color:var(--p1)}
+.sub{font-size:8pt;font-weight:900;text-transform:uppercase;letter-spacing:.6pt;color:#9a93b4;margin:2mm 0 1mm}
+.indice li{display:flex;justify-content:space-between;border-bottom:.3mm dashed #d8d1ef;padding:2mm 0;font-weight:700}
+.indice{list-style:none;padding:0;margin:0}
+table.plan{width:100%;border-collapse:separate;border-spacing:1.5mm;font-size:8.6pt;margin:2mm -1.5mm 0}
+table.plan td{background:#fff;border-radius:3mm;padding:2.4mm 3mm;vertical-align:top;box-shadow:0 .5mm 2mm rgba(60,40,140,.06)}
+table.plan td.d{background:var(--p1);color:#fff;font-weight:900;width:20mm;text-align:center;vertical-align:middle}
+.compra{columns:2;column-gap:6mm;padding:0;margin:0;list-style:none}
+.compra li{break-inside:avoid;padding-left:6mm;position:relative;margin-bottom:1.4mm}
+.compra li::before{content:"☐";position:absolute;left:0;color:var(--p1)}
+.compra h4{margin:2mm 0 1.2mm;font-size:9.5pt;break-after:avoid}
+.final{background:linear-gradient(155deg,var(--p1) 0%,var(--p2) 100%);color:#fff;display:flex;flex-direction:column;justify-content:center;text-align:center;align-items:center}
+.final h2{font-size:26pt;font-weight:900;margin:4mm 0}
+.final p{max-width:100mm;font-weight:600;opacity:.95}
+
+.ficha{background:#fff;border-radius:5mm;padding:3.4mm 4.2mm 3mm;box-shadow:0 1mm 4mm rgba(60,40,140,.08);margin-bottom:3.2mm}
+.ficha .ft{display:flex;align-items:center;gap:2.6mm}
+.ficha .ft .e{font-size:17pt;line-height:1}
+.ficha h3{font-size:11.2pt;line-height:1.12}
+.ficha .etqs{margin:.8mm 0 1.6mm}
+.ficha .ing{font-size:8.7pt;color:#4b4466;margin:0 0 1.2mm}
+.ficha .ing b{color:#231c3d}
+.ficha ol{margin:0;padding-left:4.2mm;font-size:8.8pt}
+.ficha ol li{margin-bottom:.5mm}
+.parte{background:linear-gradient(155deg,var(--p1) 0%,var(--p2) 100%);color:#fff;display:flex;flex-direction:column;justify-content:center;align-items:flex-start}
+.parte .big{font-size:58pt;line-height:1}
+.parte h1{font-size:40pt;font-weight:900;margin:5mm 0 3mm;letter-spacing:-.5pt}
+.parte p{font-size:11.5pt;font-weight:600;opacity:.92;max-width:105mm;margin:0 0 2mm}
+.parte ul{list-style:none;padding:0;margin:5mm 0 0;font-weight:800;font-size:11pt}
+.parte li{margin-bottom:2mm}
+</style></head><body>
+<section class="pag portada">
+  <span class="chip">🥗 Premio · Semana de táper</span>
+  <div class="big">🍱</div>
+  <h1>Comidas<br>y cenas</h1>
+  <p>El recetario exclusivo de Ahorraulin: 54 recetas baratas y fáciles, desde un buen plato de cuchara hasta la hamburguesa del viernes.</p>
+  <div class="sello"><span>Ahorraulin</span><span>Edición 2026</span></div>
+</section><section class="pag">
+  <div class="cab"><div class="e" style="background:#e1f4e6">🥗</div><div><h2>¡Una semana entera!</h2><small>Siete días sin comer fuera. Eso merece un premio.</small></div></div>
+  <p>Comer fuera cada día es de los gastos que más se notan a final de mes. Aquí tienes <b>54 recetas</b> para comidas y cenas: de cuchara, saludables, rápidas y hasta fast food casero para el viernes.</p>
+  <div class="caja"><h3>📖 Qué hay dentro</h3><ul class="indice"><li><span>Las reglas del buen táper 📦</span><span>3</span></li><li><span>El domingo de cocina 👩‍🍳</span><span>4</span></li><li><span><b>Comidas</b></span><span>5</span></li><li><span>🍲 De cuchara · 9 recetas</span><span>6</span></li><li><span>🍝 Pasta y arroz · 9 recetas</span><span>9</span></li><li><span>🥗 Saludables · 9 recetas</span><span>12</span></li><li><span><b>Cenas</b></span><span>15</span></li><li><span>⚡ Cenas en 15 minutos · 9 recetas</span><span>16</span></li><li><span>🌙 Cenas ligeras · 9 recetas</span><span>19</span></li><li><span>🍔 Fast food casero · 9 recetas</span><span>22</span></li><li><span>Una semana de ejemplo 🗓️</span><span>25</span></li></ul></div>
+  <div class="pie"><span>Recetario Ahorraulin · Comidas y cenas</span><span>2</span></div>
+</section>
+<section class="pag">
+  <div class="cab"><div class="e" style="background:#e3ecff">📦</div><div><h2>Las reglas del buen táper</h2><small>Para que llegue al viernes igual de rico</small></div></div>
+  <div class="caja"><h3>❄️ A la nevera, rápido</h3>Deja que la comida se temple y métela en la nevera en cuanto deje de echar vapor. No la tengas horas en la encimera.</div>
+  <div class="caja"><h3>📅 Tres o cuatro días</h3>La comida cocinada aguanta bien en la nevera unos 3–4 días. Lo del jueves y el viernes, mejor congelarlo el domingo y pasarlo a la nevera la noche antes.</div>
+  <div class="caja"><h3>🏷️ Ponle fecha</h3>Un trozo de cinta de carrocero y un rotulador. Parece una tontería, pero evita tirar comida «por si acaso».</div>
+  <div class="caja"><h3>🥫 Recipientes que cierren bien</h3>Mejor de vidrio si los vas a calentar en el microondas. Uno por ración: así no tienes que pensar por la mañana.</div>
+  <div class="caja"><h3>🥬 Lo fresco, aparte</h3>La ensalada, el aliño o el pan, en un táper pequeño separado. Así nada se queda blando.</div>
+  <div class="caja"><h3>🔥 Bien caliente</h3>Al recalentar, que quede bien caliente por dentro, removiendo a mitad de tiempo en el microondas.</div>
+  <div class="pie"><span>Recetario Ahorraulin · Comidas y cenas</span><span>3</span></div>
+</section><section class="pag">
+  <div class="cab"><div class="e" style="background:#fff1d6">👩‍🍳</div><div><h2>El domingo de cocina</h2><small>Dos horas y la semana resuelta</small></div></div>
+  <p>El truco es no cocinar 5 platos distintos, sino <b>bases que se combinan</b>. Mientras una cosa está en el horno, la otra está en el fuego.</p>
+  <div class="receta"><div class="rt"><span class="e">1️⃣</span><h3>Enciende el horno</h3></div>Mete una bandeja de verduras (pimiento, calabacín, cebolla, calabaza) y otra con pollo y patatas. Se hacen solas mientras tú sigues.</div>
+  <div class="receta"><div class="rt"><span class="e">2️⃣</span><h3>Una olla de legumbres</h3></div>Lentejas o garbanzos con verduras. Es la base más barata y la que mejor aguanta.</div>
+  <div class="receta"><div class="rt"><span class="e">3️⃣</span><h3>Un cereal</h3></div>Arroz, pasta o cuscús. Haz cantidad: sirve para tres recetas distintas.</div>
+  <div class="receta"><div class="rt"><span class="e">4️⃣</span><h3>Reparte y congela</h3></div>Lunes, martes y miércoles a la nevera. Jueves y viernes al congelador. Pon música y se pasa volando 🎶</div>
+  <div class="pie"><span>Recetario Ahorraulin · Comidas y cenas</span><span>4</span></div>
+</section><section class="pag parte"><div class="big">🍽️</div><h1>Comidas</h1><p>Para el táper del trabajo o para comer en casa. Cunden, aguantan y la mayoría se congelan.</p><ul><li>🍲 De cuchara</li><li>🍝 Pasta y arroz</li><li>🥗 Saludables</li></ul></section>
+<section class="pag "><div class="cab"><div class="e" style="background:#ffe4dc">🍲</div><div><h2>De cuchara</h2><small>Platos de toda la vida, baratos y que mejoran de un día para otro</small></div></div><div class="ficha"><div class="ft"><span class="e">🧄</span><div><h3>Sopa castellana</h3>
+<div class="etqs"><span class="etq">⏱ 25 min</span><span class="etq">4 raciones</span><span class="etq">Táper</span><span class="etq">Muy barata</span></div></div></div>
+<p class="ing"><b>Necesitas:</b> 4 rebanadas de pan del día anterior, 4 ajos, 100 g de taquitos de jamón, 4 huevos, 1 l de caldo, pimentón y aceite.</p>
+<ol><li>Dora los ajos laminados y el jamón; añade el pan en rebanadas finas y el pimentón.</li><li>Echa el caldo caliente y cuece 10 min.</li><li>Casca los huevos encima y deja 3 min hasta que cuajen.</li></ol></div><div class="ficha"><div class="ft"><span class="e">🫘</span><div><h3>Lentejas estofadas con verduras</h3>
+<div class="etqs"><span class="etq">⏱ 40 min</span><span class="etq">4 raciones</span><span class="etq">Táper</span><span class="etq">Se congela</span></div></div></div>
+<p class="ing"><b>Necesitas:</b> 300 g de lentejas pardinas, 1 cebolla, 1 pimiento, 2 zanahorias, 1 patata, 1 ajo, pimentón, laurel, aceite y sal.</p>
+<ol><li>Sofríe la cebolla, el pimiento, el ajo y la zanahoria picados.</li><li>Añade el pimentón, las lentejas lavadas, la patata troceada y el laurel.</li><li>Cubre con agua y cuece unos 30 min a fuego medio.</li></ol></div><div class="ficha"><div class="ft"><span class="e">🥬</span><div><h3>Garbanzos con espinacas</h3>
+<div class="etqs"><span class="etq">⏱ 20 min</span><span class="etq">4 raciones</span><span class="etq">Táper</span><span class="etq">Rápida</span></div></div></div>
+<p class="ing"><b>Necesitas:</b> 2 botes de garbanzos cocidos, 300 g de espinacas, 2 ajos, 1 rebanada de pan, comino, pimentón, aceite y sal.</p>
+<ol><li>Fríe el ajo y el pan, y tritúralos con un poco de agua y las especias.</li><li>Saltea las espinacas, añade los garbanzos escurridos y el majado.</li><li>Cuece 10 min con un poco de agua.</li></ol></div><div class="pie"><span>Recetario Ahorraulin · Comidas y cenas</span><span>6</span></div></section>
+<section class="pag "><div class="ficha"><div class="ft"><span class="e">🫘</span><div><h3>Potaje de alubias con verduras</h3>
+<div class="etqs"><span class="etq">⏱ 45 min</span><span class="etq">4 raciones</span><span class="etq">Táper</span><span class="etq">Se congela</span></div></div></div>
+<p class="ing"><b>Necesitas:</b> 2 botes de alubias blancas cocidas, 1 puerro, 2 zanahorias, 1 patata, 1 tomate, pimentón, aceite y sal.</p>
+<ol><li>Sofríe el puerro, la zanahoria y el tomate picados.</li><li>Añade la patata en trozos, el pimentón y agua hasta cubrir; cuece 20 min.</li><li>Incorpora las alubias y deja 10 min más.</li></ol></div><div class="ficha"><div class="ft"><span class="e">🥔</span><div><h3>Patatas guisadas con carne</h3>
+<div class="etqs"><span class="etq">⏱ 60 min</span><span class="etq">4 raciones</span><span class="etq">Táper</span><span class="etq">Se congela</span></div></div></div>
+<p class="ing"><b>Necesitas:</b> 500 g de carne de ternera para guisar, 5 patatas, 1 cebolla, 1 pimiento, 1 tomate, laurel, pimentón, aceite y sal.</p>
+<ol><li>Dora la carne en trozos y resérvala.</li><li>Pocha la cebolla, el pimiento y el tomate; vuelve a echar la carne y cubre con agua. Cuece 40 min.</li><li>Añade las patatas cascadas y cuece 20 min más.</li></ol></div><div class="ficha"><div class="ft"><span class="e">🍜</span><div><h3>Sopa de fideos casera</h3>
+<div class="etqs"><span class="etq">⏱ 30 min</span><span class="etq">4 raciones</span><span class="etq">Táper</span><span class="etq">Reconfortante</span></div></div></div>
+<p class="ing"><b>Necesitas:</b> 2 contramuslos de pollo, 1 zanahoria, 1 puerro, 1 rama de apio, 150 g de fideos finos, sal.</p>
+<ol><li>Cuece el pollo con las verduras en 1,5 l de agua durante 25 min.</li><li>Saca el pollo, desmígalo y cuela el caldo.</li><li>Cuece los fideos en el caldo 4 min y añade el pollo.</li></ol></div><div class="pie"><span>Recetario Ahorraulin · Comidas y cenas</span><span>7</span></div></section>
+<section class="pag "><div class="ficha"><div class="ft"><span class="e">🎃</span><div><h3>Crema de calabaza</h3>
+<div class="etqs"><span class="etq">⏱ 35 min</span><span class="etq">4 raciones</span><span class="etq">Táper</span><span class="etq">Se congela</span></div></div></div>
+<p class="ing"><b>Necesitas:</b> 1 kg de calabaza, 1 patata, 1 cebolla, 1 zanahoria, aceite y sal, picatostes o semillas.</p>
+<ol><li>Pocha la cebolla, añade la calabaza, la zanahoria y la patata en trozos.</li><li>Cubre con agua y cuece 20 min.</li><li>Tritura bien. Lleva los picatostes aparte.</li></ol></div><div class="ficha"><div class="ft"><span class="e">🍲</span><div><h3>Arroz caldoso de verduras</h3>
+<div class="etqs"><span class="etq">⏱ 35 min</span><span class="etq">4 raciones</span><span class="etq">Táper</span></div></div></div>
+<p class="ing"><b>Necesitas:</b> 300 g de arroz, 1 pimiento rojo, 1 calabacín, 1 tomate rallado, 1 l de caldo, pimentón, aceite y sal.</p>
+<ol><li>Sofríe el pimiento y el calabacín en dados, añade el tomate y el pimentón.</li><li>Echa el arroz, rehógalo 1 min y añade el caldo caliente.</li><li>Cuece 18 min. Debe quedar meloso, con caldo.</li></ol></div><div class="ficha"><div class="ft"><span class="e">🥘</span><div><h3>Garbanzos con chorizo</h3>
+<div class="etqs"><span class="etq">⏱ 30 min</span><span class="etq">4 raciones</span><span class="etq">Táper</span><span class="etq">Se congela</span></div></div></div>
+<p class="ing"><b>Necesitas:</b> 2 botes de garbanzos cocidos, 1 chorizo, 1 cebolla, 1 pimiento, 1 patata, pimentón y aceite.</p>
+<ol><li>Sofríe la cebolla y el pimiento; añade el chorizo en rodajas.</li><li>Agrega la patata en trozos, el pimentón y agua; cuece 15 min.</li><li>Echa los garbanzos y deja 5 min más.</li></ol></div><div class="pie"><span>Recetario Ahorraulin · Comidas y cenas</span><span>8</span></div></section>
+<section class="pag "><div class="cab"><div class="e" style="background:#fff1d6">🍝</div><div><h2>Pasta y arroz</h2><small>Cunden un montón y casi todo el mundo los sabe hacer</small></div></div><div class="ficha"><div class="ft"><span class="e">🦐</span><div><h3>Espaguetis con gambas al ajillo</h3>
+<div class="etqs"><span class="etq">⏱ 20 min</span><span class="etq">4 raciones</span><span class="etq">Rápida</span></div></div></div>
+<p class="ing"><b>Necesitas:</b> 400 g de espaguetis, 300 g de gambas peladas congeladas, 4 ajos, 1 guindilla (opcional), perejil, aceite y sal.</p>
+<ol><li>Cuece la pasta.</li><li>Dora los ajos laminados y la guindilla, añade las gambas y saltéalas 2 min.</li><li>Mezcla con la pasta, un chorrito del agua de cocción y perejil.</li></ol></div><div class="ficha"><div class="ft"><span class="e">🍝</span><div><h3>Macarrones con tomate y chorizo</h3>
+<div class="etqs"><span class="etq">⏱ 25 min</span><span class="etq">4 raciones</span><span class="etq">Táper</span><span class="etq">Se congela</span></div></div></div>
+<p class="ing"><b>Necesitas:</b> 400 g de macarrones, 1 chorizo, 1 cebolla, 400 g de tomate triturado, queso rallado, aceite y sal.</p>
+<ol><li>Cuece la pasta.</li><li>Sofríe la cebolla y el chorizo, añade el tomate y cocina 10 min.</li><li>Mezcla con la pasta y gratina con queso si quieres.</li></ol></div><div class="ficha"><div class="ft"><span class="e">🥓</span><div><h3>Espaguetis a la carbonara</h3>
+<div class="etqs"><span class="etq">⏱ 20 min</span><span class="etq">4 raciones</span><span class="etq">Rápida</span></div></div></div>
+<p class="ing"><b>Necesitas:</b> 400 g de espaguetis, 150 g de panceta o bacon, 3 huevos, queso curado rallado, pimienta negra.</p>
+<ol><li>Cuece la pasta y reserva un vaso del agua.</li><li>Dora la panceta en una sartén sin aceite.</li><li>Fuera del fuego, mezcla la pasta con la panceta, los huevos batidos con el queso y un chorrito del agua.</li></ol></div><div class="pie"><span>Recetario Ahorraulin · Comidas y cenas</span><span>9</span></div></section>
+<section class="pag "><div class="ficha"><div class="ft"><span class="e">🌿</span><div><h3>Pasta al pesto con pollo</h3>
+<div class="etqs"><span class="etq">⏱ 25 min</span><span class="etq">4 raciones</span><span class="etq">Táper</span></div></div></div>
+<p class="ing"><b>Necesitas:</b> 400 g de pasta, 2 pechugas de pollo, 1 bote de pesto, tomates cherry, queso rallado.</p>
+<ol><li>Cuece la pasta.</li><li>Haz el pollo a la plancha en tiras.</li><li>Mezcla todo con el pesto y los cherrys partidos.</li></ol></div><div class="ficha"><div class="ft"><span class="e">🍚</span><div><h3>Arroz tres delicias</h3>
+<div class="etqs"><span class="etq">⏱ 25 min</span><span class="etq">4 raciones</span><span class="etq">Táper</span><span class="etq">Aprovecha el arroz</span></div></div></div>
+<p class="ing"><b>Necesitas:</b> 300 g de arroz cocido (mejor del día anterior), 2 huevos, 100 g de jamón cocido, guisantes y zanahoria, salsa de soja y aceite.</p>
+<ol><li>Haz una tortilla fina, córtala en tiras y resérvala.</li><li>Saltea los guisantes, la zanahoria y el jamón en dados.</li><li>Añade el arroz y la soja, saltea a fuego fuerte y mezcla con la tortilla.</li></ol></div><div class="ficha"><div class="ft"><span class="e">🥘</span><div><h3>Paella mixta sencilla</h3>
+<div class="etqs"><span class="etq">⏱ 45 min</span><span class="etq">4 raciones</span><span class="etq">Táper</span></div></div></div>
+<p class="ing"><b>Necesitas:</b> 300 g de arroz, 4 contramuslos de pollo, 200 g de gambas o sepia congelada, 1 pimiento, tomate rallado, colorante o azafrán, 1 l de caldo.</p>
+<ol><li>Dora el pollo troceado y el pimiento en la paellera.</li><li>Añade el tomate y el marisco, luego el arroz y el colorante.</li><li>Echa el caldo caliente y cuece 18 min sin remover. Reposa 5 min.</li></ol></div><div class="pie"><span>Recetario Ahorraulin · Comidas y cenas</span><span>10</span></div></section>
+<section class="pag "><div class="ficha"><div class="ft"><span class="e">🍄</span><div><h3>Risotto de champiñones</h3>
+<div class="etqs"><span class="etq">⏱ 35 min</span><span class="etq">4 raciones</span><span class="etq">Reconfortante</span></div></div></div>
+<p class="ing"><b>Necesitas:</b> 300 g de arroz, 300 g de champiñones, 1 cebolla, 1 l de caldo, queso rallado, mantequilla.</p>
+<ol><li>Pocha la cebolla y saltea los champiñones.</li><li>Añade el arroz y ve echando el caldo caliente poco a poco, removiendo, durante 18 min.</li><li>Apaga y mezcla con el queso y la mantequilla.</li></ol></div><div class="ficha"><div class="ft"><span class="e">🍛</span><div><h3>Arroz con pollo al curry</h3>
+<div class="etqs"><span class="etq">⏱ 30 min</span><span class="etq">4 raciones</span><span class="etq">Táper</span></div></div></div>
+<p class="ing"><b>Necesitas:</b> 300 g de arroz, 2 pechugas de pollo, 1 cebolla, 1 calabacín, 1 lata de leche de coco, curry, aceite y sal.</p>
+<ol><li>Cuece el arroz.</li><li>Dora el pollo en dados con la cebolla y el calabacín.</li><li>Añade el curry y la leche de coco, cocina 5 min y sirve con el arroz.</li></ol></div><div class="ficha"><div class="ft"><span class="e">🧀</span><div><h3>Macarrones gratinados con atún</h3>
+<div class="etqs"><span class="etq">⏱ 30 min</span><span class="etq">4 raciones</span><span class="etq">Táper</span><span class="etq">Gusta a todos</span></div></div></div>
+<p class="ing"><b>Necesitas:</b> 400 g de macarrones, 2 latas de atún, tomate frito, 1 cebolla, queso rallado.</p>
+<ol><li>Cuece la pasta y pocha la cebolla.</li><li>Mezcla la pasta, el atún, la cebolla y el tomate frito en una fuente.</li><li>Cubre con queso y gratina 10 min.</li></ol></div><div class="pie"><span>Recetario Ahorraulin · Comidas y cenas</span><span>11</span></div></section>
+<section class="pag "><div class="cab"><div class="e" style="background:#e1f4e6">🥗</div><div><h2>Saludables</h2><small>Para cuidarte sin aburrirte ni gastar de más</small></div></div><div class="ficha"><div class="ft"><span class="e">🥑</span><div><h3>Ensalada de pollo, aguacate y maíz</h3>
+<div class="etqs"><span class="etq">⏱ 15 min</span><span class="etq">2 raciones</span><span class="etq">Táper</span><span class="etq">Rápida</span></div></div></div>
+<p class="ing"><b>Necesitas:</b> 1 pechuga de pollo, 1 aguacate, 1 lata de maíz, lechuga, tomates cherry, aceite, limón y sal.</p>
+<ol><li>Haz el pollo a la plancha y córtalo en dados.</li><li>Mezcla con la lechuga, el maíz, los cherrys y el aguacate.</li><li>Aliña con aceite y limón justo antes de comer.</li></ol></div><div class="ficha"><div class="ft"><span class="e">🥗</span><div><h3>Ensalada de garbanzos y atún</h3>
+<div class="etqs"><span class="etq">⏱ 10 min</span><span class="etq">2 raciones</span><span class="etq">Táper</span><span class="etq">Sin fuego</span></div></div></div>
+<p class="ing"><b>Necesitas:</b> 1 bote de garbanzos cocidos, 1 lata de atún, 1 tomate, ½ pimiento, ½ cebolla morada, aceite, vinagre y sal.</p>
+<ol><li>Enjuaga y escurre los garbanzos.</li><li>Pica las verduras en dados pequeños.</li><li>Mezcla todo y aliña justo antes de comer.</li></ol></div><div class="ficha"><div class="ft"><span class="e">🍋</span><div><h3>Pollo al limón con brócoli</h3>
+<div class="etqs"><span class="etq">⏱ 25 min</span><span class="etq">4 raciones</span><span class="etq">Táper</span></div></div></div>
+<p class="ing"><b>Necesitas:</b> 4 pechugas o contramuslos, 1 brócoli, 2 limones, 2 ajos, aceite, sal y pimienta.</p>
+<ol><li>Marina el pollo con zumo de limón, ajo y sal.</li><li>Hazlo a la plancha o al horno.</li><li>Acompaña con el brócoli al vapor o salteado.</li></ol></div><div class="pie"><span>Recetario Ahorraulin · Comidas y cenas</span><span>12</span></div></section>
+<section class="pag "><div class="ficha"><div class="ft"><span class="e">🍠</span><div><h3>Bol de boniato asado y garbanzos</h3>
+<div class="etqs"><span class="etq">⏱ 40 min</span><span class="etq">4 raciones</span><span class="etq">Táper</span><span class="etq">Vegetariana</span></div></div></div>
+<p class="ing"><b>Necesitas:</b> 2 boniatos, 1 bote de garbanzos, espinacas frescas, 1 aguacate, yogur natural, pimentón y comino.</p>
+<ol><li>Asa el boniato en dados con pimentón 25 min a 200 °C.</li><li>Tuesta los garbanzos con comino en la sartén.</li><li>Monta el bol con espinacas, boniato, garbanzos, aguacate y yogur.</li></ol></div><div class="ficha"><div class="ft"><span class="e">🐟</span><div><h3>Salmón al horno con verduras</h3>
+<div class="etqs"><span class="etq">⏱ 25 min</span><span class="etq">4 raciones</span><span class="etq">Omega 3</span></div></div></div>
+<p class="ing"><b>Necesitas:</b> 4 lomos de salmón (sirve congelado), 2 calabacines, 1 pimiento, 1 limón, aceite y sal.</p>
+<ol><li>Pon las verduras en una bandeja con aceite y sal y hornea 10 min a 200 °C.</li><li>Añade el salmón con limón y hornea 12 min más.</li></ol></div><div class="ficha"><div class="ft"><span class="e">🍣</span><div><h3>Poke de arroz y atún</h3>
+<div class="etqs"><span class="etq">⏱ 20 min</span><span class="etq">2 raciones</span><span class="etq">Táper</span></div></div></div>
+<p class="ing"><b>Necesitas:</b> arroz cocido, 2 latas de atún, 1 aguacate, 1 pepino, 1 zanahoria, maíz, soja y sésamo.</p>
+<ol><li>Reparte el arroz en el bol.</li><li>Coloca encima el atún, el aguacate, el pepino y la zanahoria en tiras y el maíz.</li><li>Aliña con soja y sésamo.</li></ol></div><div class="pie"><span>Recetario Ahorraulin · Comidas y cenas</span><span>13</span></div></section>
+<section class="pag "><div class="ficha"><div class="ft"><span class="e">🥢</span><div><h3>Wok de verduras con pollo</h3>
+<div class="etqs"><span class="etq">⏱ 20 min</span><span class="etq">4 raciones</span><span class="etq">Rápida</span></div></div></div>
+<p class="ing"><b>Necesitas:</b> 2 pechugas de pollo, 1 pimiento, 1 calabacín, 1 zanahoria, cebolleta, salsa de soja y jengibre.</p>
+<ol><li>Corta todo en tiras finas.</li><li>Saltea el pollo a fuego fuerte y sácalo.</li><li>Saltea las verduras, devuelve el pollo y añade la soja.</li></ol></div><div class="ficha"><div class="ft"><span class="e">🫘</span><div><h3>Ensalada templada de lentejas</h3>
+<div class="etqs"><span class="etq">⏱ 15 min</span><span class="etq">2 raciones</span><span class="etq">Táper</span><span class="etq">Vegetariana</span></div></div></div>
+<p class="ing"><b>Necesitas:</b> 1 bote de lentejas cocidas, 1 tomate, 1 pimiento, cebolleta, queso fresco, aceite, vinagre y mostaza.</p>
+<ol><li>Enjuaga las lentejas y témplalas en la sartén.</li><li>Mézclalas con las verduras picadas y el queso.</li><li>Aliña con aceite, vinagre y un poco de mostaza.</li></ol></div><div class="ficha"><div class="ft"><span class="e">🥒</span><div><h3>Quinoa con verduras asadas</h3>
+<div class="etqs"><span class="etq">⏱ 30 min</span><span class="etq">4 raciones</span><span class="etq">Táper</span><span class="etq">Vegana</span></div></div></div>
+<p class="ing"><b>Necesitas:</b> 200 g de quinoa, verduras para asar (calabacín, berenjena, pimiento, cebolla), 1 limón, perejil, aceite y sal.</p>
+<ol><li>Lava la quinoa y cuécela 12 min.</li><li>Asa las verduras en dados 20 min a 200 °C.</li><li>Mezcla todo con limón, perejil y aceite.</li></ol></div><div class="pie"><span>Recetario Ahorraulin · Comidas y cenas</span><span>14</span></div></section>
+<section class="pag parte"><div class="big">🌙</div><h1>Cenas</h1><p>Rápidas, ligeras o de capricho: para no acabar pidiendo comida a domicilio a las diez de la noche.</p><ul><li>⚡ Cenas en 15 minutos</li><li>🌙 Cenas ligeras</li><li>🍔 Fast food casero</li></ul></section>
+<section class="pag "><div class="cab"><div class="e" style="background:#e3ecff">⚡</div><div><h2>Cenas en 15 minutos</h2><small>Para cuando llegas tarde y la tentación es pedir</small></div></div><div class="ficha"><div class="ft"><span class="e">🍳</span><div><h3>Tortilla francesa rellena</h3>
+<div class="etqs"><span class="etq">⏱ 10 min</span><span class="etq">2 raciones</span><span class="etq">Rápida</span></div></div></div>
+<p class="ing"><b>Necesitas:</b> 4 huevos, jamón cocido, queso en lonchas, tomate, aceite y sal.</p>
+<ol><li>Bate 2 huevos por tortilla y cuájalos en la sartén.</li><li>Antes de doblarla, rellena con jamón, queso y tomate.</li><li>Dobla y deja 1 min para que se funda el queso.</li></ol></div><div class="ficha"><div class="ft"><span class="e">🍳</span><div><h3>Revuelto de champiñones y gambas</h3>
+<div class="etqs"><span class="etq">⏱ 15 min</span><span class="etq">2 raciones</span><span class="etq">Rápida</span></div></div></div>
+<p class="ing"><b>Necesitas:</b> 4 huevos, 200 g de champiñones, 150 g de gambas peladas congeladas, 1 ajo, aceite y sal.</p>
+<ol><li>Saltea el ajo, los champiñones laminados y las gambas.</li><li>Añade los huevos batidos y remueve a fuego suave hasta que cuajen.</li></ol></div><div class="ficha"><div class="ft"><span class="e">🥑</span><div><h3>Tostas de aguacate y huevo</h3>
+<div class="etqs"><span class="etq">⏱ 10 min</span><span class="etq">2 raciones</span><span class="etq">Rápida</span></div></div></div>
+<p class="ing"><b>Necesitas:</b> 4 rebanadas de pan, 1 aguacate, 2 huevos, tomate, aceite, sal y pimienta.</p>
+<ol><li>Tuesta el pan.</li><li>Machaca el aguacate con sal y aceite y úntalo.</li><li>Corona con tomate y un huevo a la plancha o cocido.</li></ol></div><div class="pie"><span>Recetario Ahorraulin · Comidas y cenas</span><span>16</span></div></section>
+<section class="pag "><div class="ficha"><div class="ft"><span class="e">🥚</span><div><h3>Huevos rotos con patatas</h3>
+<div class="etqs"><span class="etq">⏱ 20 min</span><span class="etq">2 raciones</span><span class="etq">Capricho barato</span></div></div></div>
+<p class="ing"><b>Necesitas:</b> 3 patatas, 2 huevos, jamón serrano (opcional), aceite y sal.</p>
+<ol><li>Haz las patatas en gajos finos al micro (8–10 min tapadas) o fritas.</li><li>Fríe los huevos.</li><li>Ponlos sobre las patatas y rómpelos con el jamón.</li></ol></div><div class="ficha"><div class="ft"><span class="e">🌯</span><div><h3>Wrap de pollo y queso</h3>
+<div class="etqs"><span class="etq">⏱ 15 min</span><span class="etq">2 raciones</span><span class="etq">Rápida</span></div></div></div>
+<p class="ing"><b>Necesitas:</b> 2 tortillas de trigo, 1 pechuga de pollo, lechuga, tomate, queso en lonchas, salsa de yogur.</p>
+<ol><li>Haz el pollo en tiras a la plancha.</li><li>Rellena las tortillas con todo y enrolla.</li><li>Dóralas 1 min por cada lado en la sartén.</li></ol></div><div class="ficha"><div class="ft"><span class="e">🥪</span><div><h3>Sándwich mixto gourmet</h3>
+<div class="etqs"><span class="etq">⏱ 10 min</span><span class="etq">2 raciones</span><span class="etq">Rápida</span></div></div></div>
+<p class="ing"><b>Necesitas:</b> 4 rebanadas de pan de molde, jamón cocido, queso, tomate, mantequilla o aceite.</p>
+<ol><li>Monta los sándwiches con jamón, queso y tomate.</li><li>Unta el pan por fuera y dóralo en la sartén por los dos lados.</li></ol></div><div class="pie"><span>Recetario Ahorraulin · Comidas y cenas</span><span>17</span></div></section>
+<section class="pag "><div class="ficha"><div class="ft"><span class="e">🍕</span><div><h3>Pizza de pan de pita</h3>
+<div class="etqs"><span class="etq">⏱ 15 min</span><span class="etq">2 raciones</span><span class="etq">Fast food casero</span></div></div></div>
+<p class="ing"><b>Necesitas:</b> 2 panes de pita, tomate frito, mozzarella, jamón, champiñones o lo que tengas, orégano.</p>
+<ol><li>Unta las pitas con tomate.</li><li>Añade los ingredientes y el queso.</li><li>Hornea 8–10 min a 220 °C o en la freidora de aire.</li></ol></div><div class="ficha"><div class="ft"><span class="e">🥘</span><div><h3>Salteado de verduras con huevo</h3>
+<div class="etqs"><span class="etq">⏱ 15 min</span><span class="etq">2 raciones</span><span class="etq">Vegetariana</span></div></div></div>
+<p class="ing"><b>Necesitas:</b> verduras de la nevera (calabacín, pimiento, cebolla, champiñón), 2 huevos, salsa de soja, aceite.</p>
+<ol><li>Saltea las verduras en tiras a fuego fuerte.</li><li>Añade los huevos batidos y remueve.</li><li>Termina con un chorrito de soja.</li></ol></div><div class="ficha"><div class="ft"><span class="e">🫓</span><div><h3>Quesadillas de pollo</h3>
+<div class="etqs"><span class="etq">⏱ 15 min</span><span class="etq">2 raciones</span><span class="etq">Fast food casero</span></div></div></div>
+<p class="ing"><b>Necesitas:</b> 4 tortillas de trigo, pollo cocinado desmigado, queso rallado, maíz, pimiento, salsa picante (opcional).</p>
+<ol><li>Rellena media tortilla con pollo, queso, maíz y pimiento.</li><li>Dobla y dora por los dos lados hasta que se funda el queso.</li><li>Corta en triángulos.</li></ol></div><div class="pie"><span>Recetario Ahorraulin · Comidas y cenas</span><span>18</span></div></section>
+<section class="pag "><div class="cab"><div class="e" style="background:#ece5ff">🌙</div><div><h2>Cenas ligeras</h2><small>Para acabar el día bien sin irte a dormir pesado</small></div></div><div class="ficha"><div class="ft"><span class="e">🥒</span><div><h3>Calabacín relleno de atún</h3>
+<div class="etqs"><span class="etq">⏱ 35 min</span><span class="etq">2 raciones</span><span class="etq">Ligera</span></div></div></div>
+<p class="ing"><b>Necesitas:</b> 2 calabacines, 2 latas de atún, ½ cebolla, tomate frito, queso rallado.</p>
+<ol><li>Parte los calabacines a lo largo, vacíalos y hornéalos 10 min a 200 °C.</li><li>Sofríe la cebolla con la pulpa picada, el atún y el tomate.</li><li>Rellena, cubre con queso y gratina 10 min.</li></ol></div><div class="ficha"><div class="ft"><span class="e">🐟</span><div><h3>Merluza al papillote</h3>
+<div class="etqs"><span class="etq">⏱ 20 min</span><span class="etq">2 raciones</span><span class="etq">Ligera</span></div></div></div>
+<p class="ing"><b>Necesitas:</b> 2 lomos de merluza (sirve congelada), 1 calabacín, 1 zanahoria, 1 limón, aceite y sal.</p>
+<ol><li>Pon el pescado sobre las verduras en tiras, en papel de horno.</li><li>Añade limón, aceite y sal y cierra el paquete.</li><li>Hornea 15 min a 200 °C.</li></ol></div><div class="ficha"><div class="ft"><span class="e">🥒</span><div><h3>Crema de calabacín</h3>
+<div class="etqs"><span class="etq">⏱ 25 min</span><span class="etq">4 raciones</span><span class="etq">Ligera</span><span class="etq">Se congela</span></div></div></div>
+<p class="ing"><b>Necesitas:</b> 3 calabacines, 1 cebolla, 1 patata pequeña, quesito o un poco de queso, aceite y sal.</p>
+<ol><li>Pocha la cebolla, añade el calabacín y la patata en trozos.</li><li>Cubre con agua y cuece 15 min.</li><li>Tritura con el quesito.</li></ol></div><div class="pie"><span>Recetario Ahorraulin · Comidas y cenas</span><span>19</span></div></section>
+<section class="pag "><div class="ficha"><div class="ft"><span class="e">🥗</span><div><h3>Ensalada templada de pollo</h3>
+<div class="etqs"><span class="etq">⏱ 15 min</span><span class="etq">2 raciones</span><span class="etq">Ligera</span></div></div></div>
+<p class="ing"><b>Necesitas:</b> 1 pechuga de pollo, mezcla de lechugas, tomates cherry, nueces, manzana, aceite, vinagre y miel.</p>
+<ol><li>Haz el pollo a la plancha en tiras.</li><li>Monta la ensalada con la manzana en láminas y las nueces.</li><li>Pon el pollo caliente encima y aliña.</li></ol></div><div class="ficha"><div class="ft"><span class="e">🍆</span><div><h3>Berenjenas rellenas</h3>
+<div class="etqs"><span class="etq">⏱ 45 min</span><span class="etq">4 raciones</span><span class="etq">Táper</span><span class="etq">Se congela</span></div></div></div>
+<p class="ing"><b>Necesitas:</b> 2 berenjenas, 250 g de carne picada, 1 cebolla, tomate frito, queso rallado.</p>
+<ol><li>Parte las berenjenas, hazles cortes y ásalas 20 min a 200 °C.</li><li>Vacía la pulpa y sofríela con la cebolla, la carne y el tomate.</li><li>Rellena, cubre con queso y gratina 10 min.</li></ol></div><div class="ficha"><div class="ft"><span class="e">🌱</span><div><h3>Revuelto de espárragos y ajetes</h3>
+<div class="etqs"><span class="etq">⏱ 15 min</span><span class="etq">2 raciones</span><span class="etq">Ligera</span></div></div></div>
+<p class="ing"><b>Necesitas:</b> 1 manojo de espárragos trigueros, 2 ajetes, 4 huevos, aceite y sal.</p>
+<ol><li>Saltea los espárragos y los ajetes troceados.</li><li>Añade los huevos batidos y cuaja a fuego suave.</li></ol></div><div class="pie"><span>Recetario Ahorraulin · Comidas y cenas</span><span>20</span></div></section>
+<section class="pag "><div class="ficha"><div class="ft"><span class="e">🥣</span><div><h3>Sopa de verduras</h3>
+<div class="etqs"><span class="etq">⏱ 30 min</span><span class="etq">4 raciones</span><span class="etq">Ligera</span><span class="etq">Se congela</span></div></div></div>
+<p class="ing"><b>Necesitas:</b> 1 puerro, 2 zanahorias, 1 calabacín, 1 patata, apio, sal y aceite.</p>
+<ol><li>Pica todas las verduras en dados pequeños.</li><li>Rehógalas 5 min y cubre con agua.</li><li>Cuece 20 min. Puedes añadir unos fideos.</li></ol></div><div class="ficha"><div class="ft"><span class="e">🍗</span><div><h3>Pechuga con verduras asadas</h3>
+<div class="etqs"><span class="etq">⏱ 30 min</span><span class="etq">2 raciones</span><span class="etq">Ligera</span></div></div></div>
+<p class="ing"><b>Necesitas:</b> 2 pechugas de pollo, 1 pimiento, 1 cebolla, 1 calabacín, hierbas provenzales, aceite y sal.</p>
+<ol><li>Asa las verduras en trozos 20 min a 200 °C.</li><li>Haz la pechuga a la plancha con las hierbas.</li><li>Sirve junto con las verduras.</li></ol></div><div class="ficha"><div class="ft"><span class="e">🥚</span><div><h3>Tortilla de calabacín</h3>
+<div class="etqs"><span class="etq">⏱ 20 min</span><span class="etq">2 raciones</span><span class="etq">Ligera</span><span class="etq">Vegetariana</span></div></div></div>
+<p class="ing"><b>Necesitas:</b> 1 calabacín, ½ cebolla, 4 huevos, aceite y sal.</p>
+<ol><li>Pocha la cebolla y el calabacín en dados.</li><li>Mézclalos con los huevos batidos.</li><li>Cuaja la tortilla por los dos lados.</li></ol></div><div class="pie"><span>Recetario Ahorraulin · Comidas y cenas</span><span>21</span></div></section>
+<section class="pag "><div class="cab"><div class="e" style="background:#fde3f3">🍔</div><div><h2>Fast food casero</h2><small>El capricho del viernes, más rico y mucho más barato que pedirlo</small></div></div><div class="ficha"><div class="ft"><span class="e">🌭</span><div><h3>Perritos con cebolla caramelizada</h3>
+<div class="etqs"><span class="etq">⏱ 20 min</span><span class="etq">4 raciones</span><span class="etq">Fast food casero</span></div></div></div>
+<p class="ing"><b>Necesitas:</b> 8 salchichas, 8 panes de perrito, 2 cebollas, queso rallado, kétchup y mostaza, un poco de azúcar.</p>
+<ol><li>Pocha la cebolla en tiras a fuego lento con una pizca de azúcar 15 min.</li><li>Haz las salchichas a la plancha.</li><li>Monta los perritos con la cebolla, el queso y las salsas.</li></ol></div><div class="ficha"><div class="ft"><span class="e">🍔</span><div><h3>Hamburguesa smash</h3>
+<div class="etqs"><span class="etq">⏱ 20 min</span><span class="etq">2 raciones</span><span class="etq">Fast food casero</span></div></div></div>
+<p class="ing"><b>Necesitas:</b> 300 g de carne picada de ternera, 2 panes de hamburguesa, queso cheddar, cebolla, pepinillos, kétchup y mostaza.</p>
+<ol><li>Haz bolas de 75 g y aplástalas fuerte en una sartén muy caliente.</li><li>Dales la vuelta a los 2 min y pon el queso encima.</li><li>Monta 2 carnes por pan con cebolla, pepinillo y salsas.</li></ol></div><div class="ficha"><div class="ft"><span class="e">🍕</span><div><h3>Pizza casera de verdad</h3>
+<div class="etqs"><span class="etq">⏱ 30 min</span><span class="etq">4 raciones</span><span class="etq">Fast food casero</span></div></div></div>
+<p class="ing"><b>Necesitas:</b> 1 masa de pizza (o 250 g de harina, levadura, agua y aceite), tomate triturado, mozzarella, tus ingredientes favoritos, orégano.</p>
+<ol><li>Estira la masa en la bandeja del horno.</li><li>Pon el tomate, el queso y los ingredientes.</li><li>Hornea 12–15 min a 230 °C, lo más fuerte que dé tu horno.</li></ol></div><div class="pie"><span>Recetario Ahorraulin · Comidas y cenas</span><span>22</span></div></section>
+<section class="pag "><div class="ficha"><div class="ft"><span class="e">🍗</span><div><h3>Nuggets de pollo al horno</h3>
+<div class="etqs"><span class="etq">⏱ 30 min</span><span class="etq">4 raciones</span><span class="etq">Fast food casero</span><span class="etq">Gusta a los niños</span></div></div></div>
+<p class="ing"><b>Necesitas:</b> 2 pechugas de pollo, 2 huevos, pan rallado o cereales de maíz triturados, pimentón, ajo en polvo y sal.</p>
+<ol><li>Corta el pollo en trozos y sazónalo.</li><li>Pásalos por huevo y por el rebozado.</li><li>Hornea 18–20 min a 200 °C con un poco de aceite por encima.</li></ol></div><div class="ficha"><div class="ft"><span class="e">🌮</span><div><h3>Tacos de carne picada</h3>
+<div class="etqs"><span class="etq">⏱ 20 min</span><span class="etq">4 raciones</span><span class="etq">Fast food casero</span></div></div></div>
+<p class="ing"><b>Necesitas:</b> 400 g de carne picada, 8 tortillas pequeñas, 1 cebolla, tomate, lechuga, queso rallado, comino y pimentón.</p>
+<ol><li>Sofríe la cebolla y la carne con las especias.</li><li>Calienta las tortillas en la sartén.</li><li>Rellena con la carne, lechuga, tomate y queso.</li></ol></div><div class="ficha"><div class="ft"><span class="e">🥙</span><div><h3>Kebab casero en pan de pita</h3>
+<div class="etqs"><span class="etq">⏱ 25 min</span><span class="etq">2 raciones</span><span class="etq">Fast food casero</span></div></div></div>
+<p class="ing"><b>Necesitas:</b> 2 contramuslos de pollo, 2 panes de pita, lechuga, tomate y cebolla, yogur natural, comino, pimentón, ajo.</p>
+<ol><li>Marina el pollo en tiras con las especias y un poco de yogur.</li><li>Hazlo a la plancha muy dorado.</li><li>Rellena la pita con el pollo, la verdura y salsa de yogur con ajo.</li></ol></div><div class="pie"><span>Recetario Ahorraulin · Comidas y cenas</span><span>23</span></div></section>
+<section class="pag "><div class="ficha"><div class="ft"><span class="e">🍟</span><div><h3>Patatas bravas caseras</h3>
+<div class="etqs"><span class="etq">⏱ 35 min</span><span class="etq">4 raciones</span><span class="etq">Para compartir</span></div></div></div>
+<p class="ing"><b>Necesitas:</b> 4 patatas, tomate frito, pimentón picante, mayonesa, ajo, aceite y sal.</p>
+<ol><li>Haz las patatas en dados al horno 25 min a 220 °C o en freidora de aire.</li><li>Calienta el tomate con el pimentón para la brava.</li><li>Sirve con la brava y alioli (mayonesa con ajo).</li></ol></div><div class="ficha"><div class="ft"><span class="e">🍗</span><div><h3>Alitas al horno con salsa barbacoa</h3>
+<div class="etqs"><span class="etq">⏱ 45 min</span><span class="etq">4 raciones</span><span class="etq">Para compartir</span></div></div></div>
+<p class="ing"><b>Necesitas:</b> 1 kg de alitas de pollo, salsa barbacoa, ajo en polvo, pimentón, sal.</p>
+<ol><li>Sazona las alitas con las especias.</li><li>Hornea 35 min a 200 °C dándoles la vuelta a mitad.</li><li>Píntalas con barbacoa y 5 min más de horno.</li></ol></div><div class="ficha"><div class="ft"><span class="e">🧀</span><div><h3>Nachos gratinados</h3>
+<div class="etqs"><span class="etq">⏱ 15 min</span><span class="etq">4 raciones</span><span class="etq">Para compartir</span></div></div></div>
+<p class="ing"><b>Necesitas:</b> 1 bolsa de nachos, queso rallado, carne picada o frijoles (opcional), guacamole, pico de gallo o tomate.</p>
+<ol><li>Extiende los nachos en una fuente.</li><li>Cubre con el queso y la carne si la usas.</li><li>Gratina 5 min y sirve con guacamole y tomate.</li></ol></div><div class="pie"><span>Recetario Ahorraulin · Comidas y cenas</span><span>24</span></div></section>
+<section class="pag "><div class="cab"><div class="e" style="background:#ece5ff">🗓️</div><div><h2>Una semana de ejemplo</h2><small>Comidas y cenas, sin repetir y sin pedir a domicilio</small></div></div>
+<table class="plan"><tr><td class="d">Lunes</td><td><b>☀️</b> Sopa castellana<br><b>🌙</b> Merluza al papillote</td></tr><tr><td class="d">Martes</td><td><b>☀️</b> Risotto de champiñones<br><b>🌙</b> Revuelto de champiñones y gambas</td></tr><tr><td class="d">Miércoles</td><td><b>☀️</b> Pollo al limón con brócoli<br><b>🌙</b> Calabacín relleno de atún</td></tr><tr><td class="d">Jueves</td><td><b>☀️</b> Lentejas estofadas con verduras<br><b>🌙</b> Huevos rotos con patatas</td></tr><tr><td class="d">Viernes</td><td><b>☀️</b> Espaguetis con gambas al ajillo<br><b>🌙</b> Perritos con cebolla caramelizada</td></tr><tr><td class="d">Sábado</td><td><b>☀️</b> Arroz tres delicias<br><b>🌙</b> Hamburguesa smash</td></tr><tr><td class="d">Domingo</td><td><b>☀️</b> Potaje de alubias con verduras<br><b>🌙</b> Revuelto de espárragos y ajetes</td></tr></table>
+<div class="caja"><h3>📲 Apúntalo</h3>Cada comida en casa en vez de fuera es dinero que se queda contigo. A final de mes mira en Ahorraulin cuánto ha bajado <b>🍔 Comer fuera</b>.</div><div class="pie"><span>Recetario Ahorraulin · Comidas y cenas</span><span>25</span></div></section>
+<section class="pag final">
+  <div style="font-size:56pt">🍱</div>
+  <h2>¡Que aproveche!</h2>
+  <p>Cada plato que haces en casa es una comida fuera que te ahorras. Sigue sumando medallas en Ahorraulin: el premio gordo es un <b>show de magia privado en tu casa</b> 🎩✨</p>
+  <p style="margin-top:8mm;font-size:9pt;opacity:.85">Revisa siempre las etiquetas si tienes alguna alergia o intolerancia.<br>Ahorraulin · Edición 2026</p>
+</section></body></html>

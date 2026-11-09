@@ -280,10 +280,76 @@ body.tapado .ojo-fijo{background:var(--p);border-color:var(--p)}
 body.tapado .m{filter:blur(7px);opacity:.75;cursor:pointer;-webkit-user-select:none;user-select:none}
 body.tapado .balance .n .m{filter:blur(12px)}
 body.tapado .vchart .tip{display:none}
+/* rachas */
+.racha{display:flex;align-items:center;gap:12px;padding:12px 14px}
+.racha .fuego{width:46px;height:46px;border-radius:15px;background:linear-gradient(135deg,#ffe4c4,#ffd0d0);display:grid;place-items:center;font-size:25px;flex:0 0 auto}
+.racha .fuego.vivo{animation:latido 1.6s ease-in-out infinite}
+@keyframes latido{50%{transform:scale(1.1) rotate(-4deg)}}
+body.dark .racha .fuego{background:linear-gradient(135deg,#5a3a20,#5a2a2a)}
+.racha .rt{flex:1;min-width:0}.racha .rt b{display:block;font-family:Fredoka,sans-serif;font-size:18px}.racha .rt small{color:var(--ink3);font-weight:800;font-size:12.5px}
+.racha .nada{background:var(--soft);color:var(--ink2);border-radius:999px;padding:9px 12px;font-weight:900;font-size:12.5px;flex:0 0 auto}
+/* medallas */
+.medallas{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.medalla{display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 4px;border-radius:16px;background:var(--soft);min-width:0}
+.medalla .me{font-size:26px;filter:grayscale(1);opacity:.45}
+.medalla .mn{font-size:10.5px;font-weight:900;color:var(--ink3);text-align:center;line-height:1.15}
+.medalla.si{background:linear-gradient(160deg,#fff3c4,#ffe0ef)}
+body.dark .medalla.si{background:linear-gradient(160deg,#4a3d10,#4a2035)}
+.medalla.si .me{filter:none;opacity:1}.medalla.si .mn{color:var(--ink)}
+.rs-cta{background:linear-gradient(135deg,var(--p),var(--p2));color:#fff}
+/* resumen del mes */
+.rs{position:fixed;inset:0;z-index:50;background:linear-gradient(160deg,var(--p) 0%,var(--p2) 100%);color:#fff;display:none;-webkit-user-select:none;user-select:none;overflow:hidden}
+.rs.show{display:block;animation:rsIn .3s ease}
+@keyframes rsIn{from{opacity:0;transform:scale(1.04)}}
+.rs::before{content:"";position:absolute;width:420px;height:420px;border-radius:50%;background:rgba(255,255,255,.1);right:-140px;top:-120px}
+.rs-barras{position:absolute;top:calc(12px + var(--st));left:14px;right:60px;display:flex;gap:4px;z-index:2}
+.rs-barras i{flex:1;height:4px;border-radius:4px;background:rgba(255,255,255,.3);overflow:hidden}
+.rs-barras b{display:block;height:100%;width:0;background:#fff;transition:width .35s}
+.rs-x{position:absolute;top:calc(2px + var(--st));right:10px;width:44px;height:44px;color:#fff;font-size:20px;z-index:3}
+.rs-slide{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:60px 28px;opacity:0;pointer-events:none;transform:translateX(30px);transition:.35s}
+.rs-slide.on{opacity:1;pointer-events:auto;transform:none}
+.rs-slide h3{font-family:Fredoka,sans-serif;font-size:34px;line-height:1.1;margin:10px 0}
+.rs-slide p{font-size:18px;font-weight:800;margin:6px 0;opacity:.95;max-width:420px}
+.rs-slide .rs-sm{font-size:15px;opacity:.8}
+.rs-big{font-size:86px;line-height:1;margin-bottom:8px;width:100%;text-align:center;animation:pop .5s cubic-bezier(.2,1.6,.4,1)}
+.rs-slide:not(.on) .rs-big{animation:none}
+@keyframes pop{from{transform:scale(.3);opacity:0}}
+.rs .m{color:#fff}
+.rs-btns{display:flex;gap:10px;margin:18px 0 6px}
+.rs-b{background:#fff;color:var(--p);border-radius:999px;padding:14px 22px;font-weight:900;font-size:16px}
+.rs-b.blanco{background:rgba(255,255,255,.2);color:#fff}
+/* premios */
+.premio{display:flex;align-items:center;gap:12px;width:100%;text-align:left;padding:12px;border-radius:18px;background:var(--soft);margin-top:8px}
+.premio .pe{width:42px;height:42px;border-radius:14px;background:var(--card);display:grid;place-items:center;font-size:22px;flex:0 0 auto;filter:grayscale(1);opacity:.6}
+.premio .pt{flex:1;min-width:0}.premio .pt b{display:block;font-size:14.5px}.premio .pt small{color:var(--ink3);font-weight:800;font-size:12px}
+.premio .pa{font-size:24px;font-weight:900;color:var(--p)}
+.premio.si{background:linear-gradient(135deg,#fff3c4,#ffe0ef)}
+body.dark .premio.si{background:linear-gradient(135deg,#4a3d10,#4a2035)}
+.premio.si .pe{filter:none;opacity:1}.premio.si .pt small{color:var(--p)}
+.premio.usado{opacity:.6}
+.vale-nuevo{text-align:center;font-family:Fredoka,sans-serif;font-size:22px;margin:-6px 0 12px;color:var(--p)}
+.vale{background:linear-gradient(150deg,var(--p),var(--p2));color:#fff;border-radius:24px;padding:22px 20px;text-align:center;position:relative;margin-bottom:14px}
+.vale.usado{filter:grayscale(.8)}
+.vale-e{font-size:54px;line-height:1}
+.vale-n{display:block;font-family:Fredoka,sans-serif;font-size:23px;margin:8px 0 6px}
+.vale-d{font-size:14px;font-weight:700;opacity:.92;line-height:1.4}
+.vale-corte{border-top:2px dashed rgba(255,255,255,.45);margin:16px -6px 12px;position:relative}
+.vale-corte::before,.vale-corte::after{content:"";position:absolute;top:-12px;width:22px;height:22px;border-radius:50%;background:var(--card)}
+.vale-corte::before{left:-28px}.vale-corte::after{right:-28px}
+.vale small{display:block;font-weight:800;opacity:.85;font-size:12px}
+.vale-c{font-family:ui-monospace,Menlo,monospace;font-size:30px;font-weight:900;letter-spacing:3px;margin:4px 0 6px;-webkit-user-select:all;user-select:all}
+#valeBody .btn{display:block;text-align:center;text-decoration:none}
+.rachagrande{display:flex;align-items:center;gap:14px}
+.rachagrande .fuego{width:64px;height:64px;border-radius:20px;background:linear-gradient(135deg,#ffe4c4,#ffd0d0);display:grid;place-items:center;font-size:36px;flex:0 0 auto}
+.rachagrande .fuego.vivo{animation:latido 1.6s ease-in-out infinite}
+body.dark .rachagrande .fuego{background:linear-gradient(135deg,#5a3a20,#5a2a2a)}
+.rachagrande .rt b{display:block;font-family:Fredoka,sans-serif;font-size:26px;line-height:1.1}
+.rachagrande .rt small{display:block;color:var(--ink3);font-weight:800;font-size:12.5px;margin-top:2px}
+.rachagrande .rt small b{display:inline;font-family:Nunito,sans-serif;font-size:12.5px;color:var(--ink)}
 /* nav */
 nav{position:fixed;left:0;right:0;bottom:0;background:color-mix(in srgb,var(--card) 92%,transparent);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-top:1px solid var(--line);padding:6px 6px calc(6px + var(--sb));z-index:10}
-nav .in{display:grid;grid-template-columns:repeat(6,1fr);gap:2px;max-width:560px;margin:0 auto}
-nav button{display:flex;flex-direction:column;align-items:center;gap:1px;padding:7px 0;border-radius:16px;font-size:10.5px;min-width:0;font-weight:900;color:var(--ink3);min-height:54px}
+nav .in{display:flex;gap:1px;max-width:560px;margin:0 auto}
+nav button{display:flex;flex-direction:column;align-items:center;gap:1px;padding:7px 0;border-radius:14px;font-size:9.6px;letter-spacing:-.2px;white-space:nowrap;flex:1 1 0;min-width:max-content;padding-left:3px;padding-right:3px;font-weight:900;color:var(--ink3);min-height:54px}
 nav button .e{font-size:22px;line-height:1.1;filter:grayscale(.7);opacity:.7;transition:.15s}
 nav button.on{color:var(--p);background:var(--p-soft)}
 nav button.on .e{filter:none;opacity:1;transform:translateY(-1px) scale(1.08)}
@@ -382,6 +448,7 @@ nav button.on .e{filter:none;opacity:1;transform:translateY(-1px) scale(1.08)}
 
     <!-- Apuntar -->
     <div id="v-add">
+      <div class="card racha" id="rachaCard"></div>
       <div class="card">
         <div class="seg" id="seg"><button data-t="gasto" class="on">💸 Gasto</button><button data-t="ingreso">💰 Ingreso</button></div>
         <div class="cats" id="cats"></div>
@@ -410,6 +477,9 @@ nav button.on .e{filter:none;opacity:1;transform:translateY(-1px) scale(1.08)}
     <!-- Ahorro -->
     <div id="v-save" class="hidden"><div id="saveBody"></div></div>
 
+    <!-- Recompensas -->
+    <div id="v-premios" class="hidden"><div id="premiosBody"></div></div>
+
     <!-- Ideas -->
     <div id="v-ideas" class="hidden"><div id="ideasBody"></div></div>
 
@@ -420,6 +490,8 @@ nav button.on .e{filter:none;opacity:1;transform:translateY(-1px) scale(1.08)}
         <h2>👑 Administrador</h2>
         <div class="muted small" style="margin-bottom:6px">Si alguien olvida su código, restablécelo aquí. La próxima vez que entre creará uno nuevo. Sus gastos no se tocan.</div>
         <div id="adminList"></div>
+        <div class="sub-h">🎁 Vales de premios</div>
+        <div id="adminPremios"></div>
       </div>
       <div class="card">
         <h2>Tu perfil</h2>
@@ -482,6 +554,7 @@ nav button.on .e{filter:none;opacity:1;transform:translateY(-1px) scale(1.08)}
   <button data-v="charts"><span class="e">📊</span>Gráficas</button>
   <button data-v="save"><span class="e">🐷</span>Ahorro</button>
   <button data-v="ideas"><span class="e">💡</span>Ideas</button>
+  <button data-v="premios"><span class="e">🏆</span>Recompensas</button>
   <button data-v="set"><span class="e">⚙️</span>Ajustes</button>
 </div></nav>
 
@@ -540,12 +613,23 @@ nav button.on .e{filter:none;opacity:1;transform:translateY(-1px) scale(1.08)}
   </div>
 </div></div>
 
+<div class="modal" id="valeModal"><div class="sheet" role="dialog" aria-modal="true" aria-label="Tu premio">
+  <div class="grab"></div>
+  <div style="display:flex;justify-content:flex-end"><button class="x" id="valeCerrar" aria-label="Cerrar">✕</button></div>
+  <div id="valeBody"></div>
+</div></div>
+<div class="rs" id="resumen" role="dialog" aria-modal="true" aria-label="Tu mes en resumen">
+  <div class="rs-barras" id="rsBarras"></div>
+  <button class="rs-x" id="rsX" aria-label="Cerrar">✕</button>
+  <div id="rsSlides"></div>
+</div>
 <div class="toast" id="toast"><div class="tt"><b id="toastFrase" class="hidden"></b><span id="toastTxt"></span></div><button id="undo">Deshacer</button></div>
 
-<script src="config.js?v=28"></script>
-<script src="datos.js?v=28"></script>
-<script src="excel.js?v=28"></script>
+<script src="config.js?v=34"></script>
+<script src="datos.js?v=34"></script>
+<script src="excel.js?v=34"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js" defer></script>
-<script src="app.js?v=28"></script>
+<script src="app.js?v=34"></script>
+<script src="logros.js?v=34"></script>
 </body>
 </html>

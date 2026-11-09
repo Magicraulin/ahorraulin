@@ -38,7 +38,8 @@ const PALETAS = {
   naranja:  ["#e0622a","#f6a35c","Naranja"],
   coral:    ["#e04f5f","#f7878f","Coral"],
   turquesa: ["#0f8fa8","#4cc6d9","Turquesa"],
-  noche:    ["#2d2a4a","#5f5a94","Noche"]
+  noche:    ["#2d2a4a","#5f5a94","Noche"],
+  oro:      ["#a87a12","#e2b84a","Dorado ✨"]   // solo para quien gana «Apuntador de oro»
 };
 
 const EMOJIS = ["🎩","🪄","🃏","🐰","📚","✏️","🍎","🎓","🌸","🌻","🌈","⭐","🦄","🐱","🐶","🦊",
