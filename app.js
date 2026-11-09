@@ -3,7 +3,7 @@
    ===================================================================== */
 "use strict";
 const CFG = window.CONFIG || {};
-const VERSION = "3.8";
+const VERSION = "3.9";
 const ADMIN = "p1";   // Raúl es el administrador
 const REMOTO = !!(CFG.supabaseUrl && CFG.supabaseKey);
 const IA = !!CFG.workerUrl;
@@ -434,11 +434,13 @@ function abrirSesion(id, pin, r){
   document.querySelectorAll("nav button").forEach(x => x.classList.toggle("on", x.dataset.v === "add"));
   show("app"); pintarCabecera(); pintarCats(); pintarTodo();
   cargarPremios();
-  const rk = resumenPendiente(); if (rk) setTimeout(() => { if (S && S.id === id) abrirResumen(rk); }, 700);
+  if (tutorialPendiente()) setTimeout(() => { if (S && S.id === id) empezarTutorial(); }, 600);
+  else { const rk = resumenPendiente(); if (rk) setTimeout(() => { if (S && S.id === id) abrirResumen(rk); }, 700); }
 }
 function cerrarSesion(){
   if (window.__actualizar){ window.__actualizar(); return; }
   if (resumen){ $("resumen").classList.remove("show"); resumen = null; }
+  if (tuto){ tuto = null; $("tuto").classList.remove("show"); }
   $("valeModal").classList.remove("show");
   valePendiente = null;
   S = null; copiasCache = null; $("adminCard").classList.add("hidden"); $("adminList").innerHTML = ""; cerrarEntry(); show("menu"); cargarMenu();

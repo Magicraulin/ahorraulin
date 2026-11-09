@@ -238,48 +238,106 @@ function datosResumen(k){
            diasN: dias.length, rachaMes: rachaMaxima(dias), diaTop, cambio: gp > 0 ? Math.round((g - gp) / gp * 100) : null, mesPrev: monthOnly(shiftMonth(k, -1)) };
 }
 let resumen = null;
+const RS_DUR = 6000;   // ms por tarjeta
+// Números que cuentan solos (si son euros, se tapan con el modo discreto)
+const cnt = (v, t) => `<b class="cnt${t === "eur" ? " m" : ""}" data-v="${v}" data-t="${t}">${t === "eur" ? eur(0) : t === "pct" ? "0 %" : "0"}</b>`;
+function contar(slide){
+  slide.querySelectorAll(".cnt").forEach(el => {
+    const fin = Number(el.dataset.v), t = el.dataset.t, ini = performance.now(), dur = 1300;
+    const pinta = x => el.textContent = t === "eur" ? eur(Math.round(x * 100) / 100) : t === "pct" ? Math.round(x) + " %" : String(Math.round(x));
+    const paso = now => { const k = Math.min(1, (now - ini) / dur), e = 1 - Math.pow(1 - k, 3); pinta(fin * e); if (k < 1 && resumen) requestAnimationFrame(paso); else pinta(fin); };
+    requestAnimationFrame(paso);
+  });
+}
 function abrirResumen(k){
-  const d = datosResumen(k), mes = monthOnly(k), P = S.perfil, ganadas = medallasGanadas();
-  const sl = [];
-  sl.push(`<div class="rs-big">${esc(P.emoji)}</div><h3>Tu ${mes}<br>en Ahorraulin</h3><p>Toca para ver cómo te ha ido ▶</p>`);
-  sl.push(`<div class="rs-big">${d.quedan >= 0 ? "🟢" : "🔴"}</div><p>Entraron <b>${eur(d.i)}</b><br>y se fueron <b>${eur(d.g)}</b></p>
-           <h3>${d.quedan >= 0 ? `Te quedaron ${eur(d.quedan)}` : `Te pasaste ${eur(-d.quedan)}`}</h3>
-           ${d.tasa !== null ? `<p>${d.tasa >= 20 ? `¡Ahorraste el ${d.tasa} %! Eso es nivel pro 🏆` : d.tasa >= 0 ? `Ahorraste el ${d.tasa} % de lo que entró` : "Este mes tocó tirar de colchón. ¡El próximo, mejor! 💪"}</p>` : ""}
-           ${d.guard > 0 ? `<p class="rs-sm">Y además apartaste ${eur(d.guard)} en ahorro e inversión 🐷</p>` : ""}`);
+  const d = datosResumen(k), mes = monthOnly(k), P = S.perfil, ganadas = medallasGanadas(), C = PALETAS[P.color] || PALETAS.violeta;
+  const sl = [];   // { fondo:[color1,color2], flota:"emojis", html, fiesta }
+  sl.push({ fondo:[C[0], C[1]], flota:"✨💸🪙", html:`<div class="rs-big gira">${esc(P.emoji)}</div><div class="rs-pre">Tu resumen de</div><h3 class="rs-mes">${mes}</h3><p>Prepárate, que vienen datos 👀</p>` });
+  sl.push({ fondo: d.quedan >= 0 ? ["#0f9b6c","#4fd1a5"] : ["#c0392b","#f5876b"], flota: d.quedan >= 0 ? "💚🪙✨" : "💸🔥😅", fiesta: d.quedan >= 0,
+    html:`<div class="rs-big rebota">${d.quedan >= 0 ? "🤑" : "😬"}</div><p>Entraron ${cnt(d.i,"eur")}<br>y se fueron ${cnt(d.g,"eur")}</p>
+      <h3>${d.quedan >= 0 ? "Te quedaron" : "Te pasaste"}<br><span class="rs-gigante">${cnt(Math.abs(d.quedan),"eur")}</span></h3>
+      ${d.tasa !== null ? `<p class="rs-chip">${d.tasa >= 20 ? `🏆 Ahorraste el ${cnt(d.tasa,"pct")} · ¡nivel pro!` : d.tasa >= 0 ? `Ahorraste el ${cnt(d.tasa,"pct")} de lo que entró` : "Tocó tirar de colchón. ¡El próximo, mejor! 💪"}</p>` : ""}
+      ${d.guard > 0 ? `<p class="rs-sm">Y además apartaste ${cnt(d.guard,"eur")} en ahorro 🐷</p>` : ""}` });
   if (d.top){ const c = catOf({ tipo:"gasto", cat:d.top[0] }), p = d.g ? Math.round(d.top[1] / d.g * 100) : 0;
-    sl.push(`<p>Tu categoría estrella fue…</p><div class="rs-big">${c.e}</div><h3>${esc(c.n)}</h3><p><b>${eur(d.top[1])}</b> · el ${p} % de tus gastos</p><p class="rs-sm">${esc(COMENTARIO_CAT[d.top[0]] || COMENTARIO_CAT.otros)}</p>`); }
-  if (d.diaTop) sl.push(`<p>Tu día más gastón fue el…</p><div class="rs-big">📅</div><h3>${esc(dayLabel(d.diaTop[0]))}</h3><p>Ese día se fueron <b>${eur(d.diaTop[1])}</b></p><p class="rs-sm">¿Qué pasó ese día? 👀</p>`);
-  if (d.cambio !== null) sl.push(`<div class="rs-big">${d.cambio <= 0 ? "📉" : "📈"}</div><h3>${d.cambio <= 0 ? `Gastaste un ${-d.cambio} % menos` : `Gastaste un ${d.cambio} % más`}</h3><p>que en ${esc(d.mesPrev)}</p><p class="rs-sm">${d.cambio <= -10 ? "¡Eso es mejorar! 👏" : d.cambio <= 0 ? "Poco a poco, pero en la buena dirección." : d.cambio < 15 ? "Un pelín más… nada que no se arregle." : "Este mes se te fue un poco de las manos 😅"}</p>`);
-  sl.push(`<div class="rs-big">🔥</div><h3>${d.n} apuntes</h3><p>en ${d.diasN} días distintos</p><p>Tu mejor racha del mes: <b>${d.rachaMes} ${d.rachaMes === 1 ? "día" : "días"}</b></p><p class="rs-sm">🏅 Llevas ${ganadas.length} de ${MEDALLAS.length} medallas</p>`);
-  sl.push(`<div class="rs-big">💪</div><h3>¡A por ${monthOnly(shiftMonth(k, 1))}!</h3><p>Cada euro que apuntas es un euro que controlas.</p>
-           <div class="rs-btns"><button class="rs-b" id="rsCompartir">📤 Compartir</button><button class="rs-b blanco" id="rsCerrar">Cerrar</button></div>
-           <p class="rs-sm">Al compartir solo salen porcentajes, nunca tus cantidades.</p>`);
-  resumen = { k, i:0, n: sl.length, d };
-  $("rsSlides").innerHTML = sl.map((h, i) => `<div class="rs-slide" data-i="${i}">${h}</div>`).join("");
+    sl.push({ fondo:["#ff7a59","#ffb347"], flota: c.e.repeat(3),
+      html:`<p class="rs-pre">Tu categoría estrella fue…</p><div class="rs-big zoom">${c.e}</div><h3>${esc(c.n)}</h3>
+        <div class="rs-anillo" style="--p:${p}"><span>${cnt(p,"pct")}</span></div><p>${cnt(d.top[1],"eur")} de tus gastos</p><p class="rs-sm">${esc(COMENTARIO_CAT[d.top[0]] || COMENTARIO_CAT.otros)}</p>` }); }
+  if (d.diaTop) sl.push({ fondo:["#2a78d6","#9a7cf3"], flota:"📅💳🛍️",
+    html:`<p class="rs-pre">Tu día más gastón fue el…</p><div class="rs-big rebota">📅</div><h3>${esc(dayLabel(d.diaTop[0]))}</h3><p>Ese día se fueron ${cnt(d.diaTop[1],"eur")}</p><p class="rs-sm">¿Qué pasó ese día? 👀</p>` });
+  if (d.cambio !== null) sl.push({ fondo: d.cambio <= 0 ? ["#13a383","#a8e063"] : ["#e04f5f","#f7b267"], flota: d.cambio <= 0 ? "📉👏✨" : "📈😅💸", fiesta: d.cambio <= -10,
+    html:`<div class="rs-big ${d.cambio <= 0 ? "baja" : "sube"}">${d.cambio <= 0 ? "📉" : "📈"}</div><h3>Gastaste un<br><span class="rs-gigante">${cnt(Math.abs(d.cambio),"pct")}</span><br>${d.cambio <= 0 ? "menos" : "más"}</h3><p>que en ${esc(d.mesPrev)}</p>
+      <p class="rs-sm">${d.cambio <= -10 ? "¡Eso es mejorar! 👏" : d.cambio <= 0 ? "Poco a poco, en la buena dirección." : d.cambio < 15 ? "Un pelín más… nada que no se arregle." : "Este mes se te fue un poco de las manos 😅"}</p>` });
+  sl.push({ fondo:["#f12711","#f5af19"], flota:"🔥🔥✨",
+    html:`<div class="rs-big latido">🔥</div><h3><span class="rs-gigante">${cnt(d.n,"int")}</span><br>apuntes</h3><p>en ${cnt(d.diasN,"int")} días distintos</p><p class="rs-chip">Tu mejor racha: ${cnt(d.rachaMes,"int")} ${d.rachaMes === 1 ? "día" : "días"}</p><p class="rs-sm">🏅 Llevas ${ganadas.length} de ${MEDALLAS.length} medallas</p>` });
+  sl.push({ fondo:[C[0], "#e04fa0"], flota:"🎉🥳✨", fiesta:true, ultima:true,
+    html:`<div class="rs-big gira">💪</div><h3>¡A por<br>${monthOnly(shiftMonth(k, 1))}!</h3><p>Cada euro que apuntas es un euro que controlas.</p>
+      <div class="rs-btns"><button class="rs-b" id="rsCompartir">📤 Compartir</button><button class="rs-b blanco" id="rsCerrar">Cerrar</button></div>
+      <p class="rs-sm">Al compartir solo salen porcentajes, nunca tus cantidades.</p>` });
+  resumen = { k, i:0, n: sl.length, d, sl, pausa:false };
+  $("rsSlides").innerHTML = sl.map((x, i) => `<div class="rs-slide" data-i="${i}">${x.html}</div>`).join("");
   $("rsBarras").innerHTML = sl.map(() => `<i><b></b></i>`).join("");
-  marcarImportes($("rsSlides"));
   $("resumen").classList.add("show"); irSlide(0);
   const vistos = LS.get(kResumen(), {}); vistos[k] = 1; LS.set(kResumen(), vistos);
+}
+function pintarFlota(emojis){
+  const l = [...emojis]; let h = "";
+  for (let i = 0; i < 14; i++) h += `<span style="left:${(i * 7.3 + Math.random() * 6) % 100}%;animation-delay:${(-Math.random() * 9).toFixed(1)}s;animation-duration:${(7 + Math.random() * 6).toFixed(1)}s;font-size:${(18 + Math.random() * 22) | 0}px">${l[i % l.length]}</span>`;
+  $("rsFlota").innerHTML = h;
 }
 function irSlide(i){
   if (!resumen) return;
   if (i >= resumen.n){ cerrarResumen(); return; }
   resumen.i = Math.max(0, i);
+  const x = resumen.sl[resumen.i];
+  // Fondo: se funde con el siguiente color
+  const capa = $("rsFondo"), nueva = document.createElement("div");
+  nueva.className = "rs-capa"; nueva.style.background = `linear-gradient(160deg,${x.fondo[0]} 0%,${x.fondo[1]} 100%)`;
+  capa.appendChild(nueva); requestAnimationFrame(() => nueva.classList.add("on"));
+  setTimeout(() => { while (capa.children.length > 1) capa.firstChild.remove(); }, 700);
+  pintarFlota(x.flota || "✨");
   document.querySelectorAll("#rsSlides .rs-slide").forEach((s, j) => s.classList.toggle("on", j === resumen.i));
-  document.querySelectorAll("#rsBarras b").forEach((b, j) => b.style.width = j <= resumen.i ? "100%" : "0");
+  const slide = document.querySelector(`#rsSlides .rs-slide[data-i="${resumen.i}"]`);
+  contar(slide);
+  if (x.fiesta) setTimeout(() => { if (resumen && resumen.i === i) confetti(); }, 500);
+  // Barras tipo «historias»: la actual se llena sola y pasa a la siguiente
+  document.querySelectorAll("#rsBarras b").forEach((b, j) => {
+    b.style.animation = "none"; void b.offsetWidth;
+    if (j < resumen.i) b.style.width = "100%";
+    else if (j > resumen.i) b.style.width = "0";
+    else { b.style.width = "0"; b.style.animation = `rsLlena ${RS_DUR}ms linear forwards`; b.style.animationPlayState = resumen.pausa ? "paused" : "running";
+           b.onanimationend = () => { if (resumen && resumen.i === j && !x.ultima) irSlide(j + 1); }; }
+  });
+}
+function pausarResumen(p){
+  if (!resumen) return; resumen.pausa = p;
+  const b = document.querySelectorAll("#rsBarras b")[resumen.i]; if (b) b.style.animationPlayState = p ? "paused" : "running";
+  $("resumen").classList.toggle("pausa", p);
 }
 let valePendiente = null;
 function cerrarResumen(){
-  $("resumen").classList.remove("show"); resumen = null; revisarMedallas(); if (S) pintarTodo();
+  $("resumen").classList.remove("show"); resumen = null; $("rsFlota").innerHTML = "";
+  revisarMedallas(); if (S) pintarTodo();
   if (valePendiente && S){ const t = valePendiente; valePendiente = null; setTimeout(() => { confetti(); abrirVale(t, true); }, 400); }
 }
+// Tocar a la izquierda = atrás, a la derecha = adelante; mantener pulsado = pausa
+let rsToque = null;
+$("resumen").addEventListener("pointerdown", e => {
+  if (!resumen || e.target.closest("button")) return;
+  rsToque = { t: Date.now(), x: e.clientX }; pausarResumen(true);
+});
+$("resumen").addEventListener("pointerup", e => {
+  if (!resumen || !rsToque) return;
+  const largo = Date.now() - rsToque.t > 280, x = rsToque.x; rsToque = null; pausarResumen(false);
+  if (largo) return;
+  if (TAPADO && e.target.closest(".m")){ ponerTapado(false, true); return; }
+  const r = $("resumen").getBoundingClientRect();
+  irSlide(resumen.i + (x < r.left + r.width * .3 ? -1 : 1));
+});
+$("resumen").addEventListener("pointercancel", () => { rsToque = null; pausarResumen(false); });
 $("resumen").addEventListener("click", e => {
   if (!resumen) return;
   if (e.target.closest("#rsCerrar") || e.target.closest("#rsX")){ cerrarResumen(); return; }
   if (e.target.closest("#rsCompartir")){ compartirResumen(); return; }
-  if (TAPADO && e.target.closest(".m")){ ponerTapado(false, true); return; }
-  const r = $("resumen").getBoundingClientRect();
-  irSlide(resumen.i + (e.clientX < r.left + r.width * .3 ? -1 : 1));
 });
 document.addEventListener("keydown", e => { if (!resumen) return; if (e.key === "Escape") cerrarResumen(); if (e.key === "ArrowRight") irSlide(resumen.i + 1); if (e.key === "ArrowLeft") irSlide(resumen.i - 1); });
 document.addEventListener("click", e => { if (e.target.closest("#verResumen")){ vibrar(); abrirResumen(e.target.closest("#verResumen").dataset.k); } });
