@@ -126,7 +126,7 @@ async function reclamarPremios(g){
   try {
     for (const p of nuevos){ const r = await Store.reclamarPremio(S.id, S.pin, p.tipo, TEMPORADA()); if (r.ok) S.premios = r.premios; }
     const tipo = nuevos[nuevos.length - 1].tipo;
-    setTimeout(() => { if (resumen || $("resumen").classList.contains("show")) valePendiente = tipo; else { confetti(); abrirVale(tipo, true); } }, 1200);
+    setTimeout(() => { if (resumen || $("resumen").classList.contains("show") || (typeof tuto !== "undefined" && tuto)) valePendiente = tipo; else { confetti(); abrirVale(tipo, true); } }, 1200);
     pintarCabecera(); if (view === "premios") pintarRecompensas(); if (view === "perfil") pintarPerfil();
   } catch(e){} finally { reclamarPremios.ocupado = false; }
 }

@@ -3,7 +3,7 @@
    ===================================================================== */
 "use strict";
 const CFG = window.CONFIG || {};
-const VERSION = "3.9";
+const VERSION = "3.10";
 const ADMIN = "p1";   // Raúl es el administrador
 const REMOTO = !!(CFG.supabaseUrl && CFG.supabaseKey);
 const IA = !!CFG.workerUrl;
@@ -434,7 +434,8 @@ function abrirSesion(id, pin, r){
   document.querySelectorAll("nav button").forEach(x => x.classList.toggle("on", x.dataset.v === "add"));
   show("app"); pintarCabecera(); pintarCats(); pintarTodo();
   cargarPremios();
-  if (tutorialPendiente()) setTimeout(() => { if (S && S.id === id) empezarTutorial(); }, 600);
+  const tp = tutorialPendiente();
+  if (tp) setTimeout(() => { if (S && S.id === id) empezarTutorial(tp === "novedades"); }, 600);
   else { const rk = resumenPendiente(); if (rk) setTimeout(() => { if (S && S.id === id) abrirResumen(rk); }, 700); }
 }
 function cerrarSesion(){

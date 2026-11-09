@@ -21,22 +21,27 @@ const PASOS_TUTO = [
   { e:"🎉", t:"¡Ya lo tienes!", d:"Empieza apuntando tu primer gasto de hoy. Si algún día lo necesitas, este tutorial está en Ajustes.", fin:"¡A apuntar! 💪" }
 ];
 const kTuto = () => "ahorraulin_tuto_" + S.id;
+// Para quien ya usaba la app: el tutorial sale una vez como «novedades» tras una actualización grande
+const NOVEDADES = "3.9";
+const kNov = () => "ahorraulin_novedades_" + S.id;
+const PASO_NOVEDADES = { e:"✨", t:"¡Ahorraulin se ha actualizado!", d:"Hay un montón de cosas nuevas: recompensas con premios de verdad, rachas, modo discreto, resumen del mes… Te lo enseño todo en un minuto." };
 let tuto = null;
 
-function empezarTutorial(){
+function empezarTutorial(novedades){
   if (!S) return;
   if (typeof resumen !== "undefined" && resumen) cerrarResumen();
   $("valeModal").classList.remove("show");
-  tuto = { i:0 };
+  tuto = { i:0, novedades: !!novedades };
   $("tuto").classList.add("show");
   pasoTuto(0);
 }
 function terminarTutorial(confeti){
   if (!tuto) return;
-  try { localStorage.setItem(kTuto(), "1"); } catch(e){}
+  try { localStorage.setItem(kTuto(), "1"); localStorage.setItem(kNov(), NOVEDADES); } catch(e){}
   tuto = null; $("tuto").classList.remove("show");
   if (confeti) confetti();
   irA("add");
+  if (valePendiente){ const v = valePendiente; valePendiente = null; setTimeout(() => { confetti(); abrirVale(v, true); }, 700); }
 }
 function rectDe(sels){
   const rs = sels.map(s => document.querySelector(s)).filter(el => el && el.getClientRects().length && getComputedStyle(el).visibility !== "hidden")
@@ -48,7 +53,7 @@ function rectDe(sels){
 function pasoTuto(i){
   if (!tuto) return;
   tuto.i = Math.max(0, Math.min(PASOS_TUTO.length - 1, i));
-  const p = PASOS_TUTO[tuto.i];
+  const p = tuto.i === 0 && tuto.novedades ? PASO_NOVEDADES : PASOS_TUTO[tuto.i];
   if (p.vista && view !== p.vista) irA(p.vista);
   const primero = p.sel && document.querySelector(p.sel[0]);
   if (primero && !primero.closest("nav") && primero.id !== "ojoBtn") primero.scrollIntoView({ block:"center", behavior:"instant" in document.documentElement.style ? "instant" : "auto" });
@@ -103,8 +108,12 @@ document.addEventListener("keydown", e => {
   if (e.key === "ArrowLeft") pasoTuto(tuto.i - 1);
 });
 document.addEventListener("click", e => { if (e.target.closest("#verTutorial")){ vibrar(); empezarTutorial(); } });
-// ¿Toca enseñarlo? Solo a quien entra por primera vez y aún no ha apuntado nada
+// ¿Toca enseñarlo? A quien entra por primera vez sin nada apuntado (tutorial)
+// o a Sara y Marta tras una actualización grande (novedades). Al administrador no.
 function tutorialPendiente(){
-  let visto = false; try { visto = localStorage.getItem(kTuto()) === "1"; } catch(e){}
-  return !visto && S && !(S.movs || []).length;
+  if (!S) return null;
+  let visto = false, nov = ""; try { visto = localStorage.getItem(kTuto()) === "1"; nov = localStorage.getItem(kNov()) || ""; } catch(e){}
+  if (!visto && !(S.movs || []).length) return "nuevo";
+  if (S.id !== ADMIN && nov !== NOVEDADES) return "novedades";
+  return null;
 }
