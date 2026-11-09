@@ -3,7 +3,7 @@
    ===================================================================== */
 "use strict";
 const CFG = window.CONFIG || {};
-const VERSION = "3.19";
+const VERSION = "3.20";
 const ADMIN = "p1";   // Raúl es el administrador
 const DEMO = "p4";    // perfil de prueba: oculto en el menú, solo entra el administrador
 const REMOTO = !!(CFG.supabaseUrl && CFG.supabaseKey);
@@ -72,6 +72,7 @@ const Nube = {
   verCodigo(c){ return this.rpc("ver_codigo",{p_codigo:c}); },
   activarCodigo(c,nombre,emoji,pin){ return this.rpc("activar_codigo",{p_codigo:c,p_nombre:nombre,p_emoji:emoji,p_pin:pin}); },
   entrarCuenta(c,pin){ return this.rpc("entrar_cuenta",{p_codigo:c,p_pin:pin}); },
+  desbloquear(id,llave,pin){ return this.rpc("desbloquear",{p_id:id,p_llave:llave,p_pin:pin}); },
   nuevaLlave(id,pin){ return this.rpc("nueva_llave",{p_id:id,p_pin:pin}); },
   salirMovil(id,llave){ return this.rpc("salir_movil",{p_id:id,p_llave:llave}); },
   adminUsuarios(pin){ return this.rpc("admin_usuarios",{p_pin:pin}); },
@@ -235,7 +236,7 @@ const Local = {
   }
 };
 // Las cuentas de clientes solo existen en la nube
-for (const f of ["nuevaLlave","verCodigo","activarCodigo","entrarCuenta","salirMovil","adminUsuarios","adminCrearCodigo","adminAnularCodigo","adminCliente"])
+for (const f of ["desbloquear","nuevaLlave","verCodigo","activarCodigo","entrarCuenta","salirMovil","adminUsuarios","adminCrearCodigo","adminAnularCodigo","adminCliente"])
   if (!Local[f]) Local[f] = async () => ({ error:"SOLO_NUBE" });
 const Store = REMOTO ? Nube : Local;
 
@@ -391,6 +392,17 @@ async function pinListo(){
   const s = pinState, pin = s.buf; s.buf = "";
   $("pinMsg").innerHTML = '<span class="spin"></span>';
   try {
+    if (s.mode === "enter" && s.llave){
+      // Móvil recordado con «pedir código al abrir»: el móvil tiene que seguir autorizado y las 4 cifras ser correctas
+      const d = await Store.desbloquear(s.id, s.llave, pin);
+      if (!d.ok){
+        if (["SESION","CADUCADA","DESACTIVADA","NO_EXISTE"].includes(d.error)){ tratarErrorCuenta(d.error); pinState = null; saltarAuto = true; show("menu"); cargarMenu(); return; }
+        sacudir($("dots")); pintarPin(errTxt(d.error), true); return;
+      }
+      const r = await Store.entrar(s.id, s.llave);
+      if (r.ok){ abrirSesion(s.id, s.llave, r); return; }
+      tratarErrorCuenta(r.error); pinState = null; saltarAuto = true; show("menu"); cargarMenu(); return;
+    }
     if (s.mode === "enter"){
       const r = await Store.entrar(s.id, pin);
       if (r.ok){
