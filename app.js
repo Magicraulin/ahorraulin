@@ -753,7 +753,7 @@ async function activarAviso(){
   const r = await Store.guardarAviso(S.id, S.pin, { endpoint:j.endpoint, p256dh:j.keys.p256dh, auth:j.keys.auth }, hora);
   if (!r.ok) throw new Error(r.error);
   S.avisos = (S.avisos || []).filter(a => a.endpoint !== j.endpoint).concat({ endpoint:j.endpoint, hora });
-  toast(`🔔 ¡Hecho! Te avisaré cada día a las ${hora} si no has apuntado nada`);
+  toast(`🔔 ¡Hecho! Te avisaré cada día a las ${hora}`);
 }
 function ayudaAvisos(perm){
   const est = $("avisoTxt").dataset.diag || "";
