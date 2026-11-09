@@ -60,17 +60,16 @@ function tratarErrorCuenta(err){
 
 /* ---------- Menú de inicio ---------- */
 function pintarMenuClientes(){
-  const fam = verFamilia(), c = cuentaGuardada();
+  const c = cuentaGuardada();
   $("clAviso").innerHTML = avisoMenu || ""; $("clAviso").classList.toggle("hidden", !avisoMenu);
-  $("clienteBox").classList.toggle("hidden", !REMOTO || (fam && !c));
+  $("clienteBox").classList.toggle("hidden", !REMOTO);
   $("tengoCodigo").textContent = c ? `${c.emoji || "🙂"} Entrar como ${c.nombre || "yo"}` : "🔑 Tengo un código de acceso";
   $("tengoCodigo").dataset.modo = c ? "entrar" : "codigo";
-  $("menu").querySelector(".sub").textContent = fam ? "Tus cuentas claras · ¿Quién eres?" : "Tus cuentas claras, sin complicaciones";
+  $("menu").querySelector(".sub").textContent = REMOTO ? "Tus cuentas claras, sin complicaciones" : "Tus cuentas claras · ¿Quién eres?";
   const link = $("clLink");
-  link.classList.toggle("hidden", !REMOTO);
-  link.textContent = fam ? (c ? "" : "¿Tienes un código de acceso? Toca aquí") : "¿Eres de la familia? Entra aquí";
-  link.dataset.modo = fam ? "codigo" : "familia";
-  if (fam && c) link.classList.add("hidden");
+  link.classList.toggle("hidden", !REMOTO || !!c);
+  link.textContent = "🔒 Acceso trabajadores";
+  link.dataset.modo = "trabajador";
 }
 $("tengoCodigo").onclick = () => {
   vibrar();
@@ -80,8 +79,7 @@ $("tengoCodigo").onclick = () => {
 $("yaCuenta").onclick = () => { vibrar(); abrirCuenta("entrar"); };
 $("clLink").onclick = () => {
   vibrar();
-  if ($("clLink").dataset.modo === "familia"){ verFamiliaYa = true; pintarMenu(); pintarMenuClientes(); return; }
-  abrirCuenta("codigo");
+  abrirCuenta("trabajador");
 };
 
 /* ---------- Hoja de alta / entrada ---------- */
@@ -117,7 +115,11 @@ function pintarCuenta(){
       <label>Código nuevo de 4 cifras</label>${campoPin("cuPin1")}
       <label>Repítelo</label>${campoPin("cuPin2")}
       <button class="btn p" id="cuSeguir">Entrar</button><div class="err" id="cuErr"></div></div>`;
-  if (cu.paso === "entrar") b.innerHTML = `<div class="cu-paso">
+  if (cu.paso === "entrar" || cu.paso === "trabajador") b.innerHTML = cu.paso === "trabajador" ? `<div class="cu-paso">
+      <h3>🔒 Acceso trabajadores</h3><p>Solo para el equipo de Ahorraulin. Este móvil quedará recordado.</p>
+      <label>Tu código de trabajador</label>${campoCodigo(cu.codigo)}
+      <label>Tus 4 cifras</label>${campoPin("cuPin1")}
+      <button class="btn p" id="cuSeguir">Entrar</button><div class="err" id="cuErr"></div></div>` : `<div class="cu-paso">
       <h3>📱 Entrar en este móvil</h3><p>Usa el código de acceso que te mandaron por WhatsApp y tus 4 cifras.</p>
       <label>Código de acceso</label>${campoCodigo(cu.codigo)}
       <label>Tu código de 4 cifras</label>${campoPin("cuPin1")}
@@ -138,6 +140,7 @@ async function seguirCuenta(){
   const val = id => ($(id) ? $(id).value.trim() : "");
   const btn = $("cuSeguir"), txt = btn.textContent;
   const pin1 = val("cuPin1"), pin2 = val("cuPin2");
+  if (cu.paso === "trabajador") cu.paso = "entrar";
   if (cu.paso === "codigo" || cu.paso === "entrar"){ cu.codigo = val("cuCodigo").toUpperCase(); if (cu.codigo.replace(/[^A-Z0-9]/g, "").length < 11) return err("Escribe el código completo: AHR-XXXX-XXXX"); }
   if (cu.paso === "alta"){ cu.nombre = val("cuNombre"); if (!cu.nombre) return err("Escribe tu nombre"); }
   if (cu.paso !== "codigo"){
@@ -176,15 +179,15 @@ async function seguirCuenta(){
 const fechaLarga = ms => new Date(ms).toLocaleDateString("es-ES", { day:"numeric", month:"long", year:"numeric" });
 const diasHasta = ms => Math.ceil((ms - Date.now()) / 86400000);
 function pintarCuentaCard(){
-  const card = $("cuentaCard"), P = S.perfil;
-  card.classList.toggle("hidden", !P.cliente);
-  $("logout").innerHTML = P.cliente ? `<span class="e">🚪</span><span>Cerrar sesión en este móvil<small>Para volver a entrar necesitarás tu código de acceso y tus 4 cifras</small></span>`
+  const card = $("cuentaCard"), P = S.perfil, conLlave = !!cuentaGuardada() && S.id !== DEMO;
+  card.classList.toggle("hidden", !conLlave);
+  $("logout").innerHTML = conLlave ? `<span class="e">🚪</span><span>Cerrar sesión en este móvil<small>Para volver a entrar necesitarás tu código de acceso y tus 4 cifras</small></span>`
                                     : `<span class="e">🚪</span><span>Salir<small>Tu cuenta se queda bloqueada</small></span>`;
-  if (!P.cliente) return;
-  const c = cuentaGuardada() || {}, dias = P.caduca ? diasHasta(P.caduca) : 999;
+  if (!conLlave) return;
+  const c = cuentaGuardada() || {}, dias = P.cliente && P.caduca ? diasHasta(P.caduca) : 999;
   const msg = encodeURIComponent(`¡Hola! Quiero renovar mi año de Ahorraulin. Soy ${P.nombre}${c.codigo ? " (código " + c.codigo + ")" : ""} 😊`);
   card.innerHTML = `<h2>📱 Tu cuenta</h2>
-    <div class="muted small">${P.caduca ? `Tu acceso está activo hasta el <b>${fechaLarga(P.caduca)}</b>${dias <= 45 ? ` (quedan ${dias} días)` : ""}.` : "Tu acceso es ilimitado ♾️"}</div>
+    <div class="muted small">${!P.cliente ? "Cuenta de trabajador: sin fecha de fin." : P.caduca ? `Tu acceso está activo hasta el <b>${fechaLarga(P.caduca)}</b>${dias <= 45 ? ` (quedan ${dias} días)` : ""}.` : "Tu acceso es ilimitado ♾️"}</div>
     ${c.codigo ? `<div class="muted small" style="margin-top:4px">Tu código de acceso: <b>${esc(c.codigo)}</b></div>` : ""}
     <div class="set-row" style="margin-top:8px"><label>Pedir mi código al abrir la app<small>Más privado: tendrás que escribir tus 4 cifras cada vez</small></label><button class="switch ${c.pinAbrir ? "on" : ""}" id="pinAbrirSw" role="switch" aria-checked="${!!c.pinAbrir}" aria-label="Pedir código al abrir"></button></div>
     ${dias <= 45 ? `<a class="opt" style="text-decoration:none;color:inherit" target="_blank" rel="noopener" href="https://wa.me/${WHATSAPP_PREMIOS}?text=${msg}"><span class="e">💬</span><span>Renovar otro año<small>Escribe al administrador por WhatsApp</small></span></a>` : ""}`;

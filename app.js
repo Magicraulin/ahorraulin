@@ -3,7 +3,7 @@
    ===================================================================== */
 "use strict";
 const CFG = window.CONFIG || {};
-const VERSION = "3.17";
+const VERSION = "3.18";
 const ADMIN = "p1";   // Raúl es el administrador
 const DEMO = "p4";    // perfil de prueba: oculto en el menú, solo entra el administrador
 const REMOTO = !!(CFG.supabaseUrl && CFG.supabaseKey);
@@ -338,7 +338,7 @@ async function cargarMenu(){
   }
 }
 function pintarMenu(){
-  if (!verFamilia()){ $("pcards").innerHTML = ""; return; }
+  if (REMOTO){ $("pcards").innerHTML = ""; return; }   // con la nube, cada uno entra con su código de acceso
   $("pcards").innerHTML = perfilesMenu.map(p => {
     const P = PALETAS[p.color] || PALETAS.violeta;
     return `<button class="pcard" data-p="${esc(p.id)}" style="--c1:${P[0]};--c2:${P[1]}">
@@ -495,7 +495,7 @@ function cerrarSesion(){
   S = null; copiasCache = null; $("adminCard").classList.add("hidden"); cerrarEntry(); show("menu"); cargarMenu();
 }
 $("lockBtn").onclick = cerrarSesion;
-$("logout").onclick = () => { if (S && S.perfil.cliente) olvidarMovil(); else cerrarSesion(); };
+$("logout").onclick = () => { if (S && cuentaGuardada()) olvidarMovil(); else cerrarSesion(); };
 
 async function refrescar(){
   if (!S || !REMOTO) return;
@@ -513,16 +513,18 @@ document.addEventListener("visibilitychange", () => {
 });
 
 // Perfil de prueba: el administrador entra con su propio código
+let llaveAdmin = null;   // para volver del perfil de prueba
 async function entrarDemo(){
   const pin = S.pin;
   try {
     const r1 = await Store.adminEntrarDemo(pin); if (!r1.ok) throw new Error(r1.error);
-    const r = await Store.entrar(DEMO, pin); if (!r.ok) throw new Error(r.error);
-    abrirSesion(DEMO, pin, r); toast("🧪 Estás en el perfil de prueba", false, "Así ven la app Sara y Marta");
+    const k = r1.llave || pin;
+    const r = await Store.entrar(DEMO, k); if (!r.ok) throw new Error(r.error);
+    llaveAdmin = pin; abrirSesion(DEMO, k, r); toast("🧪 Estás en el perfil de prueba", false, "Así ven la app tus usuarios");
   } catch(e){ toast("⚠️ No se ha podido abrir el perfil de prueba"); }
 }
 async function volverAdmin(){
-  const pin = S.pin;
+  const pin = llaveAdmin || (cuentaGuardada() || {}).llave || S.pin;
   try { const r = await Store.entrar(ADMIN, pin); if (!r.ok) throw new Error(r.error); abrirSesion(ADMIN, pin, r); toast("🎩 De vuelta en tu perfil"); }
   catch(e){ cerrarSesion(); }
 }
@@ -540,7 +542,8 @@ document.addEventListener("click", async e => {
 function pintarCabecera(){
   $("demoBar").classList.toggle("hidden", !S || S.id !== DEMO);
   const h = new Date().getHours(), P = S.perfil;
-  $("lockBtn").classList.toggle("hidden", !!(P.cliente && !(cuentaGuardada() || {}).pinAbrir));
+  const cg = cuentaGuardada();
+  $("lockBtn").classList.toggle("hidden", !!(cg && !cg.pinAbrir));
   $("hAv").textContent = P.emoji;
   $("hHi").innerHTML = `${h < 14 ? "Buenos días" : h < 21 ? "Buenas tardes" : "Buenas noches"}, ${esc(P.nombre)}${typeof tieneOro === "function" && tieneOro() ? " 👑" : ""}<small>${REMOTO ? "Guardado en la nube ☁️" : "Modo prueba · solo en este móvil"}</small>`;
 }
