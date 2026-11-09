@@ -82,7 +82,7 @@ input,select{font:inherit;color:inherit;font-size:16px}
 .keys .k2{font-size:21px;background:transparent}
 
 /* ===== APP ===== */
-#app{padding-bottom:calc(84px + var(--sb))}
+#app{padding-bottom:calc(130px + var(--sb))}
 .hero{background:linear-gradient(140deg,var(--p) 0,var(--p2) 100%);color:#fff;padding:calc(14px + var(--st)) 18px 74px;border-radius:0 0 32px 32px;position:relative;overflow:hidden}
 .hero::before{content:"";position:absolute;width:220px;height:220px;border-radius:50%;background:rgba(255,255,255,.1);right:-60px;top:-80px}
 .hero::after{content:"";position:absolute;width:120px;height:120px;border-radius:50%;background:rgba(255,255,255,.08);left:-30px;bottom:-40px}
@@ -110,6 +110,7 @@ input,select{font:inherit;color:inherit;font-size:16px}
 .seg button{padding:12px;border-radius:13px;font-weight:900;color:var(--ink3)}
 .seg button.on[data-t=gasto]{background:var(--gasto);color:#fff;box-shadow:0 6px 14px -6px var(--gasto)}
 .seg button.on[data-t=ingreso]{background:var(--ingreso);color:#fff;box-shadow:0 6px 14px -6px var(--ingreso)}
+.seg button.on[data-tapar]{background:var(--card);color:var(--p);box-shadow:0 2px 8px rgba(20,10,60,.12)}
 .cats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px}
 .cat{border-radius:20px;padding:15px 4px 12px;display:flex;flex-direction:column;align-items:center;gap:6px;font-weight:900;font-size:13px;line-height:1.15;text-align:center;transition:transform .08s;background:var(--cb);color:#2a2540;min-height:96px}
 body.dark .cat{filter:saturate(.9) brightness(.92)}
@@ -270,6 +271,15 @@ details.fold[open]>summary{margin-bottom:12px}
 .ayuda-aviso{background:#fff4d6;color:#5a4000;border-radius:16px;padding:12px 14px;font-size:13.5px;font-weight:700;line-height:1.45;margin:8px 0}
 .ayuda-aviso ol{margin:6px 0 6px;padding-left:20px}.ayuda-aviso li{margin:4px 0}.ayuda-aviso small{opacity:.6;font-size:11px}
 body.dark .ayuda-aviso{background:#3a3016;color:#f3e3b5}
+.ojo-fijo{position:fixed;z-index:9;right:max(14px, calc(50vw - 266px));bottom:calc(78px + var(--sb));width:46px;height:46px;border-radius:50%;
+  background:color-mix(in srgb,var(--card) 88%,transparent);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+  box-shadow:0 4px 16px rgba(20,10,60,.18);border:1px solid var(--line);font-size:21px;display:grid;place-items:center;transition:transform .15s}
+.ojo-fijo:active{transform:scale(.9)}
+body.tapado .ojo-fijo{background:var(--p);border-color:var(--p)}
+.m{transition:filter .25s, opacity .25s}
+body.tapado .m{filter:blur(7px);opacity:.75;cursor:pointer;-webkit-user-select:none;user-select:none}
+body.tapado .balance .n .m{filter:blur(12px)}
+body.tapado .vchart .tip{display:none}
 /* nav */
 nav{position:fixed;left:0;right:0;bottom:0;background:color-mix(in srgb,var(--card) 92%,transparent);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-top:1px solid var(--line);padding:6px 6px calc(6px + var(--sb));z-index:10}
 nav .in{display:grid;grid-template-columns:repeat(6,1fr);gap:2px;max-width:560px;margin:0 auto}
@@ -422,6 +432,7 @@ nav button.on .e{filter:none;opacity:1;transform:translateY(-1px) scale(1.08)}
         <div class="swatches" id="swatches"></div>
         <div class="set-row" style="margin-top:8px"><label>Modo oscuro<small>Más cómodo por la noche</small></label><button class="switch" id="darkSw" role="switch" aria-label="Modo oscuro"></button></div>
       </div>
+
     </div>
 
     <!-- Ajustes -->
@@ -452,6 +463,9 @@ nav button.on .e{filter:none;opacity:1;transform:translateY(-1px) scale(1.08)}
       </div>
       <div class="card">
         <h2>Seguridad y datos</h2>
+        <div class="sub-h" style="margin-top:0">🙈 Al abrir la app, los importes salen…</div>
+        <div class="seg" id="taparSeg"><button data-tapar="1">🙈 Ocultos</button><button data-tapar="0">👁️ A la vista</button></div>
+        <div class="muted small" style="margin:8px 0 10px">Con el botón 👁️ de abajo a la derecha los tapas o destapas cuando quieras. También al tocar cualquier cifra borrosa.</div>
         <button class="opt" id="xlBtn"><span class="e">📥</span><span>Descargar una copia en Excel<small id="xlSub">Crea un archivo nuevo cada vez</small></span></button>
         <button class="opt" id="chPin"><span class="e">🔑</span><span>Cambiar mi código<small>Elige 4 números nuevos</small></span></button>
         <button class="opt" id="logout"><span class="e">🚪</span><span>Salir<small>Tu cuenta se queda bloqueada</small></span></button>
@@ -461,6 +475,7 @@ nav button.on .e{filter:none;opacity:1;transform:translateY(-1px) scale(1.08)}
   </div>
 </section>
 
+<button class="ojo-fijo hidden" id="ojoBtn" aria-label="Mostrar importes"><span id="ojoIco">👁️</span></button>
 <nav id="nav" class="hidden"><div class="in">
   <button data-v="add" class="on"><span class="e">➕</span>Apuntar</button>
   <button data-v="list"><span class="e">📋</span>Lista</button>
@@ -527,10 +542,10 @@ nav button.on .e{filter:none;opacity:1;transform:translateY(-1px) scale(1.08)}
 
 <div class="toast" id="toast"><div class="tt"><b id="toastFrase" class="hidden"></b><span id="toastTxt"></span></div><button id="undo">Deshacer</button></div>
 
-<script src="config.js?v=25"></script>
-<script src="datos.js?v=25"></script>
-<script src="excel.js?v=25"></script>
+<script src="config.js?v=27"></script>
+<script src="datos.js?v=27"></script>
+<script src="excel.js?v=27"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js" defer></script>
-<script src="app.js?v=25"></script>
+<script src="app.js?v=27"></script>
 </body>
 </html>

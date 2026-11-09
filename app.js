@@ -3,7 +3,7 @@
    ===================================================================== */
 "use strict";
 const CFG = window.CONFIG || {};
-const VERSION = "2.9";
+const VERSION = "3.1";
 const ADMIN = "p1";   // Raúl es el administrador
 const REMOTO = !!(CFG.supabaseUrl && CFG.supabaseKey);
 const IA = !!CFG.workerUrl;
@@ -233,6 +233,7 @@ function aplicarTema(color, oscuro){
 function show(screen){
   ["menu","pin","app"].forEach(s => $(s).classList.toggle("hidden", s !== screen));
   $("nav").classList.toggle("hidden", screen !== "app");
+  $("ojoBtn").classList.toggle("hidden", screen !== "app");
   if (screen !== "app") document.body.classList.remove("dark");
   if (screen === "menu") document.querySelector('meta[name="theme-color"]').content = "#f7f3ff";
   window.scrollTo(0,0);
@@ -368,9 +369,42 @@ function aplicarDatos(r){
     objetivo:Math.max(0, Number(m.objetivo) || 0), fecha:/^\d{4}-\d{2}-\d{2}/.test(m.fecha || "") ? String(m.fecha).slice(0,10) : null, creado:Number(m.creado) || Date.now() }));
   S.avisos = Array.isArray(r.avisos) ? r.avisos : [];
 }
+/* ---------- Modo discreto: importes ocultos (para el metro, la cola…) ---------- */
+const PREF_TAPAR = "ahorraulin_tapar";
+const taparAlAbrir = () => { try { return localStorage.getItem(PREF_TAPAR) !== "0"; } catch(e){ return true; } };
+let TAPADO = taparAlAbrir();
+const RE_EUR = /[−+\-]?\d{1,3}(?:\.\d{3})*(?:,\d+)?\s?€/g;
+function marcarImportes(root){
+  const w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, { acceptNode: n =>
+    (RE_EUR.lastIndex = 0, RE_EUR.test(n.nodeValue)) && !n.parentElement.closest(".m, svg, script, style, textarea") ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT });
+  const nodos = []; while (w.nextNode()) nodos.push(w.currentNode);
+  nodos.forEach(n => {
+    const f = document.createDocumentFragment(), t = n.nodeValue; let i = 0; RE_EUR.lastIndex = 0; let m;
+    while ((m = RE_EUR.exec(t))){
+      if (m.index > i) f.append(t.slice(i, m.index));
+      const sp = document.createElement("span"); sp.className = "m"; sp.textContent = m[0]; f.append(sp); i = m.index + m[0].length;
+    }
+    if (i < t.length) f.append(t.slice(i));
+    n.replaceWith(f);
+  });
+}
+new MutationObserver(() => marcarImportes($("app"))).observe($("app"), { childList:true, subtree:true, characterData:true });
+function ponerTapado(v, conToque){
+  const cambia = TAPADO !== v; TAPADO = v;
+  document.body.classList.toggle("tapado", v);
+  $("ojoIco").textContent = v ? "🙈" : "👁️"; $("ojoBtn").setAttribute("aria-label", v ? "Mostrar importes" : "Ocultar importes");
+  if (cambia && conToque){ vibrar(); if (S) pintarTodo(); }
+}
+$("ojoBtn").onclick = e => { e.stopPropagation(); ponerTapado(!TAPADO, true); };
+// Tocar cualquier importe tapado lo destapa todo
+$("app").addEventListener("click", e => { if (TAPADO && e.target.closest(".m, svg .money")){ e.preventDefault(); e.stopPropagation(); ponerTapado(false, true); } }, true);
+// Al salir de la app (o bloquear el móvil), se vuelve a tapar
+document.addEventListener("visibilitychange", () => { if (document.hidden && taparAlAbrir()) ponerTapado(true); });
+
 function abrirSesion(id, pin, r){
   S = { id, pin }; aplicarDatos(r);
   pinState = null; view = "add"; tipo = "gasto"; viewMonth = monthKey(new Date());
+  ponerTapado(taparAlAbrir());
   aplicarTema(S.perfil.color, S.perfil.oscuro);
   document.querySelectorAll("#seg button").forEach(x => x.classList.toggle("on", x.dataset.t === "gasto"));
   document.querySelectorAll("nav button").forEach(x => x.classList.toggle("on", x.dataset.v === "add"));
@@ -830,7 +864,7 @@ function barras(el, data, colors, showLabel){
   let s = `<svg viewBox="0 0 ${W} ${H}" role="img">`;
   for (let t = 0; t <= 4; t += 2){
     const yy = padT + ih - ih*t/4;
-    s += `<line class="grid" x1="${padL}" x2="${W}" y1="${yy}" y2="${yy}"/><text class="axis" x="${padL-5}" y="${yy+4}" text-anchor="end">${fmt0.format(max*t/4).replace(/\s?€/,"€")}</text>`;
+    s += `<line class="grid" x1="${padL}" x2="${W}" y1="${yy}" y2="${yy}"/><text class="axis money" x="${padL-5}" y="${yy+4}" text-anchor="end">${TAPADO && t ? "•••" : fmt0.format(max*t/4).replace(/\s?€/,"€")}</text>`;
   }
   data.forEach((d,i) => {
     const x0 = padL + i*slot + (slot-gw)/2;
@@ -986,7 +1020,14 @@ function pintarPerfil(){
   $("darkSw").classList.toggle("on", !!P.oscuro); $("darkSw").setAttribute("aria-checked", !!P.oscuro);
   pintarAdmin();
 }
+$("taparSeg").addEventListener("click", e => {
+  const b = e.target.closest("[data-tapar]"); if (!b) return;
+  const nuevo = b.dataset.tapar === "1"; try { localStorage.setItem(PREF_TAPAR, nuevo ? "1" : "0"); } catch(err){}
+  vibrar(); pintarTaparSeg(); toast(nuevo ? "🙈 Al abrir la app, los importes saldrán ocultos" : "👁️ Al abrir la app, los importes saldrán a la vista");
+});
+function pintarTaparSeg(){ const t = taparAlAbrir(); document.querySelectorAll("#taparSeg [data-tapar]").forEach(x => x.classList.toggle("on", (x.dataset.tapar === "1") === t)); }
 function pintarAjustes(){
+  pintarTaparSeg();
   $("xlSub").textContent = `Archivo nuevo con tus ${S.movs.length === 1 ? "1 movimiento" : S.movs.length + " movimientos"} · para enviarlo o guardarlo`;
   pintarCopias();
   pintarHojaGoogle();
