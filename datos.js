@@ -28,7 +28,7 @@ const CATEGORIAS = {
   }
 };
 // Qué tipo de categorías usa cada perfil
-const TIPO_PERFIL = { p1:"mago", p2:"profe", p3:"profe" };
+const TIPO_PERFIL = { p1:"mago", p2:"profe", p3:"profe", p4:"profe" };   // p4 = perfil de prueba del administrador
 
 const PALETAS = {
   violeta:  ["#6250d6","#9a7cf3","Violeta"],

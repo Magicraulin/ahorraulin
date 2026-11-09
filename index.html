@@ -375,6 +375,9 @@ body.dark .medalla.si{background:linear-gradient(160deg,#4a3d10,#4a2035)}
 .tb-saltar{color:var(--ink3);font-weight:800;font-size:14px;padding:10px 4px;margin-right:auto}
 .tb-atras{background:var(--soft);color:var(--ink2);border-radius:999px;padding:11px 14px;font-weight:900;font-size:14px}
 .tb-sig{background:linear-gradient(135deg,var(--p),var(--p2));color:#fff;border-radius:999px;padding:11px 18px;font-weight:900;font-size:14.5px;margin-left:auto;box-shadow:0 6px 16px -6px var(--p)}
+.demo-bar{position:sticky;top:0;z-index:20;background:#1f1a2e;color:#fff;font-weight:800;font-size:12.5px;padding:calc(8px + var(--st)) 12px 8px;display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;text-align:center}
+.demo-bar button{background:#fff;color:#1f1a2e;border-radius:999px;padding:6px 12px;font-weight:900;font-size:12px}
+#vaciarDemo.sure{background:#ffe3e6}
 /* premios */
 .premio{display:flex;align-items:center;gap:12px;width:100%;text-align:left;padding:12px;border-radius:18px;background:var(--soft);margin-top:8px}
 .premio .pe{width:42px;height:42px;border-radius:14px;background:var(--card);display:grid;place-items:center;font-size:22px;flex:0 0 auto;filter:grayscale(1);opacity:.6}
@@ -486,6 +489,7 @@ nav button.on .e{filter:none;opacity:1;transform:translateY(-1px) scale(1.08)}
 
 <!-- ================= APP ================= -->
 <section id="app" class="hidden">
+  <div class="demo-bar hidden" id="demoBar">🧪 Perfil de prueba · así lo ven Sara y Marta <button id="volverAdmin">Volver a mi perfil</button></div>
   <div class="hero"><div class="hero-in">
     <div class="av" id="hAv"></div>
     <div class="hi" id="hHi"></div>
@@ -547,6 +551,9 @@ nav button.on .e{filter:none;opacity:1;transform:translateY(-1px) scale(1.08)}
         <h2>👑 Administrador</h2>
         <div class="muted small" style="margin-bottom:6px">Si alguien olvida su código, restablécelo aquí. La próxima vez que entre creará uno nuevo. Sus gastos no se tocan.</div>
         <div id="adminList"></div>
+        <div class="sub-h">🧪 Perfil de prueba</div>
+        <button class="opt" id="entrarDemo"><span class="e">🧪</span><span>Entrar al perfil de prueba<small>Mira la app exactamente como la ven Sara y Marta</small></span></button>
+        <button class="opt" id="vaciarDemo"><span class="e">🧹</span><span>Vaciar el perfil de prueba<small>Borra sus apuntes, metas y premios para empezar de cero</small></span></button>
         <div class="sub-h">🎁 Vales de premios</div>
         <div id="adminPremios"></div>
       </div>
@@ -689,12 +696,12 @@ nav button.on .e{filter:none;opacity:1;transform:translateY(-1px) scale(1.08)}
 </div>
 <div class="toast" id="toast"><div class="tt"><b id="toastFrase" class="hidden"></b><span id="toastTxt"></span></div><button id="undo">Deshacer</button></div>
 
-<script src="config.js?v=36"></script>
-<script src="datos.js?v=36"></script>
-<script src="excel.js?v=36"></script>
+<script src="config.js?v=37"></script>
+<script src="datos.js?v=37"></script>
+<script src="excel.js?v=37"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js" defer></script>
-<script src="app.js?v=36"></script>
-<script src="logros.js?v=36"></script>
-<script src="tutorial.js?v=36"></script>
+<script src="app.js?v=37"></script>
+<script src="logros.js?v=37"></script>
+<script src="tutorial.js?v=37"></script>
 </body>
 </html>

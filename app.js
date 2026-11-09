@@ -3,8 +3,9 @@
    ===================================================================== */
 "use strict";
 const CFG = window.CONFIG || {};
-const VERSION = "3.10";
+const VERSION = "3.11";
 const ADMIN = "p1";   // Raúl es el administrador
+const DEMO = "p4";    // perfil de prueba: oculto en el menú, solo entra el administrador
 const REMOTO = !!(CFG.supabaseUrl && CFG.supabaseKey);
 const IA = !!CFG.workerUrl;
 
@@ -58,6 +59,8 @@ const Nube = {
   ultimaCopia(){ return this.rpc("ultima_copia"); },
   adminEstado(pin){ return this.rpc("admin_estado",{p_pin:pin}); },
   adminResetear(pin,obj){ return this.rpc("admin_resetear_pin",{p_pin:pin,p_objetivo:obj}); },
+  adminEntrarDemo(pin){ return this.rpc("admin_entrar_demo",{p_pin:pin}); },
+  adminVaciarDemo(pin){ return this.rpc("admin_vaciar_demo",{p_pin:pin}); },
   reclamarPremio(id,pin,tipo,temp){ return this.rpc("reclamar_premio",{p_id:id,p_pin:pin,p_tipo:tipo,p_temporada:temp}); },
   misPremios(id,pin){ return this.rpc("mis_premios",{p_id:id,p_pin:pin}); },
   adminPremios(pin){ return this.rpc("admin_premios",{p_pin:pin}); },
@@ -177,7 +180,20 @@ const Local = {
     if (p.fallos >= 5){ p.fallos = 0; p.bloq = Date.now() + 5*60000; this.save(d); return "BLOQUEADO"; }
     this.save(d); return "PIN_MAL";
   },
-  async menu(){ const d = this.db(); return Object.keys(d.perfiles).map(id => ({ ...this.perfil(d,id), tiene_pin: !!d.perfiles[id].pin })); },
+  async adminEntrarDemo(pin){
+    const d = this.db(), e = await this.check(d,ADMIN,pin); if (e !== "OK") return {error:e};
+    d.perfiles[DEMO] = d.perfiles[DEMO] || {nombre:"Demo",emoji:"🧪",color:"menta",oscuro:false,provincia:"28",combustible:"1"};
+    Object.assign(d.perfiles[DEMO], { pin:d.perfiles[ADMIN].pin, salt:d.perfiles[ADMIN].salt, fallos:0, bloq:0 }); this.save(d); return {ok:true};
+  },
+  async adminVaciarDemo(pin){
+    const d = this.db(), e = await this.check(d,ADMIN,pin); if (e !== "OK") return {error:e};
+    const fuera = x => x.persona !== DEMO;
+    d.movs = d.movs.filter(fuera); d.recurrentes = (d.recurrentes || []).filter(fuera); d.metas = (d.metas || []).filter(fuera); d.premios = (d.premios || []).filter(fuera);
+    if (d.presu) delete d.presu[DEMO];
+    if (d.perfiles[DEMO]) Object.assign(d.perfiles[DEMO], {nombre:"Demo",emoji:"🧪",color:"menta",oscuro:false});
+    this.save(d); return {ok:true};
+  },
+  async menu(){ const d = this.db(); return Object.keys(d.perfiles).filter(id => id !== DEMO).map(id => ({ ...this.perfil(d,id), tiene_pin: !!d.perfiles[id].pin })); },
   async crearPin(id,pin){
     const d = this.db(), p = d.perfiles[id];
     if (!/^\d{4}$/.test(pin)) return {error:"PIN_FORMATO"};
@@ -463,7 +479,33 @@ document.addEventListener("visibilitychange", () => {
   refrescar();
 });
 
+// Perfil de prueba: el administrador entra con su propio código
+async function entrarDemo(){
+  const pin = S.pin;
+  try {
+    const r1 = await Store.adminEntrarDemo(pin); if (!r1.ok) throw new Error(r1.error);
+    const r = await Store.entrar(DEMO, pin); if (!r.ok) throw new Error(r.error);
+    abrirSesion(DEMO, pin, r); toast("🧪 Estás en el perfil de prueba", false, "Así ven la app Sara y Marta");
+  } catch(e){ toast("⚠️ No se ha podido abrir el perfil de prueba"); }
+}
+async function volverAdmin(){
+  const pin = S.pin;
+  try { const r = await Store.entrar(ADMIN, pin); if (!r.ok) throw new Error(r.error); abrirSesion(ADMIN, pin, r); toast("🎩 De vuelta en tu perfil"); }
+  catch(e){ cerrarSesion(); }
+}
+document.addEventListener("click", async e => {
+  if (e.target.closest("#entrarDemo")){ vibrar(); entrarDemo(); }
+  if (e.target.closest("#volverAdmin")){ vibrar(); volverAdmin(); }
+  const v = e.target.closest("#vaciarDemo");
+  if (v){
+    if (!v.classList.contains("sure")){ v.classList.add("sure"); v.querySelector("small").textContent = "Toca otra vez para borrar todo lo del perfil de prueba"; setTimeout(() => { if (v.isConnected){ v.classList.remove("sure"); v.querySelector("small").textContent = "Borra sus apuntes, metas y premios para empezar de cero"; } }, 3500); return; }
+    try { const r = await Store.adminVaciarDemo(S.pin); if (!r.ok) throw new Error(r.error); toast("🧹 Perfil de prueba vacío. Al entrar verá el tutorial de nuevo usuario"); try { localStorage.removeItem("ahorraulin_tuto_" + DEMO); localStorage.removeItem("ahorraulin_novedades_" + DEMO); localStorage.removeItem("ahorraulin_nada_" + DEMO); } catch(err){} }
+    catch(err){ toast("⚠️ No se ha podido vaciar"); }
+    v.classList.remove("sure"); v.querySelector("small").textContent = "Borra sus apuntes, metas y premios para empezar de cero";
+  }
+});
 function pintarCabecera(){
+  $("demoBar").classList.toggle("hidden", !S || S.id !== DEMO);
   const h = new Date().getHours(), P = S.perfil;
   $("hAv").textContent = P.emoji;
   $("hHi").innerHTML = `${h < 14 ? "Buenos días" : h < 21 ? "Buenas tardes" : "Buenas noches"}, ${esc(P.nombre)}${typeof tieneOro === "function" && tieneOro() ? " 👑" : ""}<small>${REMOTO ? "Guardado en la nube ☁️" : "Modo prueba · solo en este móvil"}</small>`;
