@@ -3,7 +3,7 @@
    ===================================================================== */
 "use strict";
 const CFG = window.CONFIG || {};
-const VERSION = "3.1";
+const VERSION = "3.2";
 const ADMIN = "p1";   // Raúl es el administrador
 const REMOTO = !!(CFG.supabaseUrl && CFG.supabaseKey);
 const IA = !!CFG.workerUrl;
@@ -392,7 +392,7 @@ new MutationObserver(() => marcarImportes($("app"))).observe($("app"), { childLi
 function ponerTapado(v, conToque){
   const cambia = TAPADO !== v; TAPADO = v;
   document.body.classList.toggle("tapado", v);
-  $("ojoIco").textContent = v ? "🙈" : "👁️"; $("ojoBtn").setAttribute("aria-label", v ? "Mostrar importes" : "Ocultar importes");
+  $("ojoIco").textContent = v ? "🙈" : "🙉"; $("ojoBtn").setAttribute("aria-label", v ? "Mostrar importes" : "Ocultar importes");
   if (cambia && conToque){ vibrar(); if (S) pintarTodo(); }
 }
 $("ojoBtn").onclick = e => { e.stopPropagation(); ponerTapado(!TAPADO, true); };
@@ -1023,7 +1023,7 @@ function pintarPerfil(){
 $("taparSeg").addEventListener("click", e => {
   const b = e.target.closest("[data-tapar]"); if (!b) return;
   const nuevo = b.dataset.tapar === "1"; try { localStorage.setItem(PREF_TAPAR, nuevo ? "1" : "0"); } catch(err){}
-  vibrar(); pintarTaparSeg(); toast(nuevo ? "🙈 Al abrir la app, los importes saldrán ocultos" : "👁️ Al abrir la app, los importes saldrán a la vista");
+  vibrar(); pintarTaparSeg(); toast(nuevo ? "🙈 Al abrir la app, los importes saldrán ocultos" : "🙉 Al abrir la app, los importes saldrán a la vista");
 });
 function pintarTaparSeg(){ const t = taparAlAbrir(); document.querySelectorAll("#taparSeg [data-tapar]").forEach(x => x.classList.toggle("on", (x.dataset.tapar === "1") === t)); }
 function pintarAjustes(){
