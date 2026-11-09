@@ -3,7 +3,7 @@
    ===================================================================== */
 "use strict";
 const CFG = window.CONFIG || {};
-const VERSION = "3.11";
+const VERSION = "3.12";
 const ADMIN = "p1";   // Raúl es el administrador
 const DEMO = "p4";    // perfil de prueba: oculto en el menú, solo entra el administrador
 const REMOTO = !!(CFG.supabaseUrl && CFG.supabaseKey);
@@ -458,7 +458,7 @@ function cerrarSesion(){
   if (window.__actualizar){ window.__actualizar(); return; }
   if (resumen){ $("resumen").classList.remove("show"); resumen = null; }
   if (tuto){ tuto = null; $("tuto").classList.remove("show"); }
-  $("valeModal").classList.remove("show");
+  $("valeModal").classList.remove("show"); $("probarModal").classList.remove("show");
   valePendiente = null;
   S = null; copiasCache = null; $("adminCard").classList.add("hidden"); $("adminList").innerHTML = ""; cerrarEntry(); show("menu"); cargarMenu();
 }
@@ -635,7 +635,7 @@ $("eSave").onclick = async () => {
   const m = { tipo:entry.tipo, cat:entry.cat.id, importe:v, fecha, nota:$("eNote").value.trim().slice(0,80), meta:metaSel };
   const temp = { id:"tmp" + Date.now(), ...m, creado:Date.now() };
   S.movs.push(temp); cerrarEntry(); pintarTodo(); vibrar(20);
-  const c = catOf(m); toast(`${c.e} ${eur(v)} · ${c.n} ✓`, true, avisoPresupuesto(m) || fraseMeta(m) || fraseApunte(m.tipo, m.cat, v)); lastAdded = temp.id;
+  const c = catOf(m); toast(`${c.e} ${eur(v)} · ${c.n} ✓`, true, avisoPresupuesto(m) || fraseMeta(m) || fraseContexto(m) || fraseApunte(m.tipo, m.cat, v)); lastAdded = temp.id;
   try {
     const r = await Store.guardarMov(S.id, S.pin, m);
     if (!r.ok) throw new Error(r.error);
@@ -748,6 +748,24 @@ $("presuSet").addEventListener("change", async e => {
 /* ---------- Metas de ahorro ---------- */
 const META_EMOJIS = ["🎯","✈️","🏖️","🏠","🚗","💍","🎓","💻","📱","🎁","🐶","👶","🏍️","🎸","🏝️","🛋️"];
 function ahorradoMeta(id){ return S.movs.filter(m => m.meta === id).reduce((s,m) => s + m.importe, 0); }
+// Compara el gasto con lo que suele gastar esa persona: si se pasa de su media o repite mucho, se lo dice con números
+function fraseContexto(m){
+  if (m.tipo !== "gasto" || CATS_GUARDADO.includes(m.cat) || ["casa","salud","trabajo"].includes(m.cat)) return null;
+  const c = catOf(m), k = m.fecha.slice(0,7), g = gastoMes(m.cat, k), antes = g - m.importe;
+  const previos = [1,2,3].map(n => gastoMes(m.cat, shiftMonth(k, -n))).filter(x => x > 0);
+  if (previos.length >= 2){
+    const media = previos.reduce((a,b) => a + b, 0) / previos.length, tope = media * 1.15;
+    if (g > tope && antes <= tope) return `📈 Ya llevas ${eur(g)} en ${c.n} este mes, más de lo normal en ti (${eur(media)}). ¡Frena un poco!`;
+    if (g > tope && Math.random() < .4) return `📈 Sigues por encima de lo normal en ${c.n}: ${eur(g)} este mes (lo normal en ti: ${eur(media)}).`;
+  }
+  // Muchos gastos pequeños seguidos en la misma categoría
+  const veces = ofMonth(S.movs, k).filter(x => x.tipo === "gasto" && x.cat === m.cat).length;
+  if (["comer","ocio","belleza","ropa","otros"].includes(m.cat) && veces >= 6 && veces % 3 === 0){
+    const dia = Number(m.fecha.slice(8)) || 1, anual = g / dia * 365;
+    return `🔁 Ya van ${veces} gastos de ${c.n} este mes (${eur(g)}). A este ritmo, unos ${eur(Math.round(anual / 10) * 10)} al año. ¿Recortamos?`;
+  }
+  return null;
+}
 function fraseMeta(m){
   if (!m.meta) return null;
   const meta = (S.metas || []).find(x => x.id === m.meta); if (!meta) return null;

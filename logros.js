@@ -175,7 +175,7 @@ async function pintarAdminPremios(){
   const box = $("adminPremios"); if (!box || S.id !== ADMIN) return;
   try {
     const r = await Store.adminPremios(S.pin); if (!r.ok) throw new Error(r.error);
-    const l = r.premios || [];
+    const l = (r.premios || []).filter(v => v.persona !== DEMO);   // los del perfil de prueba no cuentan
     box.innerHTML = l.length ? l.map(v => { const p = PREMIOS.find(x => x.tipo === v.tipo) || { e:"🎁", n:v.tipo };
       return `<div class="copia adm"><div class="ci" style="background:var(--soft)">${esc(v.emoji)}</div>
         <div class="cm"><b>${esc(v.nombre)} · ${p.e} ${esc(p.n)}</b><span>${esc(v.codigo)} · ${v.temporada} · ${["guia","recetario","oro"].includes(v.tipo) ? "⚡ Se activa solo" : v.usado ? "✅ Canjeado" : "⏳ Pendiente"}</span></div>
@@ -389,3 +389,35 @@ function pintarRecompensas(){
   h += medallasHTML();
   $("premiosBody").innerHTML = h;
 }
+
+/* ---------- Perfil de prueba: desbloquear cualquier cosa para verla ---------- */
+function abrirProbar(){
+  $("probarOps").innerHTML = PREMIOS.map(p => `<button class="demo-op" data-probar="${p.tipo}"><span>${p.e}</span><div><b>${esc(p.n)}</b><small>${p.descarga ? "Con su PDF para descargar" : p.tema ? "Tema dorado" : "Vale con WhatsApp"}</small></div></button>`).join("") +
+    `<button class="demo-op" data-probar="todos"><span>🎁</span><div><b>Desbloquear todos los premios</b><small>Para verlos en Recompensas</small></div></button>
+     <button class="demo-op" data-probar="medalla"><span>🏅</span><div><b>Animación de medalla nueva</b><small>La que sale al ganar una</small></div></button>
+     <button class="demo-op" data-probar="resumen"><span>🎬</span><div><b>Resumen del mes (wrapped)</b><small>Con los datos del mes pasado</small></div></button>
+     <button class="demo-op" data-probar="tuto"><span>📖</span><div><b>Tutorial de nuevos usuarios</b><small>Paso a paso por todas las pestañas</small></div></button>
+     <button class="demo-op" data-probar="novedades"><span>✨</span><div><b>Aviso de novedades</b><small>El que ven Sara y Marta al actualizar</small></div></button>`;
+  $("probarModal").classList.add("show");
+}
+document.addEventListener("click", async e => {
+  if (e.target.closest("#probarDemo")){ vibrar(); abrirProbar(); return; }
+  const m = $("probarModal"); if (!m || !m.classList.contains("show")) return;
+  if (e.target.id === "probarModal" || e.target.closest("#probarX")){ m.classList.remove("show"); return; }
+  const o = e.target.closest("[data-probar]"); if (!o || !S || S.id !== DEMO) return;
+  const t = o.dataset.probar; m.classList.remove("show");
+  if (t === "tuto"){ empezarTutorial(); return; }
+  if (t === "novedades"){ empezarTutorial(true); return; }
+  if (t === "resumen"){ abrirResumen(shiftMonth(monthKey(new Date()), -1)); return; }
+  if (t === "medalla"){
+    const g = new Set(medallasGanadas()), x = MEDALLAS.find(z => !g.has(z.id)) || MEDALLAS[0];
+    setTimeout(() => { toast(x.c + " ✔", false, `🏅 ¡Nueva medalla! ${x.e} ${x.n}`); confetti(); }, 300); return;
+  }
+  const tipos = t === "todos" ? PREMIOS.map(p => p.tipo) : [t];
+  try {
+    for (const tipo of tipos){ const r = await Store.reclamarPremio(S.id, S.pin, tipo, TEMPORADA()); if (!r.ok) throw new Error(r.error); S.premios = r.premios; }
+  } catch(err){ toast("⚠️ No se ha podido desbloquear"); return; }
+  pintarCabecera(); pintarTodo();
+  if (t === "todos"){ confetti(); toast("🎁 Todos los premios desbloqueados", false, "Míralos en la pestaña Recompensas"); return; }
+  setTimeout(() => { confetti(); abrirVale(t, true); }, 300);
+});
