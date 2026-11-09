@@ -211,7 +211,7 @@ async function olvidarMovil(){
 /* =====================================================================
    PANEL «USUARIOS» DEL ADMINISTRADOR
    ===================================================================== */
-let usDatos = null, usAbierto = null, usResultado = null;
+let usDatos = null, usAbierto = null, usResultado = null, usBorrar = null;
 const msgAlta = (nombre, c) => `¡Hola ${nombre}! 🎉 Aquí tienes tu acceso a *Ahorraulin*, la app para controlar tus gastos y ahorrar.\n\n` +
   `1️⃣ Abre este enlace: ${APP_URL}?codigo=${c}\n2️⃣ Crea tu cuenta (tu código ya viene puesto: *${c}*)\n3️⃣ Añádela a la pantalla de inicio del móvil para tenerla como una app\n\n` +
   `📌 Guarda este mensaje: si cambias de móvil, entrarás con este código y tus 4 cifras.\nTu acceso dura 1 año. ¡A ahorrar! 💸`;
@@ -284,13 +284,15 @@ function listaUsuarios(){
           <button data-us="nuevo_acceso" data-id="${esc(u.id)}">🔑 Acceso nuevo<br><small style="font-weight:700;color:var(--ink3)">si olvida su código</small></button>
           <button data-us="echar" data-id="${esc(u.id)}">📵 Echar de sus móviles<br><small style="font-weight:700;color:var(--ink3)">móvil robado o perdido</small></button>
           <button data-us="${u.activo ? "desactivar" : "activar"}" data-id="${esc(u.id)}">${u.activo ? "⛔ Desactivar" : "✅ Activar"}</button>
-          <button class="peligro" data-us="vaciar" data-id="${esc(u.id)}">🧹 Borrar sus apuntes</button>
-          <button class="peligro" data-us="eliminar" data-id="${esc(u.id)}">🗑️ Eliminar cuenta</button>
-        </div>${u.codigo ? `<div class="muted small" style="margin-top:8px;text-align:center">Código de alta: <b>${esc(u.codigo)}</b></div>` : ""}` : ""}</div>`; }).join("")}</div>`;
+          <button class="peligro" data-us="pedirBorrar" data-id="${esc(u.id)}" style="grid-column:1/-1">🗑️ Eliminar cuenta</button>
+        </div>${usBorrar === u.id ? `<div class="us-borrar"><b>⚠️ Eliminar la cuenta de ${esc(u.nombre)}</b>
+          <div class="muted small">Se borra la cuenta con todos sus apuntes, metas y premios. Durante 30 días quedan en las copias de seguridad de cada noche; después, desaparecen para siempre.</div>
+          ${campoPin("usPinBorrar", "Tu código")}
+          <div class="us-acc"><button data-us="noBorrar">Cancelar</button><button class="sure" data-us="eliminar" data-id="${esc(u.id)}">Eliminar</button></div></div>` : ""}${u.codigo ? `<div class="muted small" style="margin-top:8px;text-align:center">Código de alta: <b>${esc(u.codigo)}</b></div>` : ""}` : ""}</div>`; }).join("")}</div>`;
 }
-const US_CONFIRMAR = { echar:"¿Echar de todos sus móviles?", desactivar:"¿Desactivar?", vaciar:"¿Borrar TODOS sus apuntes?", eliminar:"¿Eliminar para siempre?", nuevo_acceso:"¿Seguro? Se cierra en sus móviles" };
+const US_CONFIRMAR = { echar:"¿Echar de todos sus móviles?", desactivar:"¿Desactivar?", nuevo_acceso:"¿Seguro? Se cierra en sus móviles" };
 const US_HECHO = { renovar:"📅 Renovada 1 año más", activar:"✅ Cuenta activada", desactivar:"⛔ Cuenta desactivada. Ya no puede entrar", echar:"📵 Fuera de todos sus móviles. Tendrá que entrar con su código y sus 4 cifras",
-  vaciar:"🧹 Apuntes borrados", eliminar:"🗑️ Cuenta eliminada" };
+  eliminar:"🗑️ Cuenta eliminada" };
 document.addEventListener("click", async e => {
   if (e.target.closest("#usCrear")){
     const n = $("usNombre").value.trim(); if (!n){ toast("Escribe el nombre de quien lo compra"); $("usNombre").focus(); return; }
@@ -302,7 +304,9 @@ document.addEventListener("click", async e => {
   }
   const b = e.target.closest("[data-us]"); if (!b || !S || S.id !== ADMIN) return;
   const acc = b.dataset.us, id = b.dataset.id;
-  if (acc === "abrir"){ vibrar(); usAbierto = usAbierto === id ? null : id; pintarUsuarios(); return; }
+  if (acc === "abrir"){ vibrar(); usAbierto = usAbierto === id ? null : id; usBorrar = null; pintarUsuarios(); return; }
+  if (acc === "pedirBorrar"){ vibrar(); usBorrar = id; pintarUsuarios(); setTimeout(() => $("usPinBorrar") && $("usPinBorrar").focus(), 100); return; }
+  if (acc === "noBorrar"){ usBorrar = null; pintarUsuarios(); return; }
   if (acc === "cerrarRes"){ usResultado = null; pintarUsuarios(); return; }
   if (acc === "copiar"){
     try { await navigator.clipboard.writeText(usResultado.msg); toast("📋 Mensaje copiado. Pégalo en WhatsApp"); } catch(err){ toast("⚠️ No se ha podido copiar"); }
@@ -317,19 +321,28 @@ document.addEventListener("click", async e => {
     b.classList.add("sure"); b.dataset.txt = b.innerHTML; b.textContent = US_CONFIRMAR[acc]; vibrar();
     setTimeout(() => { if (b.isConnected){ b.classList.remove("sure"); b.innerHTML = b.dataset.txt; } }, 3500); return;
   }
+  let pinUsar = S.pin;
+  if (acc === "eliminar"){
+    pinUsar = ($("usPinBorrar") || {}).value || "";
+    if (!/^\d{4}$/.test(pinUsar)){ toast("Escribe tu código de 4 cifras para eliminar"); sacudir($("usPinBorrar")); return; }
+  }
   b.disabled = true;
   try {
-    const r = await Store.adminCliente(S.pin, id, acc); if (!r.ok) throw new Error(r.error);
+    const r = await Store.adminCliente(pinUsar, id, acc); if (!r.ok) throw new Error(r.error);
     const u = (usDatos.usuarios || []).find(x => x.id === id) || {};
     if (acc === "nuevo_acceso") usResultado = { titulo:`🔑 Acceso nuevo para ${esc(r.nombre)}`, codigo:r.codigo, msg:msgRecuperar(r.nombre, r.codigo) };
     else if (acc === "renovar"){
       const fin = Math.max(u.caduca || Date.now(), Date.now()) + 365 * 86400000;
       usResultado = { titulo:`📅 ${esc(u.nombre)} renovado hasta el ${fechaLarga(fin)}`, msg:msgRenovar(u.nombre, fin) };
     }
-    if (acc === "eliminar") usAbierto = null;
+    if (acc === "eliminar"){ usAbierto = null; usBorrar = null; }
     toast(US_HECHO[acc] || "✓ Hecho"); vibrar(20);
     if (usResultado) window.scrollTo({ top:0, behavior:"smooth" });
-  } catch(err){ toast("⚠️ No se ha podido: " + errTxt(err.message || "RED")); }
+  } catch(err){
+    const m = err.message || "RED";
+    if (acc === "eliminar" && (m === "PIN_MAL" || m === "BLOQUEADO")){ b.disabled = false; $("usPinBorrar").value = ""; sacudir($("usPinBorrar")); toast(m === "PIN_MAL" ? "❌ Código incorrecto. No se ha borrado nada" : errTxt(m)); return; }
+    toast("⚠️ No se ha podido: " + errTxt(m));
+  }
   pintarUsuarios();
 });
 

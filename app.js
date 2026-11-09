@@ -3,7 +3,7 @@
    ===================================================================== */
 "use strict";
 const CFG = window.CONFIG || {};
-const VERSION = "3.14";
+const VERSION = "3.15";
 const ADMIN = "p1";   // Raúl es el administrador
 const DEMO = "p4";    // perfil de prueba: oculto en el menú, solo entra el administrador
 const REMOTO = !!(CFG.supabaseUrl && CFG.supabaseKey);
@@ -72,6 +72,7 @@ const Nube = {
   verCodigo(c){ return this.rpc("ver_codigo",{p_codigo:c}); },
   activarCodigo(c,nombre,emoji,pin){ return this.rpc("activar_codigo",{p_codigo:c,p_nombre:nombre,p_emoji:emoji,p_pin:pin}); },
   entrarCuenta(c,pin){ return this.rpc("entrar_cuenta",{p_codigo:c,p_pin:pin}); },
+  nuevaLlave(id,pin){ return this.rpc("nueva_llave",{p_id:id,p_pin:pin}); },
   salirMovil(id,llave){ return this.rpc("salir_movil",{p_id:id,p_llave:llave}); },
   adminUsuarios(pin){ return this.rpc("admin_usuarios",{p_pin:pin}); },
   adminCrearCodigo(pin,nombre){ return this.rpc("admin_crear_codigo",{p_pin:pin,p_nombre:nombre}); },
@@ -234,7 +235,7 @@ const Local = {
   }
 };
 // Las cuentas de clientes solo existen en la nube
-for (const f of ["verCodigo","activarCodigo","entrarCuenta","salirMovil","adminUsuarios","adminCrearCodigo","adminAnularCodigo","adminCliente"])
+for (const f of ["nuevaLlave","verCodigo","activarCodigo","entrarCuenta","salirMovil","adminUsuarios","adminCrearCodigo","adminAnularCodigo","adminCliente"])
   if (!Local[f]) Local[f] = async () => ({ error:"SOLO_NUBE" });
 const Store = REMOTO ? Nube : Local;
 
@@ -392,7 +393,13 @@ async function pinListo(){
   try {
     if (s.mode === "enter"){
       const r = await Store.entrar(s.id, pin);
-      if (r.ok){ abrirSesion(s.id, s.llave || pin, r); return; }
+      if (r.ok){
+        // Sara, Marta (y cualquier cuenta de cliente que entre desde la lista): este móvil queda recordado
+        if (!s.llave && r.perfil && r.perfil.cliente){
+          try { const k = await Store.nuevaLlave(s.id, pin); if (k.ok){ guardarCuenta({ id:s.id, llave:k.llave, codigo:k.codigo || "", pinAbrir:false, nombre:r.perfil.nombre, emoji:r.perfil.emoji, color:r.perfil.color }); abrirSesion(s.id, k.llave, r); return; } } catch(e){}
+        }
+        abrirSesion(s.id, s.llave || pin, r); return;
+      }
       sacudir($("dots")); pintarPin(errTxt(r.error), true); return;
     }
     if (s.mode === "create" || s.mode === "change"){ s.first = pin; s.prev = s.mode; s.mode = "confirm"; pintarPin(); return; }
@@ -485,7 +492,7 @@ function cerrarSesion(){
   if (tuto){ tuto = null; $("tuto").classList.remove("show"); }
   $("valeModal").classList.remove("show"); $("probarModal").classList.remove("show");
   valePendiente = null;
-  S = null; copiasCache = null; $("adminCard").classList.add("hidden"); $("adminList").innerHTML = ""; cerrarEntry(); show("menu"); cargarMenu();
+  S = null; copiasCache = null; $("adminCard").classList.add("hidden"); cerrarEntry(); show("menu"); cargarMenu();
 }
 $("lockBtn").onclick = cerrarSesion;
 $("logout").onclick = () => { if (S && S.perfil.cliente) olvidarMovil(); else cerrarSesion(); };
@@ -1230,34 +1237,9 @@ $("copias").addEventListener("click", async e => {
   b.disabled = false; b.textContent = txt;
 });
 async function pintarAdmin(){
-  pintarAdminPremios();
-  const card = $("adminCard");
-  card.classList.toggle("hidden", S.id !== ADMIN);
-  if (S.id !== ADMIN) return;
-  const box = $("adminList");
-  try {
-    const r = await Store.adminEstado(S.pin);
-    if (!r.ok) throw new Error(r.error);
-    if (!S || view !== "usuarios") return;
-    box.innerHTML = r.perfiles.map(p => `<div class="copia adm"><div class="ci" style="background:var(--soft)">${esc(p.emoji)}</div>
-      <div class="cm"><b>${esc(p.nombre)}</b><span>${p.bloqueado ? "🔒 Bloqueado por intentos fallidos" : p.tiene_pin ? "Tiene código" : "Sin código: lo creará al entrar"}</span></div>
-      ${p.tiene_pin ? `<button class="reset" data-reset="${esc(p.id)}" data-nombre="${esc(p.nombre)}">Restablecer</button>` : ""}</div>`).join("");
-  } catch(e){ box.innerHTML = `<div class="empty">No se puede cargar ahora mismo.</div>`; }
+  $("adminCard").classList.toggle("hidden", S.id !== ADMIN);
+  if (S.id === ADMIN) pintarAdminPremios();
 }
-$("adminList").addEventListener("click", async e => {
-  const b = e.target.closest("[data-reset]"); if (!b) return;
-  if (!b.classList.contains("sure")){
-    b.classList.add("sure"); b.textContent = "¿Seguro?"; vibrar();
-    setTimeout(() => { if (b.isConnected){ b.classList.remove("sure"); b.textContent = "Restablecer"; } }, 3000); return;
-  }
-  b.disabled = true; b.innerHTML = '<span class="spin"></span>';
-  try {
-    const r = await Store.adminResetear(S.pin, b.dataset.reset);
-    if (!r.ok) throw new Error(r.error);
-    toast(`👑 Código de ${b.dataset.nombre} restablecido. Creará uno nuevo al entrar.`);
-  } catch(err){ toast("⚠️ No se ha podido restablecer"); }
-  pintarAdmin();
-});
 let ajustesT;
 async function guardarAjustes(cambios, inmediato){
   Object.assign(S.perfil, cambios);

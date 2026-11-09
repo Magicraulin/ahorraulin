@@ -400,7 +400,10 @@ body.dark .medalla.si{background:linear-gradient(160deg,#4a3d10,#4a2035)}
 .us-est.pronto{background:#fff1d6;color:#9a6200}.us-est.mal{background:#ffe0e0;color:#b42323}
 .us-acc{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
 .us-acc button,.us-acc a{background:var(--card);border-radius:12px;padding:10px 8px;font-weight:900;font-size:12.5px;text-align:center;color:var(--ink);text-decoration:none;line-height:1.25}
-.us-acc .peligro{color:var(--warn)}.us-acc .sure{background:var(--warn);color:#fff}
+.us-acc .peligro{color:var(--warn)}
+.us-borrar{background:var(--card);border:2px solid var(--warn);border-radius:14px;padding:12px;margin-top:10px}
+.us-borrar b{display:block;color:var(--warn);font-weight:900;margin-bottom:4px}
+.us-borrar .inp.pin{margin:8px 0}.us-acc .sure{background:var(--warn);color:#fff}
 .us-fila{display:flex;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--line)}
 .us-fila:first-of-type{border-top:0}
 .us-fila .cm{flex:1;min-width:0}.us-fila b{display:block;font-family:ui-monospace,Menlo,monospace}.us-fila small{color:var(--ink3);font-weight:700}
@@ -526,7 +529,7 @@ nav button.on .e{filter:none;opacity:1;transform:translateY(-1px) scale(1.08)}
 
 <!-- ================= APP ================= -->
 <section id="app" class="hidden">
-  <div class="demo-bar hidden" id="demoBar">🧪 Perfil de prueba · así lo ven Sara y Marta <button id="probarDemo">🎁 Desbloquear</button><button id="volverAdmin">Volver a mi perfil</button></div>
+  <div class="demo-bar hidden" id="demoBar">🧪 Perfil de prueba · así lo ven tus usuarios <button id="probarDemo">🎁 Desbloquear</button><button id="volverAdmin">Volver a mi perfil</button></div>
   <div class="hero"><div class="hero-in">
     <div class="av" id="hAv"></div>
     <div class="hi" id="hHi"></div>
@@ -579,11 +582,8 @@ nav button.on .e{filter:none;opacity:1;transform:translateY(-1px) scale(1.08)}
     <div id="v-usuarios" class="hidden">
       <div id="usuariosBody"></div>
       <div class="card hidden" id="adminCard">
-        <h2>👨‍👩‍👧 Familia y pruebas</h2>
-        <div class="muted small" style="margin-bottom:6px">Si alguien olvida su código, restablécelo aquí. La próxima vez que entre creará uno nuevo. Sus gastos no se tocan.</div>
-        <div id="adminList"></div>
-        <div class="sub-h">🧪 Perfil de prueba</div>
-        <button class="opt" id="entrarDemo"><span class="e">🧪</span><span>Entrar al perfil de prueba<small>Mira la app exactamente como la ven Sara y Marta</small></span></button>
+        <h2>🧪 Pruebas y premios</h2>
+        <button class="opt" id="entrarDemo"><span class="e">🧪</span><span>Entrar al perfil de prueba<small>Mira la app exactamente como la ven tus usuarios</small></span></button>
         <button class="opt" id="vaciarDemo"><span class="e">🧹</span><span>Vaciar el perfil de prueba<small>Borra sus apuntes, metas y premios para empezar de cero</small></span></button>
         <div class="sub-h">🎁 Vales de premios</div>
         <div id="adminPremios"></div>
@@ -746,13 +746,13 @@ nav button.on .e{filter:none;opacity:1;transform:translateY(-1px) scale(1.08)}
 </div>
 <div class="toast" id="toast"><div class="tt"><b id="toastFrase" class="hidden"></b><span id="toastTxt"></span></div><button id="undo">Deshacer</button></div>
 
-<script src="config.js?v=40"></script>
-<script src="datos.js?v=40"></script>
-<script src="excel.js?v=40"></script>
+<script src="config.js?v=41"></script>
+<script src="datos.js?v=41"></script>
+<script src="excel.js?v=41"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js" defer></script>
-<script src="app.js?v=40"></script>
-<script src="logros.js?v=40"></script>
-<script src="tutorial.js?v=40"></script>
-<script src="cuentas.js?v=40"></script>
+<script src="app.js?v=41"></script>
+<script src="logros.js?v=41"></script>
+<script src="tutorial.js?v=41"></script>
+<script src="cuentas.js?v=41"></script>
 </body>
 </html>
