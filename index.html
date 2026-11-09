@@ -407,6 +407,7 @@ body.dark .medalla.si{background:linear-gradient(160deg,#4a3d10,#4a2035)}
 .us-borrar.suave{border-color:var(--p)}.us-borrar.suave b{color:var(--p)}
 .us-acc .ok{background:linear-gradient(135deg,var(--p),var(--p2));color:#fff}
 .us-err{color:var(--warn);font-weight:900;font-size:13.5px;text-align:center;min-height:1em;margin:-2px 0 4px}
+.opt.sop{text-decoration:none;color:inherit}
 .us-plazos{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:10px}
 .us-plazos button{background:var(--soft);border-radius:12px;padding:10px;font-weight:900;font-size:13px;color:var(--ink)}
 .us-plazos button.on{background:var(--p);color:#fff}.us-acc .sure{background:var(--warn);color:#fff}
@@ -654,6 +655,14 @@ nav button.on .e{filter:none;opacity:1;transform:translateY(-1px) scale(1.08)}
         <button class="opt" id="chPin"><span class="e">🔑</span><span>Cambiar mi código<small>Elige 4 números nuevos</small></span></button>
         <button class="opt" id="logout"><span class="e">🚪</span><span>Salir<small>Tu cuenta se queda bloqueada</small></span></button>
       </div>
+      <div class="card hidden" id="soporteCard">
+        <h2>💬 Soporte</h2>
+        <div class="muted small" style="margin-bottom:4px">¿Tienes alguna duda, quieres personalizar algo de la app o te han robado el móvil? Escríbenos por WhatsApp y te ayudamos.</div>
+        <a class="opt sop" data-sop="duda" target="_blank" rel="noopener"><span class="e">❓</span><span>Tengo una duda<small>Te respondemos por WhatsApp</small></span></a>
+        <a class="opt sop" data-sop="personalizar" target="_blank" rel="noopener"><span class="e">🎨</span><span>Quiero personalizar algo<small>Categorías, colores, ideas para la app…</small></span></a>
+        <a class="opt sop" data-sop="robo" target="_blank" rel="noopener"><span class="e">🚨</span><span>Me han robado o he perdido el móvil<small>Avísanos y cerramos tu sesión en ese móvil</small></span></a>
+        <a class="opt" href="soporte.vcf" download="Soporte Ahorraulin.vcf" style="text-decoration:none;color:inherit"><span class="e">📇</span><span>Guardar el contacto «Soporte Ahorraulin»<small>Agéndalo para tenerlo siempre a mano</small></span></a>
+      </div>
       <div class="foot" id="foot"></div>
     </div>
   </div>
@@ -752,13 +761,13 @@ nav button.on .e{filter:none;opacity:1;transform:translateY(-1px) scale(1.08)}
 </div>
 <div class="toast" id="toast"><div class="tt"><b id="toastFrase" class="hidden"></b><span id="toastTxt"></span></div><button id="undo">Deshacer</button></div>
 
-<script src="config.js?v=44"></script>
-<script src="datos.js?v=44"></script>
-<script src="excel.js?v=44"></script>
+<script src="config.js?v=45"></script>
+<script src="datos.js?v=45"></script>
+<script src="excel.js?v=45"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js" defer></script>
-<script src="app.js?v=44"></script>
-<script src="logros.js?v=44"></script>
-<script src="tutorial.js?v=44"></script>
-<script src="cuentas.js?v=44"></script>
+<script src="app.js?v=45"></script>
+<script src="logros.js?v=45"></script>
+<script src="tutorial.js?v=45"></script>
+<script src="cuentas.js?v=45"></script>
 </body>
 </html>

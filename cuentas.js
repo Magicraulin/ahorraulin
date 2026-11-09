@@ -179,6 +179,7 @@ async function seguirCuenta(){
 const fechaLarga = ms => new Date(ms).toLocaleDateString("es-ES", { day:"numeric", month:"long", year:"numeric" });
 const diasHasta = ms => Math.ceil((ms - Date.now()) / 86400000);
 function pintarCuentaCard(){
+  pintarSoporte();
   const card = $("cuentaCard"), P = S.perfil, conLlave = !!cuentaGuardada() && S.id !== DEMO;
   card.classList.toggle("hidden", !conLlave);
   $("logout").innerHTML = conLlave ? `<span class="e">🚪</span><span>Cerrar sesión en este móvil<small>Para volver a entrar necesitarás tu código de acceso y tus 4 cifras</small></span>`
@@ -198,6 +199,22 @@ document.addEventListener("click", e => {
   guardarCuenta({ pinAbrir: !c.pinAbrir }); pintarCuentaCard(); pintarCabecera();
   toast(!c.pinAbrir ? "🔐 Te pediré tu código al abrir la app" : "📱 Entrarás directamente, sin código");
 });
+/* ---------- Soporte por WhatsApp (al final de Ajustes) ---------- */
+const SOPORTE_MSG = {
+  duda: "tengo una duda con la app: ",
+  personalizar: "me gustaría personalizar algo de la app: ",
+  robo: "🚨 me han robado o he perdido el móvil. Por favor, cierra mi sesión en ese móvil."
+};
+function pintarSoporte(){
+  const card = $("soporteCard"); if (!card) return;
+  card.classList.toggle("hidden", !S || S.id === ADMIN);
+  if (!S || S.id === ADMIN) return;
+  const c = cuentaGuardada() || {};
+  card.querySelectorAll("[data-sop]").forEach(a => {
+    const txt = `¡Hola, Soporte Ahorraulin! Soy ${S.perfil.nombre}${c.codigo ? " (" + c.codigo + ")" : ""} y ${SOPORTE_MSG[a.dataset.sop]}`;
+    a.href = `https://wa.me/${WHATSAPP_PREMIOS}?text=${encodeURIComponent(txt)}`;
+  });
+}
 function avisoCaducidad(){
   if (!S || !S.perfil.cliente || !S.perfil.caduca) return;
   const d = diasHasta(S.perfil.caduca), k = "ahorraulin_avisocad_" + ymd(new Date());
