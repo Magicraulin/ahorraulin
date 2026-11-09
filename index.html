@@ -376,6 +376,35 @@ body.dark .medalla.si{background:linear-gradient(160deg,#4a3d10,#4a2035)}
 .tb-atras{background:var(--soft);color:var(--ink2);border-radius:999px;padding:11px 14px;font-weight:900;font-size:14px}
 .tb-sig{background:linear-gradient(135deg,var(--p),var(--p2));color:#fff;border-radius:999px;padding:11px 18px;font-weight:900;font-size:14.5px;margin-left:auto;box-shadow:0 6px 16px -6px var(--p)}
 .demo-bar{position:sticky;top:0;z-index:20;background:#1f1a2e;color:#fff;font-weight:800;font-size:12.5px;padding:calc(8px + var(--st)) 12px 8px;display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;text-align:center}
+.cl-aviso{background:#fff;border-radius:20px;padding:16px;margin-bottom:14px;box-shadow:0 8px 24px -14px rgba(40,20,90,.35);font-weight:800;color:#2a2340;text-align:center;line-height:1.4}
+.cl-aviso .btn{margin-top:10px;text-decoration:none}
+#clienteBox .btn{margin-top:10px}
+.btn.cl-sec{background:#fff;color:#2a2340;box-shadow:0 6px 18px -12px rgba(40,20,90,.4)}
+.cl-link{display:block;margin:16px auto 0;color:#5b5670;font-weight:800;font-size:13.5px;text-decoration:underline;padding:8px}
+.cu-paso h3{font-family:Fredoka,sans-serif;font-size:23px;margin:0 0 4px;text-align:center}
+.cu-paso p{color:var(--ink3);font-weight:700;text-align:center;margin:0 0 14px;line-height:1.4}
+.cu-paso label{display:block;font-weight:900;font-size:13.5px;margin:12px 0 6px}
+.cu-paso .inp.code{text-align:center;font-size:21px;letter-spacing:2px;text-transform:uppercase}
+.cu-paso .inp.pin{text-align:center;font-size:22px;letter-spacing:10px;-webkit-text-security:disc}
+.cu-paso .err{color:var(--warn);font-weight:900;text-align:center;margin-top:10px;min-height:1em}
+.cu-emojis{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
+.cu-emojis button{font-size:24px;width:44px;height:44px;border-radius:12px;background:var(--soft)}
+.cu-emojis button.on{outline:3px solid var(--p);background:var(--p-soft)}
+.cu-nota{background:var(--soft);border-radius:14px;padding:11px 13px;font-size:13px;font-weight:700;color:var(--ink2);margin-top:12px;line-height:1.4}
+.us-codigo{font-family:ui-monospace,Menlo,monospace;font-weight:900;font-size:22px;letter-spacing:1px;text-align:center;padding:12px;border:2px dashed var(--p);border-radius:16px;margin:10px 0;color:var(--p)}
+.us-card{background:var(--soft);border-radius:18px;padding:12px;margin-top:10px}
+.us-top{display:flex;align-items:center;gap:12px;width:100%;text-align:left}
+.us-top .em{font-size:26px;width:44px;height:44px;border-radius:14px;background:var(--card);display:grid;place-items:center;flex:none}
+.us-top b{display:block;font-weight:900}.us-top small{display:block;color:var(--ink3);font-weight:700;font-size:12.5px;line-height:1.35}
+.us-est{font-size:11.5px;font-weight:900;padding:4px 9px;border-radius:999px;flex:none;background:#dff5e6;color:#1d7a3d}
+.us-est.pronto{background:#fff1d6;color:#9a6200}.us-est.mal{background:#ffe0e0;color:#b42323}
+.us-acc{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.us-acc button,.us-acc a{background:var(--card);border-radius:12px;padding:10px 8px;font-weight:900;font-size:12.5px;text-align:center;color:var(--ink);text-decoration:none;line-height:1.25}
+.us-acc .peligro{color:var(--warn)}.us-acc .sure{background:var(--warn);color:#fff}
+.us-fila{display:flex;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--line)}
+.us-fila:first-of-type{border-top:0}
+.us-fila .cm{flex:1;min-width:0}.us-fila b{display:block;font-family:ui-monospace,Menlo,monospace}.us-fila small{color:var(--ink3);font-weight:700}
+.us-fila button,.us-fila a{background:var(--soft);border-radius:10px;padding:8px 10px;font-weight:900;font-size:12px;color:var(--ink);text-decoration:none}
 .demo-op{display:flex;align-items:center;gap:12px;width:100%;text-align:left;padding:12px 13px;border-radius:16px;background:var(--soft);margin-top:8px;color:var(--ink)}
 .demo-op span{font-size:24px}.demo-op b{display:block;font-weight:900;font-size:14px}.demo-op small{color:var(--ink3);font-size:12px}
 .demo-bar button{background:#fff;color:#1f1a2e;border-radius:999px;padding:6px 12px;font-weight:900;font-size:12px}
@@ -466,7 +495,13 @@ nav button.on .e{filter:none;opacity:1;transform:translateY(-1px) scale(1.08)}
     <div class="logo">💸</div>
     <h1>Ahorraulin</h1>
     <div class="sub">Tus cuentas claras · ¿Quién eres?</div>
+    <div class="cl-aviso hidden" id="clAviso"></div>
     <div id="pcards"><div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div></div>
+    <div id="clienteBox" class="hidden">
+      <button class="btn p" id="tengoCodigo">🔑 Tengo un código de acceso</button>
+      <button class="btn cl-sec" id="yaCuenta">📱 Ya tengo cuenta (móvil nuevo)</button>
+    </div>
+    <button class="cl-link hidden" id="clLink"></button>
     <div class="mode-note hidden" id="modeNote"></div>
     <div class="install hidden" id="installTip"></div>
   </div>
@@ -541,16 +576,10 @@ nav button.on .e{filter:none;opacity:1;transform:translateY(-1px) scale(1.08)}
     <div id="v-save" class="hidden"><div id="saveBody"></div></div>
 
     <!-- Recompensas -->
-    <div id="v-premios" class="hidden"><div id="premiosBody"></div></div>
-
-    <!-- Ideas -->
-    <div id="v-ideas" class="hidden"><div id="ideasBody"></div></div>
-
-    <!-- Mi perfil -->
-    <div id="v-perfil" class="hidden">
-      <div class="card perfil-top"><div class="pav" id="pAv"></div><div><b id="pNombre"></b><small>Toca tu nombre o tu emoticono arriba para volver aquí</small></div></div>
+    <div id="v-usuarios" class="hidden">
+      <div id="usuariosBody"></div>
       <div class="card hidden" id="adminCard">
-        <h2>👑 Administrador</h2>
+        <h2>👨‍👩‍👧 Familia y pruebas</h2>
         <div class="muted small" style="margin-bottom:6px">Si alguien olvida su código, restablécelo aquí. La próxima vez que entre creará uno nuevo. Sus gastos no se tocan.</div>
         <div id="adminList"></div>
         <div class="sub-h">🧪 Perfil de prueba</div>
@@ -559,6 +588,15 @@ nav button.on .e{filter:none;opacity:1;transform:translateY(-1px) scale(1.08)}
         <div class="sub-h">🎁 Vales de premios</div>
         <div id="adminPremios"></div>
       </div>
+    </div>
+    <div id="v-premios" class="hidden"><div id="premiosBody"></div></div>
+
+    <!-- Ideas -->
+    <div id="v-ideas" class="hidden"><div id="ideasBody"></div></div>
+
+    <!-- Mi perfil -->
+    <div id="v-perfil" class="hidden">
+      <div class="card perfil-top"><div class="pav" id="pAv"></div><div><b id="pNombre"></b><small>Toca tu nombre o tu emoticono arriba para volver aquí</small></div></div>
       <div class="card">
         <h2>Tu perfil</h2>
         <input class="inp" id="setName" maxlength="20" placeholder="Tu nombre" aria-label="Tu nombre">
@@ -575,6 +613,7 @@ nav button.on .e{filter:none;opacity:1;transform:translateY(-1px) scale(1.08)}
 
     <!-- Ajustes -->
     <div id="v-set" class="hidden">
+      <div class="card hidden" id="cuentaCard"></div>
       <details class="card fold" id="presuFold">
         <summary><h2>🎯 Presupuestos mensuales <small id="presuResumen"></small></h2></summary>
         <div class="muted small" style="margin-bottom:6px">Pon cuánto quieres gastar como mucho al mes en cada cosa. Te avisaré al llegar al 80 %. Déjalo vacío para no poner límite.</div>
@@ -623,6 +662,7 @@ nav button.on .e{filter:none;opacity:1;transform:translateY(-1px) scale(1.08)}
   <button data-v="ideas"><span class="e">💡</span>Ideas</button>
   <button data-v="premios"><span class="e">🏆</span>Recompensas</button>
   <button data-v="set"><span class="e">⚙️</span>Ajustes</button>
+  <button data-v="usuarios" class="hidden" id="navUsuarios"><span class="e">👥</span>Usuarios</button>
 </div></nav>
 
 <!-- Hoja para apuntar -->
@@ -680,6 +720,10 @@ nav button.on .e{filter:none;opacity:1;transform:translateY(-1px) scale(1.08)}
   </div>
 </div></div>
 
+<div class="modal" id="cuentaModal"><div class="sheet" role="dialog" aria-modal="true" aria-label="Tu cuenta">
+  <div class="grab"></div>
+  <div style="display:flex;justify-content:flex-end"><button class="x" id="cuentaX" aria-label="Cerrar">✕</button></div>
+  <div id="cuentaBody"></div></div></div>
 <div class="modal" id="probarModal"><div class="sheet" role="dialog" aria-modal="true" aria-label="Probar recompensas">
   <div class="grab"></div>
   <div class="e-head"><div class="e" style="--cb:#fff3c4">🎁</div><div><b>Desbloquear para probar</b><small style="color:var(--ink3)">Solo en el perfil de prueba. Para quitarlo todo: «Vaciar perfil de prueba» en tu panel.</small></div><button class="x" id="probarX">✕</button></div>
@@ -702,12 +746,13 @@ nav button.on .e{filter:none;opacity:1;transform:translateY(-1px) scale(1.08)}
 </div>
 <div class="toast" id="toast"><div class="tt"><b id="toastFrase" class="hidden"></b><span id="toastTxt"></span></div><button id="undo">Deshacer</button></div>
 
-<script src="config.js?v=39"></script>
-<script src="datos.js?v=39"></script>
-<script src="excel.js?v=39"></script>
+<script src="config.js?v=40"></script>
+<script src="datos.js?v=40"></script>
+<script src="excel.js?v=40"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js" defer></script>
-<script src="app.js?v=39"></script>
-<script src="logros.js?v=39"></script>
-<script src="tutorial.js?v=39"></script>
+<script src="app.js?v=40"></script>
+<script src="logros.js?v=40"></script>
+<script src="tutorial.js?v=40"></script>
+<script src="cuentas.js?v=40"></script>
 </body>
 </html>

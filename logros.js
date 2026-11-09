@@ -143,7 +143,7 @@ function abrirVale(tipo, nuevo){
   const p = PREMIOS.find(x => x.tipo === tipo), v = valeDe(tipo);
   const g = new Set(medallasGanadas());
   if (!v){ vibrar(); toast(`🔒 ${p.n}`, false, "Cómo conseguirlo: " + p.reto.charAt(0).toLowerCase() + p.reto.slice(1)); return; }
-  const mensaje = encodeURIComponent(`¡Hola! Gracias a mi constancia en Ahorraulin he conseguido el premio: ${p.n} ${p.e} (código ${v.codigo})`);
+  const mensaje = encodeURIComponent(`¡Hola! Soy ${S.perfil.nombre}. Gracias a mi constancia en Ahorraulin he conseguido el premio: ${p.n} ${p.e} (código ${v.codigo})`);
   $("valeBody").innerHTML = `
     ${nuevo ? `<div class="vale-nuevo">🎉 ¡Has ganado un premio! 🎉</div>` : ""}
     <div class="vale ${v.usado ? "usado" : ""}">

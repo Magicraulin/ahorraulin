@@ -19,6 +19,13 @@ const CATEGORIAS = {
               ["sueldo","💰","Sueldo","#e1f4e6"],["bizum","💸","Bizum / me devuelven","#e0f5f5"],["ventas","🏷️","Ventas","#fff1d6"],
               ["regalo","🎁","Regalo","#fff0dc"],["otros_in","✨","Otros ingresos","#f0eef5"]]
   },
+  general: {
+    // Clientes: lo de todo el mundo, con Belleza y Deporte
+    gasto: meterDetras(meterDetras(GASTOS_BASE.map(c => c[0] === "trabajo" ? ["trabajo","💼","Trabajo / estudios","#e9ecf5"] : c), "trabajo", BELLEZA), "viajes", ["deporte","🏃","Deporte","#e6f6df"]),
+    ingreso: [["sueldo","💰","Nómina","#e1f4e6"],["extra","➕","Trabajos extra","#e3ecff"],["paga","🎄","Paga extra","#ffe4dc"],
+              ["bizum","💸","Bizum / me devuelven","#e0f5f5"],["regalo","🎁","Regalo","#fff0dc"],["ventas","🏷️","Ventas","#fff1d6"],
+              ["otros_in","✨","Otros ingresos","#f0eef5"]]
+  },
   profe: {
     // Sara y Marta: con Belleza (antes de Ahorro)
     gasto: meterDetras(GASTOS_BASE, "trabajo", BELLEZA),

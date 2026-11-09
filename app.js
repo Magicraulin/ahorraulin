@@ -3,7 +3,7 @@
    ===================================================================== */
 "use strict";
 const CFG = window.CONFIG || {};
-const VERSION = "3.13";
+const VERSION = "3.14";
 const ADMIN = "p1";   // Raúl es el administrador
 const DEMO = "p4";    // perfil de prueba: oculto en el menú, solo entra el administrador
 const REMOTO = !!(CFG.supabaseUrl && CFG.supabaseKey);
@@ -69,6 +69,14 @@ const Nube = {
   pararRecurrente(id,pin,rec){ return this.rpc("parar_recurrente",{p_id:id,p_pin:pin,p_rec:rec}); },
   misCopias(id,pin){ return this.rpc("mis_copias",{p_id:id,p_pin:pin}); },
   copiaExcel(id,pin,c){ return this.rpc("copia_excel",{p_id:id,p_pin:pin,p_copia:c}); },
+  verCodigo(c){ return this.rpc("ver_codigo",{p_codigo:c}); },
+  activarCodigo(c,nombre,emoji,pin){ return this.rpc("activar_codigo",{p_codigo:c,p_nombre:nombre,p_emoji:emoji,p_pin:pin}); },
+  entrarCuenta(c,pin){ return this.rpc("entrar_cuenta",{p_codigo:c,p_pin:pin}); },
+  salirMovil(id,llave){ return this.rpc("salir_movil",{p_id:id,p_llave:llave}); },
+  adminUsuarios(pin){ return this.rpc("admin_usuarios",{p_pin:pin}); },
+  adminCrearCodigo(pin,nombre){ return this.rpc("admin_crear_codigo",{p_pin:pin,p_nombre:nombre}); },
+  adminAnularCodigo(pin,c){ return this.rpc("admin_anular_codigo",{p_pin:pin,p_codigo:c}); },
+  adminCliente(pin,id,accion){ return this.rpc("admin_cliente",{p_pin:pin,p_id:id,p_accion:accion}); },
   guardarAjustes(id,pin,a){ return this.rpc("guardar_ajustes",{p_id:id,p_pin:pin,p_nombre:a.nombre,p_emoji:a.emoji,p_color:a.color,p_oscuro:a.oscuro,p_provincia:a.provincia,p_combustible:a.combustible}); }
 };
 
@@ -225,6 +233,9 @@ const Local = {
     Object.assign(d.perfiles[id], a); this.save(d); return {ok:true, perfil:this.perfil(d,id)};
   }
 };
+// Las cuentas de clientes solo existen en la nube
+for (const f of ["verCodigo","activarCodigo","entrarCuenta","salirMovil","adminUsuarios","adminCrearCodigo","adminAnularCodigo","adminCliente"])
+  if (!Local[f]) Local[f] = async () => ({ error:"SOLO_NUBE" });
 const Store = REMOTO ? Nube : Local;
 
 const ERRORES = {
@@ -233,7 +244,15 @@ const ERRORES = {
   SIN_PIN: "Este perfil aún no tiene código",
   YA_TIENE_PIN: "Este perfil ya tiene código",
   PIN_FORMATO: "El código tiene que ser de 4 números",
-  RED: "Sin conexión. Revisa internet e inténtalo otra vez."
+  RED: "Sin conexión. Revisa internet e inténtalo otra vez.",
+  CODIGO_MAL: "Ese código de acceso no existe. Revísalo bien 🔍",
+  CODIGO_USADO: "Ese código ya se ha usado. Si ya tienes cuenta, toca «Ya tengo cuenta»",
+  SESION: "Se ha cerrado la sesión en este móvil",
+  CADUCADA: "Tu año de Ahorraulin ha terminado",
+  DESACTIVADA: "Tu cuenta está desactivada. Habla con el administrador",
+  NO_EXISTE: "Esa cuenta ya no existe",
+  DATOS: "Falta algún dato",
+  SOLO_NUBE: "Esto solo funciona con la app conectada a la nube"
 };
 const errTxt = e => ERRORES[e] || (String(e).startsWith("RED") ? ERRORES.RED : "Algo ha fallado, inténtalo otra vez");
 
@@ -247,7 +266,8 @@ let pinState = null, pinBusy = false;
 let entry = null;                // apuntado en curso
 let lastAdded = null, ocultoDesde = 0;
 
-const cats = (t) => CATEGORIAS[TIPO_PERFIL[S.id] || "profe"][t].map(a => ({id:a[0], e:a[1], n:a[2], bg:a[3]}));
+const tipoPerfil = () => TIPO_PERFIL[S.id] || (S.perfil && CATEGORIAS[S.perfil.tipo] ? S.perfil.tipo : "general");
+const cats = (t) => CATEGORIAS[tipoPerfil()][t].map(a => ({id:a[0], e:a[1], n:a[2], bg:a[3]}));
 function catOf(m){
   const c = cats(m.tipo).find(c => c.id === m.cat);
   return c || (m.tipo === "ingreso" ? {e:"✨", n:"Otros ingresos", bg:"#f0eef5"} : {e:"✨", n:"Otros gastos", bg:"#f0eef5"});
@@ -300,6 +320,8 @@ function banner(t){ $("banner").textContent = t || ""; $("banner").classList.tog
    MENÚ
    ===================================================================== */
 async function cargarMenu(){
+  if (await entrarCuentaGuardada()) return;
+  pintarMenuClientes();
   if (!REMOTO){ $("modeNote").textContent = "🧪 Modo prueba: los datos se guardan solo en este móvil. Para compartirlos entre móviles, configura Supabase (mira README.md)."; $("modeNote").classList.remove("hidden"); }
   try {
     const r = await Store.menu();
@@ -315,6 +337,7 @@ async function cargarMenu(){
   }
 }
 function pintarMenu(){
+  if (!verFamilia()){ $("pcards").innerHTML = ""; return; }
   $("pcards").innerHTML = perfilesMenu.map(p => {
     const P = PALETAS[p.color] || PALETAS.violeta;
     return `<button class="pcard" data-p="${esc(p.id)}" style="--c1:${P[0]};--c2:${P[1]}">
@@ -369,7 +392,7 @@ async function pinListo(){
   try {
     if (s.mode === "enter"){
       const r = await Store.entrar(s.id, pin);
-      if (r.ok){ abrirSesion(s.id, pin, r); return; }
+      if (r.ok){ abrirSesion(s.id, s.llave || pin, r); return; }
       sacudir($("dots")); pintarPin(errTxt(r.error), true); return;
     }
     if (s.mode === "create" || s.mode === "change"){ s.first = pin; s.prev = s.mode; s.mode = "confirm"; pintarPin(); return; }
@@ -396,6 +419,7 @@ async function pinListo(){
 }
 $("pinBack").onclick = () => {
   if (S && pinState && (pinState.mode === "change" || pinState.prev === "change")){ pinState = null; show("app"); aplicarTema(S.perfil.color, S.perfil.oscuro); return; }
+  if (pinState && pinState.llave) saltarAuto = true;
   pinState = null; show("menu"); cargarMenu();
 };
 
@@ -443,6 +467,7 @@ document.addEventListener("visibilitychange", () => { if (document.hidden && tap
 
 function abrirSesion(id, pin, r){
   S = { id, pin }; aplicarDatos(r);
+  if (!S.perfil.cliente && id !== DEMO) marcarFamilia();
   pinState = null; view = "add"; tipo = "gasto"; viewMonth = monthKey(new Date());
   ponerTapado(taparAlAbrir());
   aplicarTema(S.perfil.color, S.perfil.oscuro);
@@ -462,14 +487,15 @@ function cerrarSesion(){
   valePendiente = null;
   S = null; copiasCache = null; $("adminCard").classList.add("hidden"); $("adminList").innerHTML = ""; cerrarEntry(); show("menu"); cargarMenu();
 }
-$("lockBtn").onclick = cerrarSesion; $("logout").onclick = cerrarSesion;
+$("lockBtn").onclick = cerrarSesion;
+$("logout").onclick = () => { if (S && S.perfil.cliente) olvidarMovil(); else cerrarSesion(); };
 
 async function refrescar(){
   if (!S || !REMOTO) return;
   try {
     const r = await Store.entrar(S.id, S.pin);
     if (r.ok){ aplicarDatos(r); banner(""); pintarCabecera(); pintarTodo(); }
-    else if (r.error === "PIN_MAL" || r.error === "SIN_PIN"){ cerrarSesion(); }
+    else if (["PIN_MAL","SIN_PIN","SESION","CADUCADA","DESACTIVADA","NO_EXISTE"].includes(r.error)){ cerrarSesion(); }
   } catch(e){ banner("Sin conexión: lo que ves puede no estar al día."); }
 }
 // Al volver a la app: sincroniza y, si ha pasado mucho rato, bloquea.
@@ -507,6 +533,7 @@ document.addEventListener("click", async e => {
 function pintarCabecera(){
   $("demoBar").classList.toggle("hidden", !S || S.id !== DEMO);
   const h = new Date().getHours(), P = S.perfil;
+  $("lockBtn").classList.toggle("hidden", !!(P.cliente && !(cuentaGuardada() || {}).pinAbrir));
   $("hAv").textContent = P.emoji;
   $("hHi").innerHTML = `${h < 14 ? "Buenos días" : h < 21 ? "Buenas tardes" : "Buenas noches"}, ${esc(P.nombre)}${typeof tieneOro === "function" && tieneOro() ? " 👑" : ""}<small>${REMOTO ? "Guardado en la nube ☁️" : "Modo prueba · solo en este móvil"}</small>`;
 }
@@ -1093,7 +1120,7 @@ document.addEventListener("click", async e => {
   const prov = (PROVINCIAS.find(p => p[0] === S.perfil.provincia) || [,"Madrid"])[1];
   try {
     const r = await fetch(CFG.workerUrl.replace(/\/+$/,"") + "/consejos", { method:"POST", headers:{"Content-Type":"application/json"},
-      body: JSON.stringify({ perfil: TIPO_PERFIL[S.id] === "mago" ? "mago profesional autónomo" : "profesora", provincia: prov, meses }) });
+      body: JSON.stringify({ perfil: { mago:"mago profesional autónomo", profe:"profesora", general:"persona que quiere controlar sus gastos" }[tipoPerfil()], provincia: prov, meses }) });
     const j = await r.json();
     if (!r.ok || !j.texto) throw new Error();
     out.innerHTML = mdLite(j.texto);
@@ -1111,7 +1138,6 @@ function pintarPerfil(){
   $("emojiGrid").innerHTML = EMOJIS.map(e => `<button data-em="${e}" class="${e === P.emoji ? "on" : ""}" aria-label="${e}">${e}</button>`).join("");
   $("swatches").innerHTML = Object.entries(PALETAS).filter(([k]) => k !== "oro" || k === P.color || (typeof tieneOro === "function" && tieneOro())).map(([k,v]) => `<button class="sw ${k === P.color ? "on" : ""}" data-col="${k}" style="background:linear-gradient(135deg,${v[0]},${v[1]})">${v[2]}</button>`).join("");
   $("darkSw").classList.toggle("on", !!P.oscuro); $("darkSw").setAttribute("aria-checked", !!P.oscuro);
-  pintarAdmin();
 }
 $("taparSeg").addEventListener("click", e => {
   const b = e.target.closest("[data-tapar]"); if (!b) return;
@@ -1120,6 +1146,7 @@ $("taparSeg").addEventListener("click", e => {
 });
 function pintarTaparSeg(){ const t = taparAlAbrir(); document.querySelectorAll("#taparSeg [data-tapar]").forEach(x => x.classList.toggle("on", (x.dataset.tapar === "1") === t)); }
 function pintarAjustes(){
+  pintarCuentaCard();
   pintarTaparSeg();
   $("xlSub").textContent = `Archivo nuevo con tus ${S.movs.length === 1 ? "1 movimiento" : S.movs.length + " movimientos"} · para enviarlo o guardarlo`;
   pintarCopias();
@@ -1211,7 +1238,7 @@ async function pintarAdmin(){
   try {
     const r = await Store.adminEstado(S.pin);
     if (!r.ok) throw new Error(r.error);
-    if (!S || view !== "perfil") return;
+    if (!S || view !== "usuarios") return;
     box.innerHTML = r.perfiles.map(p => `<div class="copia adm"><div class="ci" style="background:var(--soft)">${esc(p.emoji)}</div>
       <div class="cm"><b>${esc(p.nombre)}</b><span>${p.bloqueado ? "🔒 Bloqueado por intentos fallidos" : p.tiene_pin ? "Tiene código" : "Sin código: lo creará al entrar"}</span></div>
       ${p.tiene_pin ? `<button class="reset" data-reset="${esc(p.id)}" data-nombre="${esc(p.nombre)}">Restablecer</button>` : ""}</div>`).join("");
@@ -1296,8 +1323,9 @@ document.querySelectorAll(".mNext").forEach(b => b.onclick = () => { viewMonth =
 
 function pintarTodo(){
   if (!S) return;
-  ["add","list","charts","save","ideas","premios","perfil","set"].forEach(v => $("v-"+v).classList.toggle("hidden", v !== view));
-  $("balance").classList.toggle("hidden", ["set","ideas","perfil","premios"].includes(view));
+  ["add","list","charts","save","ideas","premios","perfil","set","usuarios"].forEach(v => $("v-"+v).classList.toggle("hidden", v !== view));
+  $("balance").classList.toggle("hidden", ["set","ideas","perfil","premios","usuarios"].includes(view));
+  $("navUsuarios").classList.toggle("hidden", S.id !== ADMIN);
   document.querySelectorAll(".mName").forEach(x => x.textContent = monthName(viewMonth));
   pintarBalance();
   if (view === "add") pintarApuntar();
@@ -1308,6 +1336,7 @@ function pintarTodo(){
   if (view === "premios") pintarRecompensas();
   if (view === "perfil") pintarPerfil();
   if (view === "set") pintarAjustes();
+  if (view === "usuarios"){ pintarUsuarios(); pintarAdmin(); }
   revisarMedallas();
 }
 
@@ -1315,7 +1344,6 @@ function pintarTodo(){
    ARRANQUE
    ===================================================================== */
 show("menu");
-cargarMenu();
 if ("serviceWorker" in navigator && location.protocol === "https:"){
   let recargando = false;
   const habia = !!navigator.serviceWorker.controller;
